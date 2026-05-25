@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 150 25% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 150 25% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 25% 15%;
+    --primary: 150 25% 27%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 150 15% 96%;
+    --secondary-foreground: 150 25% 27%;
+    --muted: 150 10% 95%;
+    --muted-foreground: 150 8% 45%;
+    --accent: 40 55% 75%;
+    --accent-foreground: 150 25% 15%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 150 15% 88%;
+    --input: 150 15% 88%;
+    --ring: 150 25% 27%;
+    --radius: 0.625rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 150 25% 15%;
+    --sidebar-primary: 150 25% 27%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 15% 96%;
+    --sidebar-accent-foreground: 150 25% 27%;
+    --sidebar-border: 150 15% 88%;
+    --sidebar-ring: 150 25% 27%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.gradient-cta {
+  background: linear-gradient(to right, #E8C892, #D4AF37);
+}
+
+.gradient-hero {
+  background: linear-gradient(to bottom, #2B4637 0%, #0A0F0C 100%);
+}
+
+.glass-panel {
+  background: rgba(43, 70, 55, 0.15);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.text-gradient-gold {
+  background: linear-gradient(to right, #E8C892, #D4AF37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
