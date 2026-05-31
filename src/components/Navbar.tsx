@@ -1,135 +1,119 @@
-import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router';
-import { Menu, X, MessageCircle, Zap } from 'lucide-react';
+import { useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { Menu, X } from 'lucide-react'
+
+const pageLinks = [
+  { label: 'Home', path: '/' },
+  { label: 'Services', path: '/services' },
+  { label: 'Materials', path: '/materials' },
+  { label: 'Contact', path: '/contact' },
+]
+
+function scrollToProjects() {
+  if (window.location.hash === '#/' || window.location.hash === '') {
+    const el = document.getElementById('projects-section')
+    if (el) { el.scrollIntoView({ behavior: 'smooth' }); return }
+  }
+  window.location.hash = '/'
+  setTimeout(() => {
+    const el = document.getElementById('projects-section')
+    if (el) el.scrollIntoView({ behavior: 'smooth' })
+  }, 300)
+}
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const location = useLocation();
+  const [scrolled, setScrolled] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const location = useLocation()
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => { setMobileOpen(false) }, [location.pathname])
 
   useEffect(() => {
-    setIsMobileMenuOpen(false);
-  }, [location]);
-
-  const navLinks = [
-    { to: '/', label: 'Home' },
-    { to: '/services', label: 'Services' },
-    { to: '/materials', label: 'Materials' },
-    { to: '/contact', label: 'Contact' },
-  ];
-
-  const isActive = (path: string) => location.pathname === path;
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''
+    return () => { document.body.style.overflow = '' }
+  }, [mobileOpen])
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? 'bg-kiwi-base/90 backdrop-blur-xl shadow-lg'
-            : 'bg-transparent'
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center transition-all duration-500 ${
+          scrolled
+            ? 'bg-[#1e3329]/90 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.15)]'
+            : 'bg-[#2d4a3e]/60 backdrop-blur-md'
         }`}
+        style={{ borderBottom: scrolled ? '1px solid rgba(212,184,150,0.08)' : '1px solid transparent' }}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 lg:h-20">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group">
-              <img
-                src="/images/logo.png"
-                alt="Kiwi Koru 3D"
-                className="h-10 w-auto transition-transform group-hover:scale-105"
-              />
-              <span className="text-white font-heading font-semibold text-lg hidden sm:block">
-                Kiwi Koru <span className="text-kiwi-gold">3D</span>
-              </span>
+        <nav className="w-full max-w-[1200px] mx-auto px-6 flex items-center justify-between" aria-label="Main navigation">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5 focus-gold shrink-0" aria-label="KiwiKoru 3D Home">
+            <img src="/images/logo.png" alt="" width="36" height="36" className="rounded-lg" style={{ objectFit: 'contain' }} />
+            <span className="text-gold font-bold text-lg tracking-tight hidden sm:inline">KiwiKoru 3D</span>
+          </Link>
+
+          {/* Desktop Nav: Home, Services, Projects, Materials, Contact */}
+          <div className="hidden md:flex items-center gap-7" role="menubar">
+            <Link to="/" role="menuitem" className={`relative text-sm font-medium tracking-[0.06em] transition-colors duration-300 focus-gold py-1 ${location.pathname === '/' ? 'text-gold' : 'text-white/80 hover:text-gold'}`}>
+              Home
+              {location.pathname === '/' && <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold rounded-full" />}
             </Link>
-
-            {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className={`text-sm font-medium tracking-wider uppercase transition-colors ${
-                    isActive(link.to)
-                      ? 'text-kiwi-gold'
-                      : 'text-white/80 hover:text-kiwi-gold'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Right Actions */}
-            <div className="flex items-center gap-3">
-              <Link
-                to="/quote"
-                className="hidden sm:flex items-center gap-2 bg-kiwi-gold hover:bg-kiwi-goldDark text-kiwi-dark px-4 py-2 rounded-lg font-medium text-sm transition-all hover:scale-[1.02]"
-              >
-                <Zap className="w-4 h-4" />
-                Instant Quote
-              </Link>
-              <a
-                href="https://wa.me/640272602954"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-green-600 text-white transition-colors"
-                title="Contact via WhatsApp"
-              >
-                <MessageCircle className="w-5 h-5" />
-              </a>
-              <button
-                className="lg:hidden flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 text-white"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
-            </div>
+            <Link to="/services" role="menuitem" className={`relative text-sm font-medium tracking-[0.06em] transition-colors duration-300 focus-gold py-1 ${location.pathname === '/services' ? 'text-gold' : 'text-white/80 hover:text-gold'}`}>
+              Services
+              {location.pathname === '/services' && <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold rounded-full" />}
+            </Link>
+            <button onClick={scrollToProjects} role="menuitem" className="relative text-sm font-medium tracking-[0.06em] text-white/80 hover:text-gold transition-colors duration-300 focus-gold py-1">
+              Projects
+            </button>
+            <Link to="/materials" role="menuitem" className={`relative text-sm font-medium tracking-[0.06em] transition-colors duration-300 focus-gold py-1 ${location.pathname === '/materials' ? 'text-gold' : 'text-white/80 hover:text-gold'}`}>
+              Materials
+              {location.pathname === '/materials' && <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold rounded-full" />}
+            </Link>
+            <Link to="/contact" role="menuitem" className={`relative text-sm font-medium tracking-[0.06em] transition-colors duration-300 focus-gold py-1 ${location.pathname === '/contact' ? 'text-gold' : 'text-white/80 hover:text-gold'}`}>
+              Contact
+              {location.pathname === '/contact' && <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold rounded-full" />}
+            </Link>
           </div>
-        </div>
-      </nav>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-kiwi-dark/98 backdrop-blur-xl lg:hidden">
-          <div className="flex flex-col items-center justify-center h-full gap-8">
-            {navLinks.map((link, i) => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className="text-2xl font-heading font-medium text-white hover:text-kiwi-gold transition-colors"
-                style={{ animationDelay: `${i * 50}ms` }}
-              >
+          {/* Desktop CTA */}
+          <Link to="/quote" className="hidden md:inline-flex items-center px-5 py-2.5 bg-gold/90 text-forest font-semibold text-sm rounded-pill transition-all duration-300 hover:bg-gold hover:-translate-y-0.5 focus-gold backdrop-blur-sm">
+            Get Instant Estimate
+          </Link>
+
+          {/* Mobile Hamburger */}
+          <button className="md:hidden text-gold p-2 focus-gold" onClick={() => setMobileOpen(true)} aria-label="Open navigation menu" aria-expanded={mobileOpen}>
+            <Menu size={24} />
+          </button>
+        </nav>
+      </header>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[60] bg-[#1e3329]/95 backdrop-blur-xl flex flex-col items-center justify-center" role="dialog" aria-label="Mobile navigation">
+          <button className="absolute top-5 right-6 text-gold p-2 focus-gold" onClick={() => setMobileOpen(false)} aria-label="Close navigation menu">
+            <X size={28} />
+          </button>
+          <div className="flex flex-col items-center gap-8" role="menubar">
+            {pageLinks.map((link) => (
+              <Link key={link.path} to={link.path} role="menuitem"
+                className={`text-2xl font-semibold transition-colors duration-200 focus-gold ${location.pathname === link.path ? 'text-gold' : 'text-white hover:text-gold'}`}
+                onClick={() => setMobileOpen(false)}>
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/quote"
-              className="mt-4 flex items-center gap-2 bg-kiwi-gold text-kiwi-dark px-8 py-3 rounded-lg font-medium"
-            >
-              <Zap className="w-5 h-5" />
-              Instant Quote
-            </Link>
-            <a
-              href="https://wa.me/640272602954"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-green-400 hover:text-green-300 transition-colors"
-            >
-              <MessageCircle className="w-5 h-5" />
-              WhatsApp Us
-            </a>
+            <button onClick={() => { scrollToProjects(); setMobileOpen(false) }} role="menuitem" className="text-2xl font-semibold text-white hover:text-gold transition-colors duration-200 focus-gold">
+              Projects
+            </button>
           </div>
+          <Link to="/quote" className="mt-10 px-8 py-3 bg-gold text-forest font-semibold rounded-pill transition-all duration-200 hover:bg-gold-light focus-gold" onClick={() => setMobileOpen(false)}>
+            Get Instant Estimate
+          </Link>
         </div>
       )}
     </>
-  );
+  )
 }
