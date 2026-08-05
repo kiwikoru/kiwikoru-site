@@ -5,7 +5,7 @@ export const maxDuration = 120
 const ALLOWED_ORIGINS = new Set(['https://kiwikoru.co.nz', 'https://www.kiwikoru.co.nz'])
 const isKiwiKoruPreview = (origin?: string) => Boolean(origin && /^https:\/\/kiwikoru-funciona-[a-z0-9-]+-kiwi-koru3d\.vercel\.app$/.test(origin))
 
-type RequestBody = { image?: string; mimeType?: string }
+type RequestBody = { image?: string; styleReference?: string; mimeType?: string }
 type GeminiResult = {
   error?: { message?: string }
   candidates?: Array<{
@@ -38,7 +38,7 @@ export default async function handler(request: IncomingMessage, response: Server
   if (!apiKey) return send(response, 503, { error: 'Youshie generation is not configured yet.' })
 
   try {
-    const { image, mimeType } = await readJson(request)
+    const { image, styleReference, mimeType } = await readJson(request)
     if (!image || !mimeType || !['image/jpeg', 'image/png', 'image/webp'].includes(mimeType)) {
       return send(response, 400, { error: 'Please upload a JPG, PNG, or WebP photo.' })
     }
@@ -51,7 +51,11 @@ export default async function handler(request: IncomingMessage, response: Server
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: YOUSHIE_PROMPT }, { inlineData: { mimeType, data: image } }] }],
+          contents: [{ parts: [
+            { text: `${YOUSHIE_PROMPT}\n\nIMAGE ORDER: The FIRST image is a Youshie STYLE REFERENCE only. Copy its charming proportions, facial simplicity, chunky printable construction, and handmade FDM character—not the identities, costumes, or copyrighted characters shown. The SECOND image is the PERSON TO TRANSFORM. Preserve only the second image's identity, hair, expression, clothing, and recognizable traits.` },
+            ...(styleReference ? [{ inlineData: { mimeType: 'image/jpeg', data: styleReference } }] : []),
+            { inlineData: { mimeType, data: image } },
+          ] }],
           generationConfig: {
             responseModalities: ['IMAGE'],
             imageConfig: { aspectRatio: '1:1', imageSize: '1K' },

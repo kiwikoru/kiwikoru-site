@@ -11,12 +11,15 @@ DESIGN
 - Use a distinctive Youshie house silhouette: softly pear-shaped rounded head, cheeks that gently taper toward a tiny chin, compact bean-like torso, arms resting close to the body, and very short legs. Avoid a square or cylindrical head.
 - Clearly non-realistic proportions. It must look like a real premium 3D-printed collectible photographed in a studio—not a 2D illustration, animation frame, or movie character.
 - Do not imitate Funko Pop, LEGO, Pixar, Disney, anime, or any existing toy franchise. This must feel like an original personalized Youshie sculpt.
+- Match the supplied Youshie style reference's emotional essence: irresistibly sweet, slightly quirky, handmade, and shelf-friendly. Avoid slick corporate mascot styling or a flawless animated-film render.
+- The head should feel broad and softly rounded, not balloon-like. Keep the body squat and sturdy, with shoulders flowing naturally into short arms and feet that feel planted rather than oversized shoes.
 
 FACE
 - Preserve apparent age range, face shape, skin tone, hairstyle, hairline or bald areas, eyebrows, glasses, facial hair, smile, and defining traits, simplified into toy geometry.
 - Eyes are exactly two simple solid-BLACK vertical ovals: no sclera, iris, pupil, catchlight, or white highlight.
 - Very small simplified nose. The mouth is small, understated, and toy-like: use one short friendly curved opening or compact smile, never a wide cartoon grin extending across the face.
 - Prefer a tiny dark curved mouth with gently lifted corners. Keep it narrower than the space between the two eyes and avoid a floating white tooth strip.
+- A tiny open smile, one or two uneven simplified teeth, or a small tooth gap is welcome only when it strengthens the person's recognizable charm. It must remain compact, friendly, and physically printable.
 - Avoid prominent white teeth, realistic lips, lipstick, tongue, individually separated teeth, or a large open mouth. Only preserve visible teeth when they are essential to recognizing the person, and then reduce them to one tiny clean printable shape that counts as WHITE in the four-colour palette.
 
 HAIR AND CLOTHING
@@ -52,6 +55,7 @@ RENDER
 - Place the figure standing directly on a clean, neutral light-wood or warm off-white desktop. Use a softly blurred, uncluttered creative-studio or home-office background with shallow depth of field, gentle daylight, and a subtle grounding shadow.
 - The desktop and blurred environment are photographic context and do not count toward the figure's four filament colours. Keep them visually quiet and clearly separate from the physical figure.
 - Matte PLA-like molded surface with very subtle realistic FDM layer texture.
+- Let the object feel genuinely 3D printed: retain softly visible horizontal layer lines, gently simplified joins, and a trace of handmade imperfection. Do not make it look injection-moulded, glossy, airbrushed, or digitally perfect.
 - Every surface, including clothing and hair, must visibly be solid molded or 3D-printed PLA. No woven fabric, knit, fur, embroidery, printed emblem, tiny badge, glossy vinyl, porcelain, or photorealistic skin.
 - No packaging, words, logo, arrows, comparison photo, prominent props, busy scenery, or frame.
 - Square 1:1 product image with comfortable empty space.

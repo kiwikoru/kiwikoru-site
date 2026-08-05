@@ -39,7 +39,7 @@ export default function YoushieMe() {
     setError(undefined)
   }
 
-  async function prepareImage(file: File) {
+  async function prepareImage(file: Blob) {
     const image = await createImageBitmap(file)
     const scale = Math.min(1, 1536 / Math.max(image.width, image.height))
     const canvas = document.createElement('canvas')
@@ -59,10 +59,13 @@ export default function YoushieMe() {
     setGeneratedPhoto(undefined)
     try {
       const image = await prepareImage(photoFile)
+      const styleReference = await fetch('/youshie-style-reference.jpg')
+        .then(response => response.blob())
+        .then(prepareImage)
       const response = await fetch('/api/youshie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image, mimeType: 'image/jpeg' }),
+        body: JSON.stringify({ image, styleReference, mimeType: 'image/jpeg' }),
       })
       const result = await response.json() as { image?: string; mimeType?: string; error?: string }
       if (!response.ok || !result.image) throw new Error(result.error || 'Could not create your Youshie.')
