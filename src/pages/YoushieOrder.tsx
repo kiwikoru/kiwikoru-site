@@ -33,7 +33,7 @@ export default function YoushieOrder() {
       <section className="order-card">
         <div className="order-visual">
           {generatedPhoto ? <img src={generatedPhoto} alt="Your personalised Youshie" /> : <div className="figure-measure" aria-label="Youshie silhouette, 10 centimetres high"><span className="measure-line"><b>10 cm</b></span><div className="figure-head"><i /><i /></div><div className="figure-body"><i /><i /></div></div>}
-          <span className="actual-note">Approximately 10 cm tall</span>
+          <span className="actual-note"><small>APPROXIMATE HEIGHT</small><strong>10 cm</strong><b>tall</b></span>
         </div>
 
         <div className="order-details">

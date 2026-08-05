@@ -7,7 +7,10 @@
 .order-card { display: grid; grid-template-columns: 1fr 1fr; background: rgba(255,255,255,.95); border: 1px solid #e5d8f5; border-radius: 30px; overflow: hidden; box-shadow: 0 28px 70px rgba(83,42,130,.16); }
 .order-visual { min-height: 650px; padding: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at 50% 34%, #fff8cf, #eee2ff 58%, #d8c2f6); }
 .order-visual > img { width: 100%; max-height: 570px; object-fit: contain; border-radius: 22px; filter: drop-shadow(0 18px 24px rgba(60,29,92,.18)); }
-.actual-note { margin-top: 18px; color: #634581; font-weight: 800; font-size: 12px; }
+.actual-note { margin-top: 20px; min-width: 220px; padding: 12px 20px; border: 2px solid rgba(112,64,189,.3); border-radius: 16px; background: rgba(255,255,255,.92); color: #634581; box-shadow: 0 10px 24px rgba(79,40,117,.12); display: flex; justify-content: center; align-items: baseline; gap: 7px; }
+.actual-note small { align-self: center; margin-right: 6px; color: #8a74a0; font-size: 9px; font-weight: 900; letter-spacing: .09em; }
+.actual-note strong { color: #6634b3; font: 900 29px/1 "Baloo 2"; }
+.actual-note b { font-size: 12px; }
 .figure-measure { width: 250px; height: 390px; position: relative; filter: drop-shadow(0 20px 20px rgba(72,35,108,.2)); }
 .figure-head { width: 210px; height: 205px; position: absolute; top: 20px; left: 30px; border-radius: 48% 48% 44% 44%; background: #7240bd; }
 .figure-head i { position: absolute; top: 82px; width: 23px; height: 39px; border-radius: 50%; background: #251735; }
