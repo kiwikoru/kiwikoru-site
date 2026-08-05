@@ -20,6 +20,12 @@ HAIR AND CLOTHING
 - Use the clothing visible in the reference unless a theme says otherwise. Preserve its main type, silhouette, and essential colour blocking while removing tiny logos, text, seams, and patterns.
 - Integrate accessories into the body wherever possible.
 
+ONE SURPRISE, CHOSEN FOR THIS PERSON
+- Add exactly one subtle, integrated magical personality detail chosen from the photograph: for example a tiny star motif, an adventurous collar, a nature-inspired accent, or a playful creative detail.
+- Choose it from the person's expression, pose, clothing, and overall energy. Do not classify or state gender, and do not rely on gender stereotypes.
+- The surprise must feel personal and delightful, but must never cover or replace the person's recognizable face, hair, clothing silhouette, or defining traits.
+- It must use only the selected four-colour palette, be fused to the figure, and remain sturdy enough for FDM printing. No separate prop, scenery, floating magic, costume change, or extra object.
+
 NON-NEGOTIABLE FOUR-FILAMENT PALETTE
 Silently select the smallest useful palette, with an absolute maximum of FOUR physical filament colours for the entire figure.
 - WHITE counts as one. BLACK counts as one. SKIN TONE counts as one. Every visibly different material colour or shade counts.

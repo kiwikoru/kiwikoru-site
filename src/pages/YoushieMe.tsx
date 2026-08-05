@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
-import { ArrowLeft, Download, ImagePlus, RotateCcw, Share2, Sparkles } from 'lucide-react'
+import { ArrowLeft, Download, ImagePlus, Share2, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import './YoushieMe.css'
 
-const DAILY_LIMIT = 3
-const usageKey = () => `youshie-generations-${new Date().toISOString().slice(0, 10)}`
+const usageKey = 'youshie-created'
+const magicMessages = [
+  'Reading the little details that make you, you…',
+  'Choosing four perfect printable colours…',
+  'Sculpting your tiny Youshie…',
+  'Adding one last touch of magic…',
+]
 
 export default function YoushieMe() {
   const [photo, setPhoto] = useState<string>()
@@ -13,10 +18,16 @@ export default function YoushieMe() {
   const [generatedPhoto, setGeneratedPhoto] = useState<string>()
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string>()
-  const [usesToday, setUsesToday] = useState(() => Number(localStorage.getItem(usageKey()) || 0))
+  const [hasCreated, setHasCreated] = useState(() => localStorage.getItem(usageKey) === 'yes')
+  const [magicStep, setMagicStep] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => () => { if (photo) URL.revokeObjectURL(photo) }, [photo])
+  useEffect(() => {
+    if (!creating) { setMagicStep(0); return }
+    const timer = window.setInterval(() => setMagicStep(step => Math.min(step + 1, magicMessages.length - 1)), 6500)
+    return () => window.clearInterval(timer)
+  }, [creating])
 
   function choosePhoto(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -41,8 +52,8 @@ export default function YoushieMe() {
 
   async function createYoushie() {
     if (!photoFile) { inputRef.current?.click(); return }
-    if (usesToday >= DAILY_LIMIT) {
-      setError('You have used today’s three Youshie creations. Come back tomorrow!')
+    if (hasCreated) {
+      setError('Your one-of-a-kind Youshie has already been created on this device.')
       return
     }
     setCreating(true)
@@ -58,9 +69,8 @@ export default function YoushieMe() {
       const result = await response.json() as { image?: string; mimeType?: string; error?: string }
       if (!response.ok || !result.image) throw new Error(result.error || 'Could not create your Youshie.')
       setGeneratedPhoto(`data:${result.mimeType || 'image/png'};base64,${result.image}`)
-      const nextUses = usesToday + 1
-      localStorage.setItem(usageKey(), String(nextUses))
-      setUsesToday(nextUses)
+      localStorage.setItem(usageKey, 'yes')
+      setHasCreated(true)
       window.setTimeout(() => document.getElementById('youshie-result')?.scrollIntoView({ behavior: 'smooth' }), 100)
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')
@@ -89,25 +99,26 @@ export default function YoushieMe() {
           <div className="eyebrow"><Sparkles size={16} /> Made for you. Made like you.</div>
           <h1>Meet your little<br /><em>3D alter ego.</em></h1>
           <p>Upload a photo and watch yourself become a playful, one-of-a-kind Youshie designed with four printable colours.</p>
-          <div className="steps"><span><b>1</b> Add a photo</span><span><b>2</b> Get Youshified</span><span><b>3</b> Save your figure</span></div>
+          <div className="steps"><span><b>1</b> Add a photo</span><span><b>2</b> Watch the magic</span><span><b>3</b> Meet your Youshie</span></div>
         </section>
 
         <section className="creator-card" aria-label="Youshie creator">
           <div className="card-heading"><div><small>YOUR TURN</small><h2>Youshie Me!</h2></div><span className="wiggle">✦</span></div>
           <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} hidden />
-          <button className={`photo-drop ${photo ? 'has-photo' : ''}`} onClick={() => inputRef.current?.click()}>
+          <button className={`photo-drop ${photo ? 'has-photo' : ''}`} onClick={() => inputRef.current?.click()} disabled={creating || hasCreated}>
             {photo ? <img src={photo} alt="Your uploaded portrait" /> : <><span className="upload-icon"><ImagePlus size={30} /></span><strong>Choose your favourite photo</strong><small>Clear, front-facing photos work best</small><span className="browse-pill">Browse photo</span></>}
-            {photo && <span className="change-photo">Change photo</span>}
+            {photo && !hasCreated && <span className="change-photo">Change photo</span>}
           </button>
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
-          <p className="generation-limit">{Math.max(0, DAILY_LIMIT - usesToday)} of {DAILY_LIMIT} free creations remaining today on this device</p>
-          <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Creating your Youshie… this can take a minute</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>
+          <p className="generation-limit">One magical Youshie creation per device</p>
+          <button className="create-button" onClick={createYoushie} disabled={creating || hasCreated}>{creating ? <><span className="spinner" /> {magicMessages[magicStep]}</> : <><Sparkles size={20} /> {hasCreated ? 'Your Youshie has been created' : photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>
+          {creating && <div className="magic-stage" aria-live="polite"><div className="magic-figure"><span>✦</span><span>✦</span><span>✦</span><div className="magic-head" /><div className="magic-body" /></div><div className="magic-progress"><i style={{ width: `${25 * (magicStep + 1)}%` }} /></div><small>Please keep this page open. Your reveal can take about a minute.</small></div>}
           {error && <p className="generation-error" role="alert">{error}</p>}
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used only to create your Youshie</p>
         </section>
 
         {generatedPhoto && <section id="youshie-result" className="result-section">
-          <div className="result-copy"><span className="eyebrow"><Sparkles size={15} /> TA-DA!</span><h2>Your Youshie is ready.</h2><p>Your photo has been transformed into an original four-colour, 3D-printable collectible concept.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie.png"><Download size={18} /> Download</a><button onClick={share}><Share2 size={18} /> Share</button><button className="again" onClick={() => setGeneratedPhoto(undefined)}><RotateCcw size={18} /> Make another</button></div></div>
+          <div className="result-copy"><span className="eyebrow"><Sparkles size={15} /> TA-DA!</span><h2>Your Youshie is ready.</h2><p>Your one-and-only photo has been transformed into an original four-colour, 3D-printable collectible concept.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie.png"><Download size={18} /> Download</a><button onClick={share}><Share2 size={18} /> Share</button></div></div>
           <div className="result-preview"><img src={generatedPhoto} alt="Your generated Youshie collectible" /></div>
         </section>}
       </main>
