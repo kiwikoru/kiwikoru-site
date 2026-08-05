@@ -4,7 +4,6 @@ import { ArrowLeft, Download, ImagePlus, Share2, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import './YoushieMe.css'
 
-const usageKey = 'youshie-created'
 const magicMessages = [
   'Reading the little details that make you, you…',
   'Choosing four perfect printable colours…',
@@ -18,7 +17,6 @@ export default function YoushieMe() {
   const [generatedPhoto, setGeneratedPhoto] = useState<string>()
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string>()
-  const [hasCreated, setHasCreated] = useState(() => localStorage.getItem(usageKey) === 'yes')
   const [magicStep, setMagicStep] = useState(0)
   const [revealCount, setRevealCount] = useState<number | 'BOOM' | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -54,10 +52,6 @@ export default function YoushieMe() {
 
   async function createYoushie() {
     if (!photoFile) { inputRef.current?.click(); return }
-    if (hasCreated) {
-      setError('Your one-of-a-kind Youshie has already been created on this device.')
-      return
-    }
     if (!audioRef.current) audioRef.current = new AudioContext()
     await audioRef.current.resume().catch(() => undefined)
     setCreating(true)
@@ -72,7 +66,8 @@ export default function YoushieMe() {
       })
       const result = await response.json() as { image?: string; mimeType?: string; error?: string }
       if (!response.ok || !result.image) throw new Error(result.error || 'Could not create your Youshie.')
-      const finishedImage = `data:${result.mimeType || 'image/png'};base64,${result.image}`
+      const rawImage = `data:${result.mimeType || 'image/png'};base64,${result.image}`
+      const finishedImage = await addKiwiKoruFrame(rawImage)
       for (const count of [3, 2, 1]) {
         setRevealCount(count)
         await new Promise(resolve => window.setTimeout(resolve, 720))
@@ -82,13 +77,52 @@ export default function YoushieMe() {
       await new Promise(resolve => window.setTimeout(resolve, 520))
       setGeneratedPhoto(finishedImage)
       setRevealCount(null)
-      localStorage.setItem(usageKey, 'yes')
-      setHasCreated(true)
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')
     } finally {
       setCreating(false)
     }
+  }
+
+  async function addKiwiKoruFrame(source: string) {
+    const load = (src: string) => new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image()
+      image.onload = () => resolve(image)
+      image.onerror = reject
+      image.src = src
+    })
+    const [figure, logo] = await Promise.all([load(source), load('/youshies-logo-transparent.png')])
+    const canvas = document.createElement('canvas')
+    canvas.width = 1200
+    canvas.height = 1500
+    const context = canvas.getContext('2d')
+    if (!context) return source
+    context.fillStyle = '#f8f3ff'
+    context.fillRect(0, 0, canvas.width, canvas.height)
+    context.fillStyle = '#6c35c9'
+    context.fillRect(0, 0, canvas.width, 178)
+    context.fillRect(0, 1250, canvas.width, 250)
+    const logoWidth = 470
+    const logoHeight = logoWidth * logo.height / logo.width
+    context.drawImage(logo, (canvas.width - logoWidth) / 2, (178 - logoHeight) / 2, logoWidth, logoHeight)
+    const availableWidth = 1120
+    const availableHeight = 1020
+    const scale = Math.min(availableWidth / figure.width, availableHeight / figure.height)
+    const width = figure.width * scale
+    const height = figure.height * scale
+    context.fillStyle = '#ffffff'
+    context.fillRect(40, 198, 1120, 1032)
+    context.drawImage(figure, (canvas.width - width) / 2, 204 + (1020 - height) / 2, width, height)
+    context.textAlign = 'center'
+    context.fillStyle = '#ffffff'
+    context.font = '700 43px Nunito, Arial, sans-serif'
+    context.fillText('KiwiKoru 3D', 600, 1322)
+    context.font = '600 25px Nunito, Arial, sans-serif'
+    context.fillText('3D solutions for people and industry', 600, 1370)
+    context.font = '700 24px Nunito, Arial, sans-serif'
+    context.fillStyle = '#f5cf4a'
+    context.fillText('kiwikoru.co.nz  ·  027 436 5339', 600, 1425)
+    return canvas.toDataURL('image/png')
   }
 
   function playFairyChime() {
@@ -121,7 +155,7 @@ export default function YoushieMe() {
         {revealCount !== null && <div className={`reveal-magic ${revealCount === 'BOOM' ? 'is-boom' : ''}`} aria-hidden="true"><div className="magic-halo" /><div className="magic-ring" />{Array.from({ length: 22 }, (_, index) => <i key={index} style={{ '--i': index } as CSSProperties}>{index % 3 === 0 ? '✧' : '✦'}</i>)}</div>}
       <header className="youshie-header">
         <Link to="/" className="back-link"><ArrowLeft size={18} /> KiwiKoru 3D</Link>
-        <img className="youshie-logo-img" src="/youshies-logo.png" alt="Youshies — Your photo. Your figure. Your Youshie." />
+        <img className="youshie-logo-img" src="/youshies-logo-transparent.png" alt="Youshies — Your photo. Your figure. Your Youshie." />
         <span className="limited-pill">Limited experience</span>
       </header>
 
@@ -135,23 +169,23 @@ export default function YoushieMe() {
 
         <section className="creator-card" aria-label="Youshie creator">
           <div className="card-heading"><div><small>{generatedPhoto ? 'TA-DA!' : 'YOUR TURN'}</small><h2>{generatedPhoto ? 'Your Youshie!' : 'Youshie Me!'}</h2></div><span className="wiggle">✦</span></div>
-          {!generatedPhoto && <div className="once-message"><Sparkles size={22} /><div><strong>This is your one magical moment.</strong><p>Choose your photo carefully—you can create only one surprise Youshie. Your character will be completely random, so save the result: you can use it to enter our Youshies competition.</p></div></div>}
+          {!generatedPhoto && <div className="once-message"><Sparkles size={22} /><div><strong>Testing mode is open.</strong><p>Create as many Youshies as you need while we perfect the magic. The final competition experience will return to one surprise creation per person.</p></div></div>}
           <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} hidden />
-          <button className={`photo-drop ${photo || generatedPhoto ? 'has-photo' : ''} ${generatedPhoto ? 'has-result' : ''}`} onClick={() => inputRef.current?.click()} disabled={creating || hasCreated}>
+          <button className={`photo-drop ${photo || generatedPhoto ? 'has-photo' : ''} ${generatedPhoto ? 'has-result' : ''}`} onClick={() => !generatedPhoto && inputRef.current?.click()} disabled={creating}>
             {generatedPhoto ? <img className="inline-result" src={generatedPhoto} alt="Your generated Youshie collectible" /> : photo ? <img src={photo} alt="Your uploaded portrait" /> : <><span className="upload-icon"><ImagePlus size={30} /></span><strong>Choose your favourite photo</strong><small>Clear, front-facing photos work best</small><span className="browse-pill">Browse photo</span></>}
-            {photo && !creating && !hasCreated && <span className="change-photo">Change photo</span>}
+            {photo && !creating && !generatedPhoto && <span className="change-photo">Change photo</span>}
             {creating && <div className={`magic-stage magic-overlay ${revealCount !== null ? 'is-revealing' : ''}`} aria-live="polite">{revealCount !== null ? <div key={revealCount} className={`magic-count ${revealCount === 'BOOM' ? 'boom' : ''}`}><span>✦</span>{revealCount}<span>✦</span></div> : <><div className="magic-figure"><span>✦</span><span>✦</span><span>✦</span><div className="magic-head" /><div className="magic-body" /></div><strong>{magicMessages[magicStep]}</strong><div className="magic-progress"><i style={{ width: `${25 * (magicStep + 1)}%` }} /></div><small>Please keep this page open. Your reveal can take about a minute.</small></>}</div>}
           </button>
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
-          <p className="generation-limit">One magical Youshie creation per device</p>
-          {!generatedPhoto && <button className="create-button" onClick={createYoushie} disabled={creating || hasCreated}>{creating ? <><span className="spinner" /> Making magic…</> : <><Sparkles size={20} /> {hasCreated ? 'Your Youshie has been created' : photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>}
-          {generatedPhoto && <div className="inline-result-copy"><p>Your one-and-only four-colour collectible concept is ready.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie.png"><Download size={18} /> Download</a><button onClick={share}><Share2 size={18} /> Share</button></div></div>}
+          <p className="generation-limit">Unlimited testing is temporarily enabled</p>
+          {!generatedPhoto && <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Making magic…</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>}
+          {generatedPhoto && <div className="inline-result-copy"><p>Your framed four-colour collectible concept is ready.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie-kiwikoru.png"><Download size={18} /> Download</a><button onClick={share}><Share2 size={18} /> Share</button><button className="again" onClick={() => setGeneratedPhoto(undefined)}><Sparkles size={18} /> Try again</button></div></div>}
           {error && <p className="generation-error" role="alert">{error}</p>}
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used only to create your Youshie</p>
         </section>
 
       </main>
-      <footer className="youshie-footer"><img className="youshie-logo-img mini" src="/youshies-logo.png" alt="Youshies" /><p>A playful KiwiKoru 3D experience · Whangārei, New Zealand</p></footer>
+      <footer className="youshie-footer"><img className="youshie-logo-img mini" src="/youshies-logo-transparent.png" alt="Youshies" /><p>A playful KiwiKoru 3D experience · Whangārei, New Zealand</p></footer>
     </div>
   )
 }

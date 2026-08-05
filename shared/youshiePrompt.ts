@@ -8,12 +8,15 @@ IDENTITY FIRST: The result must immediately read as the same person translated i
 DESIGN
 - Physical collectible approximately 10 cm tall; oversized rounded head is 45–50% of total height.
 - Compact torso, short sturdy limbs, slightly oversized stable feet, friendly silhouette, smooth rounded manufacturable volumes.
+- Use a distinctive Youshie house silhouette: softly pear-shaped rounded head, cheeks that gently taper toward a tiny chin, compact bean-like torso, arms resting close to the body, and very short legs. Avoid a square or cylindrical head.
 - Clearly non-realistic proportions. It must look like a real premium 3D-printed collectible photographed in a studio—not a 2D illustration, animation frame, or movie character.
+- Do not imitate Funko Pop, LEGO, Pixar, Disney, anime, or any existing toy franchise. This must feel like an original personalized Youshie sculpt.
 
 FACE
 - Preserve apparent age range, face shape, skin tone, hairstyle, hairline or bald areas, eyebrows, glasses, facial hair, smile, and defining traits, simplified into toy geometry.
 - Eyes are exactly two simple solid-BLACK vertical ovals: no sclera, iris, pupil, catchlight, or white highlight.
 - Very small simplified nose. The mouth is small, understated, and toy-like: use one short friendly curved opening or compact smile, never a wide cartoon grin extending across the face.
+- Prefer a tiny dark curved mouth with gently lifted corners. Keep it narrower than the space between the two eyes and avoid a floating white tooth strip.
 - Avoid prominent white teeth, realistic lips, lipstick, tongue, individually separated teeth, or a large open mouth. Only preserve visible teeth when they are essential to recognizing the person, and then reduce them to one tiny clean printable shape that counts as WHITE in the four-colour palette.
 
 HAIR AND CLOTHING
@@ -22,10 +25,9 @@ HAIR AND CLOTHING
 - Integrate accessories into the body wherever possible.
 
 ONE SURPRISE, CHOSEN FOR THIS PERSON
-- Add exactly one subtle, integrated magical personality detail chosen from the photograph: for example a tiny star motif, an adventurous collar, a nature-inspired accent, or a playful creative detail.
-- Choose it from the person's expression, pose, clothing, and overall energy. Do not classify or state gender, and do not rely on gender stereotypes.
-- The surprise must feel personal and delightful, but must never cover or replace the person's recognizable face, hair, clothing silhouette, or defining traits.
-- It must use only the selected four-colour palette, be fused to the figure, and remain sturdy enough for FDM printing. No separate prop, scenery, floating magic, costume change, or extra object.
+- Keep the transformation surprising through the caricature itself, not through a random costume or unrelated accessory.
+- Preserve the clothing and personality already visible in the photograph. Do not infer gender, occupation, hobby, fantasy role, or personality stereotype.
+- No separate prop, scenery, floating magic, costume change, animal suit, hat, or extra object unless it is clearly present in the source photo.
 
 NON-NEGOTIABLE FOUR-FILAMENT PALETTE
 Silently select the smallest useful palette, with an absolute maximum of FOUR physical filament colours for the entire figure.
