@@ -374,6 +374,13 @@
   font-size: 12px;
   font-weight: 800;
 }
+.generation-limit {
+  margin: 12px 0 -10px;
+  text-align: center;
+  color: #8d75a4;
+  font-size: 10px;
+  font-weight: 700;
+}
 .gemini-star {
   color: #4b78de;
 }

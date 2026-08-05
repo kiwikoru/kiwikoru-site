@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http'
 import { YOUSHIE_PROMPT } from '../shared/youshiePrompt'
 
 export const maxDuration = 120
+const ALLOWED_ORIGINS = new Set(['https://kiwikoru.co.nz', 'https://www.kiwikoru.co.nz'])
 
 type RequestBody = { image?: string; mimeType?: string }
 
@@ -20,6 +21,10 @@ async function readJson(request: IncomingMessage): Promise<RequestBody> {
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   if (request.method !== 'POST') return send(response, 405, { error: 'Method not allowed' })
 
+  const origin = request.headers.origin
+  const isLocal = origin?.startsWith('http://localhost:') || origin?.startsWith('http://127.0.0.1:')
+  if (origin && !isLocal && !ALLOWED_ORIGINS.has(origin)) return send(response, 403, { error: 'Request origin not allowed.' })
+
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) return send(response, 503, { error: 'Youshie generation is not configured yet.' })
 
@@ -31,7 +36,7 @@ export default async function handler(request: IncomingMessage, response: Server
     if (image.length > 6_000_000) return send(response, 413, { error: 'The photo is too large. Please choose a smaller image.' })
 
     const geminiResponse = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },

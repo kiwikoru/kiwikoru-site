@@ -4,12 +4,16 @@ import { ArrowLeft, Download, ImagePlus, RotateCcw, Share2, Sparkles } from 'luc
 import { Link } from 'react-router-dom'
 import './YoushieMe.css'
 
+const DAILY_LIMIT = 3
+const usageKey = () => `youshie-generations-${new Date().toISOString().slice(0, 10)}`
+
 export default function YoushieMe() {
   const [photo, setPhoto] = useState<string>()
   const [photoFile, setPhotoFile] = useState<File>()
   const [generatedPhoto, setGeneratedPhoto] = useState<string>()
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string>()
+  const [usesToday, setUsesToday] = useState(() => Number(localStorage.getItem(usageKey()) || 0))
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => () => { if (photo) URL.revokeObjectURL(photo) }, [photo])
@@ -37,6 +41,10 @@ export default function YoushieMe() {
 
   async function createYoushie() {
     if (!photoFile) { inputRef.current?.click(); return }
+    if (usesToday >= DAILY_LIMIT) {
+      setError('You have used today’s three Youshie creations. Come back tomorrow!')
+      return
+    }
     setCreating(true)
     setError(undefined)
     setGeneratedPhoto(undefined)
@@ -50,6 +58,9 @@ export default function YoushieMe() {
       const result = await response.json() as { image?: string; mimeType?: string; error?: string }
       if (!response.ok || !result.image) throw new Error(result.error || 'Could not create your Youshie.')
       setGeneratedPhoto(`data:${result.mimeType || 'image/png'};base64,${result.image}`)
+      const nextUses = usesToday + 1
+      localStorage.setItem(usageKey(), String(nextUses))
+      setUsesToday(nextUses)
       window.setTimeout(() => document.getElementById('youshie-result')?.scrollIntoView({ behavior: 'smooth' }), 100)
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')
@@ -89,6 +100,7 @@ export default function YoushieMe() {
             {photo && <span className="change-photo">Change photo</span>}
           </button>
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
+          <p className="generation-limit">{Math.max(0, DAILY_LIMIT - usesToday)} of {DAILY_LIMIT} free creations remaining today on this device</p>
           <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Creating your Youshie… this can take a minute</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>
           {error && <p className="generation-error" role="alert">{error}</p>}
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used only to create your Youshie</p>
