@@ -10,6 +10,9 @@ export default function YoushieOrder() {
   const { state } = useLocation()
   const generatedPhoto = (state as OrderState | null)?.generatedPhoto
   const [destination, setDestination] = useState('north')
+  const [rural, setRural] = useState(false)
+  const shippingPrices: Record<string, number> = { north: 14.9, south: 14.9, australia: 32 }
+  const shipping = shippingPrices[destination] + (destination !== 'australia' && rural ? 6 : 0)
 
   return <div className="youshie-page order-page">
     <header className="youshie-header">
@@ -48,7 +51,9 @@ export default function YoushieOrder() {
             <option value="south">New Zealand — South Island</option>
             <option value="australia">Australia</option>
           </select>
-          <div className="order-total"><span>Figure + delivery</span><strong>To be confirmed</strong></div>
+          {destination !== 'australia' && <label className="rural-option"><input type="checkbox" checked={rural} onChange={event => setRural(event.target.checked)} /><span><strong>Rural delivery</strong><small>NZ Post rural surcharge</small></span><b>+ NZ$6.00</b></label>}
+          <div className="shipping-quote"><span>Estimated delivery</span><strong>NZ${shipping.toFixed(2)}</strong></div>
+          <div className="order-total"><span>Figure + delivery</span><strong>Product price pending</strong></div>
           <button className="checkout-placeholder" disabled><Check size={20} /> Secure ordering coming next</button>
           <p className="checkout-note">Prices and secure payment will be activated after final confirmation.</p>
         </div>

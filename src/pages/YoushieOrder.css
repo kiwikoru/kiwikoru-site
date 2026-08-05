@@ -26,10 +26,12 @@
 .product-points li { display: flex; gap: 13px; align-items: center; }
 .product-points svg { flex: 0 0 auto; color: #7440c3; background: #efe5fc; padding: 8px; width: 42px; height: 42px; border-radius: 13px; }
 .product-points span { display: flex; flex-direction: column; }.product-points strong { font-size: 14px; }.product-points small { color: #8b779c; font-size: 11px; line-height: 1.4; }
-.price-box,.order-total { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eadff5; padding: 18px 0; color: #705c81; }
-.price-box strong,.order-total strong { color: #6332ad; font: 800 19px "Baloo 2"; }
+.price-box,.shipping-quote,.order-total { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eadff5; padding: 18px 0; color: #705c81; }
+.price-box strong,.shipping-quote strong,.order-total strong { color: #6332ad; font: 800 19px "Baloo 2"; }
 .shipping-label { display: block; margin: 5px 0 9px; font-size: 12px; font-weight: 900; color: #584169; }
 .order-details select { width: 100%; height: 50px; border: 1px solid #dbcbed; border-radius: 13px; padding: 0 14px; background: #fbf9fe; color: #4e3761; font: 700 13px Nunito; }
+.rural-option { display: flex; align-items: center; gap: 10px; margin-top: 11px; padding: 11px 13px; border-radius: 12px; background: #f8f3fd; color: #5b416d; cursor: pointer; }
+.rural-option input { accent-color: #7140c2; width: 17px; height: 17px; }.rural-option span { display: flex; flex: 1; flex-direction: column; }.rural-option small { color: #927fa2; }.rural-option b { color: #6f3eb9; font-size: 12px; }
 .checkout-placeholder { width: 100%; height: 55px; border: 0; border-radius: 15px; background: linear-gradient(135deg,#7e49d4,#5c28ae); color: #fff; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; opacity: .58; }
 .checkout-note { color: #9a87aa; text-align: center; font-size: 10px; }
 @media (max-width: 800px) { .order-main { margin-top: 30px; }.order-card { grid-template-columns: 1fr; }.order-visual { min-height: 480px; }.order-details { padding: 30px 22px; }.figure-measure { transform: scale(.82); }.order-heading h1 { font-size: 48px; } }
