@@ -11,8 +11,10 @@ export default function YoushieOrder() {
   const generatedPhoto = (state as OrderState | null)?.generatedPhoto
   const [destination, setDestination] = useState('north')
   const [rural, setRural] = useState(false)
+  const productPrice = 30
   const shippingPrices: Record<string, number> = { north: 15, south: 15, australia: 30 }
   const shipping = shippingPrices[destination] + (destination !== 'australia' && rural ? 6 : 0)
+  const total = productPrice + shipping
 
   return <div className="youshie-page order-page">
     <header className="youshie-header">
@@ -44,7 +46,7 @@ export default function YoushieOrder() {
             <li><PackageCheck /><span><strong>Ready for your desk or shelf</strong><small>Sturdy, charming and made just for you</small></span></li>
           </ul>
 
-          <div className="price-box"><span>Youshie figure</span><strong>Price coming next</strong></div>
+          <div className="price-box"><span>Youshie figure</span><strong>NZ${productPrice.toFixed(2)}</strong></div>
           <label className="shipping-label" htmlFor="shipping">Where should your Youshie travel?</label>
           <select id="shipping" value={destination} onChange={event => setDestination(event.target.value)}>
             <option value="north">New Zealand — North Island</option>
@@ -53,9 +55,9 @@ export default function YoushieOrder() {
           </select>
           {destination !== 'australia' && <label className="rural-option"><input type="checkbox" checked={rural} onChange={event => setRural(event.target.checked)} /><span><strong>Rural delivery</strong><small>NZ Post rural surcharge</small></span><b>+ NZ$6.00</b></label>}
           <div className="shipping-quote"><span>Estimated delivery</span><strong>NZ${shipping.toFixed(2)}</strong></div>
-          <div className="order-total"><span>Figure + delivery</span><strong>Product price pending</strong></div>
+          <div className="order-total"><span>Figure + delivery</span><strong>NZ${total.toFixed(2)}</strong></div>
           <button className="checkout-placeholder" disabled><Check size={20} /> Secure ordering coming next</button>
-          <p className="checkout-note">Prices and secure payment will be activated after final confirmation.</p>
+          <p className="checkout-note">Secure payment will be activated after final checkout confirmation.</p>
         </div>
       </section>
     </main>
