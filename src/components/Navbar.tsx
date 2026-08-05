@@ -58,6 +58,9 @@ export default function Navbar() {
 
           {/* Desktop Nav: Home, Services, Projects, Materials, Contact */}
           <div className="hidden md:flex items-center gap-7" role="menubar">
+            <Link to="/youshie-me" role="menuitem" className="group inline-flex items-center gap-1.5 rounded-full border border-[#c9a8ff]/45 bg-[#7c3aed]/20 px-3 py-1.5 text-sm font-bold tracking-wide text-[#eadcff] transition-all hover:-translate-y-0.5 hover:bg-[#7c3aed]/35 hover:text-white">
+              <span aria-hidden="true">✦</span> Youshies
+            </Link>
             <Link to="/" role="menuitem" className={`relative text-sm font-medium tracking-[0.06em] transition-colors duration-300 focus-gold py-1 ${location.pathname === '/' ? 'text-gold' : 'text-white/80 hover:text-gold'}`}>
               Home
               {location.pathname === '/' && <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold rounded-full" />}
@@ -98,6 +101,9 @@ export default function Navbar() {
             <X size={28} />
           </button>
           <div className="flex flex-col items-center gap-8" role="menubar">
+            <Link to="/youshie-me" role="menuitem" className="rounded-full border border-[#c9a8ff]/50 bg-[#7c3aed]/25 px-6 py-2 text-2xl font-bold text-[#eadcff]" onClick={() => setMobileOpen(false)}>
+              ✦ Youshies
+            </Link>
             {pageLinks.map((link) => (
               <Link key={link.path} to={link.path} role="menuitem"
                 className={`text-2xl font-semibold transition-colors duration-200 focus-gold ${location.pathname === link.path ? 'text-gold' : 'text-white hover:text-gold'}`}

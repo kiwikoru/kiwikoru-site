@@ -54,10 +54,10 @@ export default function Contact() {
                 <div>
                   <h4 className="font-heading font-semibold text-kiwi-dark text-sm mb-1">Phone</h4>
                   <a
-                    href="tel:+640272602954"
+                    href="tel:+64274365339"
                     className="text-kiwi-base hover:text-kiwi-gold transition-colors"
                   >
-                    +64 027 260 2954
+                    027 436 5339
                   </a>
                 </div>
               </div>
@@ -91,7 +91,7 @@ export default function Contact() {
 
             {/* WhatsApp CTA */}
             <a
-              href="https://wa.me/640272602954"
+              href="https://wa.me/64274365339"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl transition-colors mb-8"

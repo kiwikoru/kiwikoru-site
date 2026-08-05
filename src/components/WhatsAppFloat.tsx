@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 
-const PHONE_NUMBER = '640272602954'
+const PHONE_NUMBER = '64274365339'
 
 function WhatsAppLogo({ className }: { className?: string }) {
   return (

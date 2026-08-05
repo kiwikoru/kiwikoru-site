@@ -6,6 +6,7 @@ import Services from './pages/Services'
 import Materials from './pages/Materials'
 import Contact from './pages/Contact'
 import Quote from './pages/Quote'
+import YoushieMe from './pages/YoushieMe'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -16,6 +17,12 @@ function ScrollToTop() {
 }
 
 export default function App() {
+  const { pathname } = useLocation()
+
+  if (pathname === '/youshie-me' || pathname === '/youshieme') {
+    return <YoushieMe />
+  }
+
   return (
     <>
       <ScrollToTop />

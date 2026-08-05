@@ -63,12 +63,12 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="tel:+640272602954" className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors duration-200 focus-gold">
-                  <Phone size={16} className="text-gold shrink-0" />+64 027 260 2954
+                <a href="tel:+64274365339" className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors duration-200 focus-gold">
+                  <Phone size={16} className="text-gold shrink-0" />027 436 5339
                 </a>
               </li>
               <li>
-                <a href="https://wa.me/640272602954" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors duration-200 focus-gold">
+                <a href="https://wa.me/64274365339" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors duration-200 focus-gold">
                   <MessageCircle size={16} className="shrink-0" />WhatsApp
                 </a>
               </li>

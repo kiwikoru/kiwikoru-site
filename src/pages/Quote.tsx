@@ -297,7 +297,7 @@ export default function Quote() {
                   </button>
 
                   <a
-                    href="https://wa.me/640272602954?text=Hi! I got a quote for my 3D print. Can we proceed?"
+                    href="https://wa.me/64274365339?text=Hi! I got a quote for my 3D print. Can we proceed?"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full mt-2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors"

@@ -66,14 +66,14 @@ export function generateOrganizationSchema() {
     url: SITE_URL,
     logo: `${SITE_URL}/images/og-image.jpg`,
     email: 'kiwikoru3d@gmail.com',
-    telephone: '+64-27-260-2954',
+    telephone: '+64-27-436-5339',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Morningside',
       addressRegion: 'Whangārei',
       addressCountry: 'NZ',
     },
-    sameAs: ['https://wa.me/640272602954'],
+    sameAs: ['https://wa.me/64274365339'],
     knowsAbout: [
       '3D Printing',
       'Rapid Prototyping',
@@ -93,7 +93,7 @@ export function generateLocalBusinessSchema() {
     name: 'KiwiKoru 3D',
     image: `${SITE_URL}/images/og-image.jpg`,
     url: SITE_URL,
-    telephone: '+64-27-260-2954',
+    telephone: '+64-27-436-5339',
     email: 'kiwikoru3d@gmail.com',
     address: {
       '@type': 'PostalAddress',
