@@ -118,7 +118,7 @@ export default function YoushieMe() {
   return (
     <div className="youshie-page">
       <div className="youshie-orb orb-one" /><div className="youshie-orb orb-two" />
-      {revealCount !== null && <div className={`reveal-magic ${revealCount === 'BOOM' ? 'is-boom' : ''}`} aria-hidden="true"><div className="magic-halo" />{Array.from({ length: 36 }, (_, index) => <i key={index} style={{ '--i': index } as CSSProperties}>✦</i>)}</div>}
+        {revealCount !== null && <div className={`reveal-magic ${revealCount === 'BOOM' ? 'is-boom' : ''}`} aria-hidden="true"><div className="magic-halo" /><div className="magic-ring" />{Array.from({ length: 22 }, (_, index) => <i key={index} style={{ '--i': index } as CSSProperties}>{index % 3 === 0 ? '✧' : '✦'}</i>)}</div>}
       <header className="youshie-header">
         <Link to="/" className="back-link"><ArrowLeft size={18} /> KiwiKoru 3D</Link>
         <img className="youshie-logo-img" src="/youshies-logo.png" alt="Youshies — Your photo. Your figure. Your Youshie." />
