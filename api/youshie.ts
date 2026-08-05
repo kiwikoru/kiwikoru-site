@@ -6,6 +6,14 @@ const ALLOWED_ORIGINS = new Set(['https://kiwikoru.co.nz', 'https://www.kiwikoru
 const isKiwiKoruPreview = (origin?: string) => Boolean(origin && /^https:\/\/kiwikoru-funciona-[a-z0-9-]+-kiwi-koru3d\.vercel\.app$/.test(origin))
 
 type RequestBody = { image?: string; mimeType?: string }
+type GeminiResult = {
+  error?: { message?: string }
+  candidates?: Array<{
+    finishReason?: string
+    finishMessage?: string
+    content?: { parts?: Array<{ text?: string; inlineData?: { data?: string; mimeType?: string }; thought?: boolean }> }
+  }>
+}
 
 function send(response: ServerResponse, status: number, body: unknown) {
   response.statusCode = status
@@ -36,9 +44,10 @@ export default async function handler(request: IncomingMessage, response: Server
     }
     if (image.length > 6_000_000) return send(response, 413, { error: 'The photo is too large. Please choose a smaller image.' })
 
-    const geminiResponse = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent',
-      {
+    let result: GeminiResult = {}
+    let generatedSuccessfully = false
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const geminiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
@@ -49,18 +58,15 @@ export default async function handler(request: IncomingMessage, response: Server
             thinkingConfig: { thinkingLevel: 'HIGH', includeThoughts: false },
           },
         }),
-      },
-    )
+      })
 
-    const result = await geminiResponse.json() as {
-      error?: { message?: string }
-      candidates?: Array<{
-        finishReason?: string
-        finishMessage?: string
-        content?: { parts?: Array<{ text?: string; inlineData?: { data?: string; mimeType?: string }; thought?: boolean }> }
-      }>
+      result = await geminiResponse.json() as GeminiResult
+      if (geminiResponse.ok) { generatedSuccessfully = true; break }
+      const retryable = geminiResponse.status === 429 || geminiResponse.status === 503 || /high demand|temporar/i.test(result.error?.message || '')
+      if (!retryable || attempt === 2) throw new Error(result.error?.message || 'Gemini could not generate the image.')
+      await new Promise(resolve => setTimeout(resolve, 1500 * (attempt + 1)))
     }
-    if (!geminiResponse.ok) throw new Error(result.error?.message || 'Gemini could not generate the image.')
+    if (!generatedSuccessfully) throw new Error('Gemini could not generate the image.')
 
     const generated = result.candidates?.flatMap(candidate => candidate.content?.parts || [])
       .find(part => !part.thought && part.inlineData?.data)?.inlineData
