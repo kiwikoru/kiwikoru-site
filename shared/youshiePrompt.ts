@@ -16,7 +16,7 @@ DESIGN
 
 FACE
 - Preserve apparent age range, face shape, skin tone, hairstyle, hairline or bald areas, eyebrows, glasses, facial hair, smile, and defining traits, simplified into toy geometry.
-- Eyes are exactly two simple solid-BLACK vertical ovals: no sclera, iris, pupil, catchlight, or white highlight.
+- Eyes are exactly two simple solid-BLACK softly vertical ovals: pleasantly plump and only slightly taller than wide, approximately a 1.25:1 height-to-width ratio. Never use narrow capsules or long stretched ovals. No sclera, iris, pupil, catchlight, or white highlight.
 - Very small simplified nose. The mouth is small, understated, and toy-like: use one short friendly curved opening or compact smile, never a wide cartoon grin extending across the face.
 - Prefer a tiny dark curved mouth with gently lifted corners. Keep it narrower than the space between the two eyes and avoid a floating white tooth strip.
 - A tiny open smile, one or two uneven simplified teeth, or a small tooth gap is welcome only when it strengthens the person's recognizable charm. It must remain compact, friendly, and physically printable.

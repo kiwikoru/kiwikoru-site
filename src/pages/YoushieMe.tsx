@@ -94,7 +94,7 @@ export default function YoushieMe() {
       image.onerror = reject
       image.src = src
     })
-    const [figure, logo] = await Promise.all([load(source), load('/youshies-logo-transparent.png')])
+    const [figure, logo, kiwiKoruLogo] = await Promise.all([load(source), load('/youshies-logo-transparent.png'), load('/images/kiwikoru-logo-transparent.png')])
     const canvas = document.createElement('canvas')
     canvas.width = 1200
     canvas.height = 1500
@@ -104,7 +104,6 @@ export default function YoushieMe() {
     context.fillRect(0, 0, canvas.width, canvas.height)
     context.fillStyle = '#6c35c9'
     context.fillRect(0, 0, canvas.width, 178)
-    context.fillRect(0, 1250, canvas.width, 250)
     const logoWidth = 470
     const logoHeight = logoWidth * logo.height / logo.width
     context.drawImage(logo, (canvas.width - logoWidth) / 2, (178 - logoHeight) / 2, logoWidth, logoHeight)
@@ -116,15 +115,21 @@ export default function YoushieMe() {
     context.fillStyle = '#ffffff'
     context.fillRect(40, 198, 1120, 1032)
     context.drawImage(figure, (canvas.width - width) / 2, 204 + (1020 - height) / 2, width, height)
-    context.textAlign = 'center'
     context.fillStyle = '#ffffff'
-    context.font = '700 43px Nunito, Arial, sans-serif'
-    context.fillText('KiwiKoru 3D', 600, 1322)
-    context.font = '600 25px Nunito, Arial, sans-serif'
-    context.fillText('3D solutions for people and industry', 600, 1370)
-    context.font = '700 24px Nunito, Arial, sans-serif'
-    context.fillStyle = '#f5cf4a'
-    context.fillText('kiwikoru.co.nz  ·  027 436 5339', 600, 1425)
+    context.fillRect(0, 1250, canvas.width, 250)
+    context.fillStyle = '#7541c5'
+    context.fillRect(0, 1250, canvas.width, 5)
+    context.drawImage(kiwiKoruLogo, 108, 1291, 150, 116)
+    context.textAlign = 'left'
+    context.fillStyle = '#173e2c'
+    context.font = '800 43px Nunito, Arial, sans-serif'
+    context.fillText('KiwiKoru 3D', 288, 1338)
+    context.fillStyle = '#6f6578'
+    context.font = '600 23px Nunito, Arial, sans-serif'
+    context.fillText('3D solutions for people and industry', 288, 1381)
+    context.fillStyle = '#7040bd'
+    context.font = '700 22px Nunito, Arial, sans-serif'
+    context.fillText('kiwikoru.co.nz   ·   027 436 5339', 288, 1423)
     return canvas.toDataURL('image/png')
   }
 
@@ -170,7 +175,7 @@ export default function YoushieMe() {
           <div className="steps"><span><b>1</b> Add a photo</span><span><b>2</b> Watch the magic</span><span><b>3</b> Meet your Youshie</span></div>
         </section>
 
-        <section className="creator-card" aria-label="Youshie creator">
+        <section className={`creator-card ${generatedPhoto ? 'has-generated' : ''}`} aria-label="Youshie creator">
           <div className="card-heading"><div><small>{generatedPhoto ? 'TA-DA!' : 'YOUR TURN'}</small><h2>{generatedPhoto ? 'Your Youshie!' : 'Youshie Me!'}</h2></div><span className="wiggle">✦</span></div>
           {!generatedPhoto && <div className="once-message"><Sparkles size={22} /><div><strong>Testing mode is open.</strong><p>Create as many Youshies as you need while we perfect the magic. The final competition experience will return to one surprise creation per person.</p></div></div>}
           <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} hidden />
