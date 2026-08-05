@@ -4,18 +4,12 @@ import { ArrowLeft, Download, ImagePlus, RotateCcw, Share2, Sparkles } from 'luc
 import { Link } from 'react-router-dom'
 import './YoushieMe.css'
 
-const themes = [
-  { id: 'galaxy', emoji: '⚔️', name: 'Galaxy Hero', note: 'Epic space adventurer' },
-  { id: 'monster', emoji: '💙', name: 'Friendly Monster', note: 'Big, fluffy & lovable' },
-  { id: 'astronaut', emoji: '🚀', name: 'Little Astronaut', note: 'Ready for orbit' },
-  { id: 'hero', emoji: '⚡', name: 'Super Hero', note: 'Cape, courage & colour' },
-]
-
 export default function YoushieMe() {
   const [photo, setPhoto] = useState<string>()
-  const [theme, setTheme] = useState(themes[0].id)
+  const [photoFile, setPhotoFile] = useState<File>()
+  const [generatedPhoto, setGeneratedPhoto] = useState<string>()
   const [creating, setCreating] = useState(false)
-  const [ready, setReady] = useState(false)
+  const [error, setError] = useState<string>()
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => () => { if (photo) URL.revokeObjectURL(photo) }, [photo])
@@ -25,13 +19,43 @@ export default function YoushieMe() {
     if (!file) return
     if (photo) URL.revokeObjectURL(photo)
     setPhoto(URL.createObjectURL(file))
-    setReady(false)
+    setPhotoFile(file)
+    setGeneratedPhoto(undefined)
+    setError(undefined)
   }
 
-  function createYoushie() {
-    if (!photo) { inputRef.current?.click(); return }
+  async function prepareImage(file: File) {
+    const image = await createImageBitmap(file)
+    const scale = Math.min(1, 1536 / Math.max(image.width, image.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.round(image.width * scale)
+    canvas.height = Math.round(image.height * scale)
+    canvas.getContext('2d')?.drawImage(image, 0, 0, canvas.width, canvas.height)
+    image.close()
+    return canvas.toDataURL('image/jpeg', 0.88).split(',')[1]
+  }
+
+  async function createYoushie() {
+    if (!photoFile) { inputRef.current?.click(); return }
     setCreating(true)
-    window.setTimeout(() => { setCreating(false); setReady(true) }, 1500)
+    setError(undefined)
+    setGeneratedPhoto(undefined)
+    try {
+      const image = await prepareImage(photoFile)
+      const response = await fetch('/api/youshie', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image, mimeType: 'image/jpeg' }),
+      })
+      const result = await response.json() as { image?: string; mimeType?: string; error?: string }
+      if (!response.ok || !result.image) throw new Error(result.error || 'Could not create your Youshie.')
+      setGeneratedPhoto(`data:${result.mimeType || 'image/png'};base64,${result.image}`)
+      window.setTimeout(() => document.getElementById('youshie-result')?.scrollIntoView({ behavior: 'smooth' }), 100)
+    } catch (generationError) {
+      setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')
+    } finally {
+      setCreating(false)
+    }
   }
 
   async function share() {
@@ -53,8 +77,8 @@ export default function YoushieMe() {
         <section className="youshie-intro">
           <div className="eyebrow"><Sparkles size={16} /> Made for you. Made like you.</div>
           <h1>Meet your little<br /><em>3D alter ego.</em></h1>
-          <p>Upload a photo, pick a world, and watch yourself become a playful, one-of-a-kind Youshie.</p>
-          <div className="steps"><span><b>1</b> Add a photo</span><span><b>2</b> Pick your vibe</span><span><b>3</b> Get Youshified</span></div>
+          <p>Upload a photo and watch yourself become a playful, one-of-a-kind Youshie designed with four printable colours.</p>
+          <div className="steps"><span><b>1</b> Add a photo</span><span><b>2</b> Get Youshified</span><span><b>3</b> Save your figure</span></div>
         </section>
 
         <section className="creator-card" aria-label="Youshie creator">
@@ -64,18 +88,15 @@ export default function YoushieMe() {
             {photo ? <img src={photo} alt="Your uploaded portrait" /> : <><span className="upload-icon"><ImagePlus size={30} /></span><strong>Choose your favourite photo</strong><small>Clear, front-facing photos work best</small><span className="browse-pill">Browse photo</span></>}
             {photo && <span className="change-photo">Change photo</span>}
           </button>
-
-          <div className="theme-heading"><span>Choose your Youshie world</span><small>More coming soon!</small></div>
-          <div className="theme-grid">
-            {themes.map(item => <button key={item.id} onClick={() => { setTheme(item.id); setReady(false) }} className={theme === item.id ? 'active' : ''}><span>{item.emoji}</span><strong>{item.name}</strong><small>{item.note}</small></button>)}
-          </div>
-          <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Creating your Youshie…</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>
+          <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
+          <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Creating your Youshie… this can take a minute</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>
+          {error && <p className="generation-error" role="alert">{error}</p>}
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used only to create your Youshie</p>
         </section>
 
-        {ready && photo && <section className="result-section">
-          <div className="result-copy"><span className="eyebrow"><Sparkles size={15} /> TA-DA!</span><h2>Your Youshie is ready.</h2><p>This preview is ready to save and share. The full AI transformation activates when the Gemini service key is connected.</p><div className="result-actions"><a href={photo} download="my-youshie.jpg"><Download size={18} /> Download</a><button onClick={share}><Share2 size={18} /> Share</button><button className="again" onClick={() => setReady(false)}><RotateCcw size={18} /> Make another</button></div></div>
-          <div className="result-frame"><div className="frame-title">MY Y<span>OU</span>SHIE</div><div className={`result-image theme-${theme}`}><img src={photo} alt="Your Youshie preview" /><div className="spark s1">✦</div><div className="spark s2">✦</div></div><div className="frame-footer"><strong>KiwiKoru 3D</strong><span>3D solutions for people & industry</span><small>kiwikoru.co.nz · 027 436 5339</small></div></div>
+        {generatedPhoto && <section id="youshie-result" className="result-section">
+          <div className="result-copy"><span className="eyebrow"><Sparkles size={15} /> TA-DA!</span><h2>Your Youshie is ready.</h2><p>Your photo has been transformed into an original four-colour, 3D-printable collectible concept.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie.png"><Download size={18} /> Download</a><button onClick={share}><Share2 size={18} /> Share</button><button className="again" onClick={() => setGeneratedPhoto(undefined)}><RotateCcw size={18} /> Make another</button></div></div>
+          <div className="result-preview"><img src={generatedPhoto} alt="Your generated Youshie collectible" /></div>
         </section>}
       </main>
       <footer className="youshie-footer"><div className="youshie-logo mini"><span>YOU</span>SHIES<i>✎</i></div><p>A playful KiwiKoru 3D experience · Whangārei, New Zealand</p></footer>
