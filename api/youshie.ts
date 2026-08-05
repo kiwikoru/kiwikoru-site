@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { YOUSHIE_PROMPT } from '../shared/youshiePrompt'
+import { YOUSHIE_PROMPT } from '../shared/youshiePrompt.js'
 
 export const maxDuration = 120
 const ALLOWED_ORIGINS = new Set(['https://kiwikoru.co.nz', 'https://www.kiwikoru.co.nz'])
