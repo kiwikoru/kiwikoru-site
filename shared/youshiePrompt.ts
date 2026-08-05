@@ -13,7 +13,8 @@ DESIGN
 FACE
 - Preserve apparent age range, face shape, skin tone, hairstyle, hairline or bald areas, eyebrows, glasses, facial hair, smile, and defining traits, simplified into toy geometry.
 - Eyes are exactly two simple solid-BLACK vertical ovals: no sclera, iris, pupil, catchlight, or white highlight.
-- Very small simplified nose and simple friendly mouth. Preserve distinctive teeth or smile as one bold printable shape without tiny dental detail.
+- Very small simplified nose. The mouth is small, understated, and toy-like: use one short friendly curved opening or compact smile, never a wide cartoon grin extending across the face.
+- Avoid prominent white teeth, realistic lips, lipstick, tongue, individually separated teeth, or a large open mouth. Only preserve visible teeth when they are essential to recognizing the person, and then reduce them to one tiny clean printable shape that counts as WHITE in the four-colour palette.
 
 HAIR AND CLOTHING
 - Hair becomes a few large sculpted masses. Preserve curls, fringe, buns, spikes, baldness, length, and important hair accessories; never show individual strands.
@@ -46,10 +47,11 @@ FDM MANUFACTURABILITY
 
 RENDER
 - One figure only, full body head-to-feet, centered, straight-on front view, simple nearly symmetrical pose.
-- Warm off-white seamless studio background, soft professional lighting, subtle grounding shadow.
+- Place the figure standing directly on a clean, neutral light-wood or warm off-white desktop. Use a softly blurred, uncluttered creative-studio or home-office background with shallow depth of field, gentle daylight, and a subtle grounding shadow.
+- The desktop and blurred environment are photographic context and do not count toward the figure's four filament colours. Keep them visually quiet and clearly separate from the physical figure.
 - Matte PLA-like molded surface with very subtle realistic FDM layer texture.
 - Every surface, including clothing and hair, must visibly be solid molded or 3D-printed PLA. No woven fabric, knit, fur, embroidery, printed emblem, tiny badge, glossy vinyl, porcelain, or photorealistic skin.
-- No packaging, words, logo, arrows, comparison photo, additional objects, scenery, or frame.
+- No packaging, words, logo, arrows, comparison photo, prominent props, busy scenery, or frame.
 - Square 1:1 product image with comfortable empty space.
 
 Before output, silently verify identity, solid-black oval eyes, no more than four physical filament colours, sturdy 10 cm printability, and an original Youshie appearance. Return only the final product render—no explanation, labels, text, before/after layout, or source photograph.
