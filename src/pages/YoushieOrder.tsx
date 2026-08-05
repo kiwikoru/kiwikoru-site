@@ -11,7 +11,7 @@ export default function YoushieOrder() {
   const generatedPhoto = (state as OrderState | null)?.generatedPhoto
   const [destination, setDestination] = useState('north')
   const [rural, setRural] = useState(false)
-  const shippingPrices: Record<string, number> = { north: 14.9, south: 14.9, australia: 32 }
+  const shippingPrices: Record<string, number> = { north: 15, south: 15, australia: 30 }
   const shipping = shippingPrices[destination] + (destination !== 'australia' && rural ? 6 : 0)
 
   return <div className="youshie-page order-page">
