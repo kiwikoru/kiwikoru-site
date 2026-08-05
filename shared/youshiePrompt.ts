@@ -28,6 +28,7 @@ ONE SURPRISE, CHOSEN FOR THIS PERSON
 
 NON-NEGOTIABLE FOUR-FILAMENT PALETTE
 Silently select the smallest useful palette, with an absolute maximum of FOUR physical filament colours for the entire figure.
+- Before rendering, silently name the palette C1, C2, C3, and C4 and assign EVERY visible physical region to one of those exact four base materials. Recolour, merge, or remove any region that cannot be assigned. Never invent a fifth material during rendering.
 - WHITE counts as one. BLACK counts as one. SKIN TONE counts as one. Every visibly different material colour or shade counts.
 - The tiny solid-black oval eyes may be hand-painted and excluded from the filament count. If black appears anywhere else—hair, shoes, clothing, accessories—it MUST be one of the four filament colours.
 - Use one flat skin-tone material, not separate light and dark skin materials.
@@ -35,6 +36,7 @@ Silently select the smallest useful palette, with an absolute maximum of FOUR ph
 - Every colour boundary is a clean separated physical region suitable for multi-colour FDM printing.
 - Lighting may create natural highlights and shadows, but these must read as illumination on the same four base materials, never extra coloured materials.
 - If the source has too many colours, prioritize identity-defining skin/hair, main garment colour, then one essential accent. Merge or remove everything else.
+- Practical example: if skin, black hair, and white teeth are retained, all clothing, shoes, cuffs, collars, buttons, and accessories together may use only ONE remaining base colour. Do not add a contrasting collar or cuff.
 
 FDM MANUFACTURABILITY
 - One sturdy printable object. No floating elements, loose strands, separate props, fragile fingers, thin horns, thin glasses, thin ankles, or unsupported pieces.
@@ -46,7 +48,7 @@ RENDER
 - One figure only, full body head-to-feet, centered, straight-on front view, simple nearly symmetrical pose.
 - Warm off-white seamless studio background, soft professional lighting, subtle grounding shadow.
 - Matte PLA-like molded surface with very subtle realistic FDM layer texture.
-- No glossy vinyl, porcelain, fabric/fur simulation, or photorealistic skin.
+- Every surface, including clothing and hair, must visibly be solid molded or 3D-printed PLA. No woven fabric, knit, fur, embroidery, printed emblem, tiny badge, glossy vinyl, porcelain, or photorealistic skin.
 - No packaging, words, logo, arrows, comparison photo, additional objects, scenery, or frame.
 - Square 1:1 product image with comfortable empty space.
 
