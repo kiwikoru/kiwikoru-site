@@ -1,0 +1,35 @@
+.order-main { width: min(1080px, calc(100% - 32px)); margin: 58px auto 90px; }
+.order-heading { text-align: center; max-width: 720px; margin: 0 auto 38px; }
+.order-heading .eyebrow { margin-inline: auto; }
+.order-heading h1 { font-size: clamp(45px, 7vw, 72px); line-height: .98; margin: 17px 0; }
+.order-heading h1 em { color: #7740cf; font-style: normal; }
+.order-heading > p { color: #766489; font-size: 17px; }
+.order-card { display: grid; grid-template-columns: 1fr 1fr; background: rgba(255,255,255,.95); border: 1px solid #e5d8f5; border-radius: 30px; overflow: hidden; box-shadow: 0 28px 70px rgba(83,42,130,.16); }
+.order-visual { min-height: 650px; padding: 34px; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at 50% 34%, #fff8cf, #eee2ff 58%, #d8c2f6); }
+.order-visual > img { width: 100%; max-height: 570px; object-fit: contain; border-radius: 22px; filter: drop-shadow(0 18px 24px rgba(60,29,92,.18)); }
+.actual-note { margin-top: 18px; color: #634581; font-weight: 800; font-size: 12px; }
+.figure-measure { width: 250px; height: 390px; position: relative; filter: drop-shadow(0 20px 20px rgba(72,35,108,.2)); }
+.figure-head { width: 210px; height: 205px; position: absolute; top: 20px; left: 30px; border-radius: 48% 48% 44% 44%; background: #7240bd; }
+.figure-head i { position: absolute; top: 82px; width: 23px; height: 39px; border-radius: 50%; background: #251735; }
+.figure-head i:first-child { left: 62px; }.figure-head i:last-child { right: 62px; }
+.figure-body { width: 145px; height: 165px; position: absolute; bottom: 12px; left: 62px; border-radius: 48px 48px 38px 38px; background: #6635ab; }
+.figure-body:before,.figure-body:after { content: ''; position: absolute; bottom: -8px; width: 72px; height: 48px; border-radius: 28px; background: #56308c; }
+.figure-body:before { left: -13px; }.figure-body:after { right: -13px; }
+.measure-line { position: absolute; left: -42px; top: 17px; bottom: 8px; width: 2px; background: #e9ae18; }
+.measure-line:before,.measure-line:after { content: ''; position: absolute; left: -6px; width: 14px; height: 2px; background: #e9ae18; }
+.measure-line:before { top: 0; }.measure-line:after { bottom: 0; }
+.measure-line b { position: absolute; top: 47%; left: -22px; width: 48px; transform: rotate(-90deg); color: #6d428c; font-size: 15px; }
+.order-details { padding: 48px; }
+.order-kicker { color: #d7970f; font-weight: 900; letter-spacing: .12em; }
+.order-details h2 { font-size: 38px; margin: 7px 0 26px; }
+.product-points { display: grid; gap: 17px; list-style: none; padding: 0; margin: 0 0 28px; }
+.product-points li { display: flex; gap: 13px; align-items: center; }
+.product-points svg { flex: 0 0 auto; color: #7440c3; background: #efe5fc; padding: 8px; width: 42px; height: 42px; border-radius: 13px; }
+.product-points span { display: flex; flex-direction: column; }.product-points strong { font-size: 14px; }.product-points small { color: #8b779c; font-size: 11px; line-height: 1.4; }
+.price-box,.order-total { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eadff5; padding: 18px 0; color: #705c81; }
+.price-box strong,.order-total strong { color: #6332ad; font: 800 19px "Baloo 2"; }
+.shipping-label { display: block; margin: 5px 0 9px; font-size: 12px; font-weight: 900; color: #584169; }
+.order-details select { width: 100%; height: 50px; border: 1px solid #dbcbed; border-radius: 13px; padding: 0 14px; background: #fbf9fe; color: #4e3761; font: 700 13px Nunito; }
+.checkout-placeholder { width: 100%; height: 55px; border: 0; border-radius: 15px; background: linear-gradient(135deg,#7e49d4,#5c28ae); color: #fff; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; opacity: .58; }
+.checkout-note { color: #9a87aa; text-align: center; font-size: 10px; }
+@media (max-width: 800px) { .order-main { margin-top: 30px; }.order-card { grid-template-columns: 1fr; }.order-visual { min-height: 480px; }.order-details { padding: 30px 22px; }.figure-measure { transform: scale(.82); }.order-heading h1 { font-size: 48px; } }

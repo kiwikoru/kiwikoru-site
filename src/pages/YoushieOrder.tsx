@@ -1,0 +1,58 @@
+import { ArrowLeft, Check, Home, PackageCheck, Palette, Sparkles } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import { useState } from 'react'
+import './YoushieMe.css'
+import './YoushieOrder.css'
+
+type OrderState = { generatedPhoto?: string }
+
+export default function YoushieOrder() {
+  const { state } = useLocation()
+  const generatedPhoto = (state as OrderState | null)?.generatedPhoto
+  const [destination, setDestination] = useState('north')
+
+  return <div className="youshie-page order-page">
+    <header className="youshie-header">
+      <Link to="/youshie-me" className="back-link"><ArrowLeft size={18} /> Your Youshie</Link>
+      <img className="youshie-logo-img" src="/youshies-logo-transparent.png" alt="Youshies" />
+      <span className="limited-pill">Made in New Zealand</span>
+    </header>
+
+    <main className="order-main">
+      <section className="order-heading">
+        <div className="eyebrow"><Sparkles size={16} /> From magical picture to real figure</div>
+        <h1>Bring your little<br /><em>Youshie home.</em></h1>
+        <p>Your personalised collectible is made especially for you by KiwiKoru 3D.</p>
+      </section>
+
+      <section className="order-card">
+        <div className="order-visual">
+          {generatedPhoto ? <img src={generatedPhoto} alt="Your personalised Youshie" /> : <div className="figure-measure" aria-label="Youshie silhouette, 10 centimetres high"><span className="measure-line"><b>10 cm</b></span><div className="figure-head"><i /><i /></div><div className="figure-body"><i /><i /></div></div>}
+          <span className="actual-note">Approximately 10 cm tall</span>
+        </div>
+
+        <div className="order-details">
+          <small className="order-kicker">YOUR REAL COLLECTIBLE</small>
+          <h2>One tiny version of you</h2>
+          <ul className="product-points">
+            <li><Home /><span><strong>Printed by KiwiKoru 3D</strong><small>Made locally in Whangārei</small></span></li>
+            <li><Palette /><span><strong>Four filament colours</strong><small>Selected to preserve your most recognisable features</small></span></li>
+            <li><Sparkles /><span><strong>Hand-finished when needed</strong><small>A fifth or sixth small detail may be carefully painted by hand</small></span></li>
+            <li><PackageCheck /><span><strong>Ready for your desk or shelf</strong><small>Sturdy, charming and made just for you</small></span></li>
+          </ul>
+
+          <div className="price-box"><span>Youshie figure</span><strong>Price coming next</strong></div>
+          <label className="shipping-label" htmlFor="shipping">Where should your Youshie travel?</label>
+          <select id="shipping" value={destination} onChange={event => setDestination(event.target.value)}>
+            <option value="north">New Zealand — North Island</option>
+            <option value="south">New Zealand — South Island</option>
+            <option value="australia">Australia</option>
+          </select>
+          <div className="order-total"><span>Figure + delivery</span><strong>To be confirmed</strong></div>
+          <button className="checkout-placeholder" disabled><Check size={20} /> Secure ordering coming next</button>
+          <p className="checkout-note">Prices and secure payment will be activated after final confirmation.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+}
