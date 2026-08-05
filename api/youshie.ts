@@ -3,6 +3,7 @@ import { YOUSHIE_PROMPT } from '../shared/youshiePrompt'
 
 export const maxDuration = 120
 const ALLOWED_ORIGINS = new Set(['https://kiwikoru.co.nz', 'https://www.kiwikoru.co.nz'])
+const isKiwiKoruPreview = (origin?: string) => Boolean(origin && /^https:\/\/kiwikoru-funciona-[a-z0-9-]+-kiwi-koru3d\.vercel\.app$/.test(origin))
 
 type RequestBody = { image?: string; mimeType?: string }
 
@@ -23,7 +24,7 @@ export default async function handler(request: IncomingMessage, response: Server
 
   const origin = request.headers.origin
   const isLocal = origin?.startsWith('http://localhost:') || origin?.startsWith('http://127.0.0.1:')
-  if (origin && !isLocal && !ALLOWED_ORIGINS.has(origin)) return send(response, 403, { error: 'Request origin not allowed.' })
+  if (origin && !isLocal && !isKiwiKoruPreview(origin) && !ALLOWED_ORIGINS.has(origin)) return send(response, 403, { error: 'Request origin not allowed.' })
 
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) return send(response, 503, { error: 'Youshie generation is not configured yet.' })
