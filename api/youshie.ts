@@ -54,13 +54,21 @@ export default async function handler(request: IncomingMessage, response: Server
 
     const result = await geminiResponse.json() as {
       error?: { message?: string }
-      candidates?: Array<{ content?: { parts?: Array<{ inlineData?: { data?: string; mimeType?: string }; thought?: boolean }> } }>
+      candidates?: Array<{
+        finishReason?: string
+        finishMessage?: string
+        content?: { parts?: Array<{ text?: string; inlineData?: { data?: string; mimeType?: string }; thought?: boolean }> }
+      }>
     }
     if (!geminiResponse.ok) throw new Error(result.error?.message || 'Gemini could not generate the image.')
 
     const generated = result.candidates?.flatMap(candidate => candidate.content?.parts || [])
       .find(part => !part.thought && part.inlineData?.data)?.inlineData
-    if (!generated?.data) throw new Error('Gemini returned no image. Try a clearer front-facing photo.')
+    if (!generated?.data) {
+      const candidate = result.candidates?.[0]
+      const explanation = candidate?.content?.parts?.find(part => part.text && !part.thought)?.text
+      throw new Error(candidate?.finishMessage || explanation || `Gemini returned no image${candidate?.finishReason ? ` (${candidate.finishReason})` : ''}. Try a clearer front-facing photo.`)
+    }
 
     return send(response, 200, { image: generated.data, mimeType: generated.mimeType || 'image/png' })
   } catch (error) {
