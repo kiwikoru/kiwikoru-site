@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ChangeEvent } from 'react'
+import type { ChangeEvent, CSSProperties } from 'react'
 import { ArrowLeft, Download, ImagePlus, Share2, Sparkles } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import './YoushieMe.css'
@@ -22,6 +22,7 @@ export default function YoushieMe() {
   const [magicStep, setMagicStep] = useState(0)
   const [revealCount, setRevealCount] = useState<number | 'BOOM' | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const audioRef = useRef<AudioContext | null>(null)
 
   useEffect(() => () => { if (photo) URL.revokeObjectURL(photo) }, [photo])
   useEffect(() => {
@@ -57,6 +58,8 @@ export default function YoushieMe() {
       setError('Your one-of-a-kind Youshie has already been created on this device.')
       return
     }
+    if (!audioRef.current) audioRef.current = new AudioContext()
+    await audioRef.current.resume().catch(() => undefined)
     setCreating(true)
     setError(undefined)
     setGeneratedPhoto(undefined)
@@ -75,6 +78,7 @@ export default function YoushieMe() {
         await new Promise(resolve => window.setTimeout(resolve, 720))
       }
       setRevealCount('BOOM')
+      playFairyChime()
       await new Promise(resolve => window.setTimeout(resolve, 520))
       setGeneratedPhoto(finishedImage)
       setRevealCount(null)
@@ -87,6 +91,24 @@ export default function YoushieMe() {
     }
   }
 
+  function playFairyChime() {
+    const audio = audioRef.current
+    if (!audio || audio.state !== 'running') return
+    const now = audio.currentTime
+    ;[659.25, 783.99, 987.77, 1318.51].forEach((frequency, index) => {
+      const oscillator = audio.createOscillator()
+      const gain = audio.createGain()
+      oscillator.type = index % 2 ? 'sine' : 'triangle'
+      oscillator.frequency.setValueAtTime(frequency, now + index * 0.11)
+      gain.gain.setValueAtTime(0.0001, now + index * 0.11)
+      gain.gain.exponentialRampToValueAtTime(0.12, now + index * 0.11 + 0.025)
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.11 + 1.15)
+      oscillator.connect(gain).connect(audio.destination)
+      oscillator.start(now + index * 0.11)
+      oscillator.stop(now + index * 0.11 + 1.2)
+    })
+  }
+
   async function share() {
     const data = { title: 'My Youshie', text: 'I made my own Youshie with KiwiKoru 3D!', url: window.location.href }
     if (navigator.share) await navigator.share(data).catch(() => undefined)
@@ -96,6 +118,7 @@ export default function YoushieMe() {
   return (
     <div className="youshie-page">
       <div className="youshie-orb orb-one" /><div className="youshie-orb orb-two" />
+      {revealCount !== null && <div className={`reveal-magic ${revealCount === 'BOOM' ? 'is-boom' : ''}`} aria-hidden="true"><div className="magic-halo" />{Array.from({ length: 36 }, (_, index) => <i key={index} style={{ '--i': index } as CSSProperties}>✦</i>)}</div>}
       <header className="youshie-header">
         <Link to="/" className="back-link"><ArrowLeft size={18} /> KiwiKoru 3D</Link>
         <img className="youshie-logo-img" src="/youshies-logo.png" alt="Youshies — Your photo. Your figure. Your Youshie." />
