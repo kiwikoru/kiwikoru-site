@@ -41,17 +41,19 @@
   top: 700px;
 }
 .youshie-header {
-  height: 80px;
+  height: 190px;
   max-width: 1200px;
   margin: auto;
   padding: 0 28px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
+  justify-content: center;
   align-items: center;
   position: relative;
   z-index: 2;
 }
 .back-link {
+  position: absolute;
+  left: 28px;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -172,6 +174,20 @@
   line-height: 1;
   margin: 3px 0 23px;
 }
+.once-message {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  margin: 0 0 22px;
+  padding: 15px 17px;
+  border: 1px solid #e3d2fb;
+  border-radius: 17px;
+  color: #553272;
+  background: linear-gradient(135deg, #f6eeff, #fff8dc);
+}
+.once-message > svg { flex: 0 0 auto; color: #e2a915; margin-top: 2px; }
+.once-message strong { font-family: "Baloo 2"; font-size: 17px; }
+.once-message p { margin: 2px 0 0; color: #806993; font-size: 12px; line-height: 1.5; }
 .wiggle {
   font-size: 35px;
   color: #f2bb28;
@@ -391,12 +407,12 @@
 }
 .youshie-logo-img {
   display: block;
-  width: 230px;
-  height: 58px;
+  width: min(900px, 76vw);
+  height: 175px;
   object-fit: contain;
   mix-blend-mode: multiply;
 }
-.youshie-logo-img.mini { width: 170px; height: 54px; margin: 0 auto; }
+.youshie-logo-img.mini { width: min(520px, 86vw); height: 150px; margin: 0 auto; }
 .magic-overlay {
   position: absolute;
   inset: 0;
@@ -593,10 +609,12 @@
 }
 @media (max-width: 760px) {
   .youshie-header {
-    grid-template-columns: 1fr auto;
+    height: 135px;
     padding: 0 18px;
   }
-  .limited-pill {
+.limited-pill {
+  position: absolute;
+  right: 28px;
     display: none;
   }
   .youshie-main {
@@ -631,6 +649,7 @@
     height: 330px;
   }
   .back-link {
+    left: 16px;
     font-size: 0;
   }
   .back-link svg {
@@ -640,5 +659,5 @@
   .youshie-logo {
     font-size: 25px;
   }
-  .youshie-logo-img { width: 180px; height: 50px; }
+  .youshie-logo-img { width: min(390px, 88vw); height: 120px; }
 }

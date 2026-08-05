@@ -112,6 +112,7 @@ export default function YoushieMe() {
 
         <section className="creator-card" aria-label="Youshie creator">
           <div className="card-heading"><div><small>{generatedPhoto ? 'TA-DA!' : 'YOUR TURN'}</small><h2>{generatedPhoto ? 'Your Youshie!' : 'Youshie Me!'}</h2></div><span className="wiggle">✦</span></div>
+          {!generatedPhoto && <div className="once-message"><Sparkles size={22} /><div><strong>This is your one magical moment.</strong><p>Choose your photo carefully—you can create only one surprise Youshie. Your character will be completely random, so save the result: you can use it to enter our Youshies competition.</p></div></div>}
           <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} hidden />
           <button className={`photo-drop ${photo || generatedPhoto ? 'has-photo' : ''} ${generatedPhoto ? 'has-result' : ''}`} onClick={() => inputRef.current?.click()} disabled={creating || hasCreated}>
             {generatedPhoto ? <img className="inline-result" src={generatedPhoto} alt="Your generated Youshie collectible" /> : photo ? <img src={photo} alt="Your uploaded portrait" /> : <><span className="upload-icon"><ImagePlus size={30} /></span><strong>Choose your favourite photo</strong><small>Clear, front-facing photos work best</small><span className="browse-pill">Browse photo</span></>}
