@@ -80,7 +80,6 @@ export default function YoushieMe() {
       setRevealCount(null)
       localStorage.setItem(usageKey, 'yes')
       setHasCreated(true)
-      window.setTimeout(() => document.getElementById('youshie-result')?.scrollIntoView({ behavior: 'smooth' }), 100)
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')
     } finally {
@@ -99,7 +98,7 @@ export default function YoushieMe() {
       <div className="youshie-orb orb-one" /><div className="youshie-orb orb-two" />
       <header className="youshie-header">
         <Link to="/" className="back-link"><ArrowLeft size={18} /> KiwiKoru 3D</Link>
-        <div className="youshie-logo" aria-label="Youshies"><span>YOU</span>SHIES<i>✎</i></div>
+        <img className="youshie-logo-img" src="/youshies-logo.png" alt="Youshies — Your photo. Your figure. Your Youshie." />
         <span className="limited-pill">Limited experience</span>
       </header>
 
@@ -112,26 +111,23 @@ export default function YoushieMe() {
         </section>
 
         <section className="creator-card" aria-label="Youshie creator">
-          <div className="card-heading"><div><small>YOUR TURN</small><h2>Youshie Me!</h2></div><span className="wiggle">✦</span></div>
+          <div className="card-heading"><div><small>{generatedPhoto ? 'TA-DA!' : 'YOUR TURN'}</small><h2>{generatedPhoto ? 'Your Youshie!' : 'Youshie Me!'}</h2></div><span className="wiggle">✦</span></div>
           <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} hidden />
-          <button className={`photo-drop ${photo ? 'has-photo' : ''}`} onClick={() => inputRef.current?.click()} disabled={creating || hasCreated}>
-            {photo ? <img src={photo} alt="Your uploaded portrait" /> : <><span className="upload-icon"><ImagePlus size={30} /></span><strong>Choose your favourite photo</strong><small>Clear, front-facing photos work best</small><span className="browse-pill">Browse photo</span></>}
-            {photo && !hasCreated && <span className="change-photo">Change photo</span>}
+          <button className={`photo-drop ${photo || generatedPhoto ? 'has-photo' : ''} ${generatedPhoto ? 'has-result' : ''}`} onClick={() => inputRef.current?.click()} disabled={creating || hasCreated}>
+            {generatedPhoto ? <img className="inline-result" src={generatedPhoto} alt="Your generated Youshie collectible" /> : photo ? <img src={photo} alt="Your uploaded portrait" /> : <><span className="upload-icon"><ImagePlus size={30} /></span><strong>Choose your favourite photo</strong><small>Clear, front-facing photos work best</small><span className="browse-pill">Browse photo</span></>}
+            {photo && !creating && !hasCreated && <span className="change-photo">Change photo</span>}
+            {creating && <div className={`magic-stage magic-overlay ${revealCount !== null ? 'is-revealing' : ''}`} aria-live="polite">{revealCount !== null ? <div key={revealCount} className={`magic-count ${revealCount === 'BOOM' ? 'boom' : ''}`}><span>✦</span>{revealCount}<span>✦</span></div> : <><div className="magic-figure"><span>✦</span><span>✦</span><span>✦</span><div className="magic-head" /><div className="magic-body" /></div><strong>{magicMessages[magicStep]}</strong><div className="magic-progress"><i style={{ width: `${25 * (magicStep + 1)}%` }} /></div><small>Please keep this page open. Your reveal can take about a minute.</small></>}</div>}
           </button>
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
           <p className="generation-limit">One magical Youshie creation per device</p>
-          <button className="create-button" onClick={createYoushie} disabled={creating || hasCreated}>{creating ? <><span className="spinner" /> {magicMessages[magicStep]}</> : <><Sparkles size={20} /> {hasCreated ? 'Your Youshie has been created' : photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>
-          {creating && <div className={`magic-stage ${revealCount !== null ? 'is-revealing' : ''}`} aria-live="polite">{revealCount !== null ? <div key={revealCount} className={`magic-count ${revealCount === 'BOOM' ? 'boom' : ''}`}><span>✦</span>{revealCount}<span>✦</span></div> : <><div className="magic-figure"><span>✦</span><span>✦</span><span>✦</span><div className="magic-head" /><div className="magic-body" /></div><div className="magic-progress"><i style={{ width: `${25 * (magicStep + 1)}%` }} /></div><small>Please keep this page open. Your reveal can take about a minute.</small></>}</div>}
+          {!generatedPhoto && <button className="create-button" onClick={createYoushie} disabled={creating || hasCreated}>{creating ? <><span className="spinner" /> Making magic…</> : <><Sparkles size={20} /> {hasCreated ? 'Your Youshie has been created' : photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>}
+          {generatedPhoto && <div className="inline-result-copy"><p>Your one-and-only four-colour collectible concept is ready.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie.png"><Download size={18} /> Download</a><button onClick={share}><Share2 size={18} /> Share</button></div></div>}
           {error && <p className="generation-error" role="alert">{error}</p>}
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used only to create your Youshie</p>
         </section>
 
-        {generatedPhoto && <section id="youshie-result" className="result-section">
-          <div className="result-copy"><span className="eyebrow"><Sparkles size={15} /> TA-DA!</span><h2>Your Youshie is ready.</h2><p>Your one-and-only photo has been transformed into an original four-colour, 3D-printable collectible concept.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie.png"><Download size={18} /> Download</a><button onClick={share}><Share2 size={18} /> Share</button></div></div>
-          <div className="result-preview"><img src={generatedPhoto} alt="Your generated Youshie collectible" /></div>
-        </section>}
       </main>
-      <footer className="youshie-footer"><div className="youshie-logo mini"><span>YOU</span>SHIES<i>✎</i></div><p>A playful KiwiKoru 3D experience · Whangārei, New Zealand</p></footer>
+      <footer className="youshie-footer"><img className="youshie-logo-img mini" src="/youshies-logo.png" alt="Youshies" /><p>A playful KiwiKoru 3D experience · Whangārei, New Zealand</p></footer>
     </div>
   )
 }

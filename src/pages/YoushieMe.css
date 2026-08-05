@@ -389,6 +389,35 @@
   background: radial-gradient(circle at 50% 35%, #f0e4ff, #faf7ff 68%);
   text-align: center;
 }
+.youshie-logo-img {
+  display: block;
+  width: 230px;
+  height: 58px;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+.youshie-logo-img.mini { width: 170px; height: 54px; margin: 0 auto; }
+.magic-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  margin: 0;
+  border: 0;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: var(--ink);
+  background: radial-gradient(circle at 50% 35%, #f5e8ff 0, #e6d2ff 46%, #6c35d9 160%);
+}
+.magic-overlay > strong { margin-bottom: 15px; font-size: 14px; }
+.magic-overlay .magic-progress { width: min(360px, 75%); margin-inline: auto; }
+.photo-drop.has-result { cursor: default; border-style: solid; border-color: #8a55df; box-shadow: 0 18px 50px #6c35d933; animation: inline-result-reveal .75s cubic-bezier(.2,.85,.25,1.2) both; }
+.photo-drop .inline-result { object-fit: contain; background: #f4efe8; }
+.inline-result-copy { text-align: center; padding-top: 18px; }
+.inline-result-copy p { margin: 0; color: #766489; font-size: 13px; }
+.inline-result-copy .result-actions { justify-content: center; margin-top: 14px; }
+@keyframes inline-result-reveal { from { opacity: .2; transform: scale(.9); filter: blur(9px); } to { opacity: 1; transform: none; filter: none; } }
 .magic-figure { position: relative; width: 72px; height: 78px; margin: 0 auto 14px; animation: magic-float 2.2s ease-in-out infinite; }
 .magic-head { position: absolute; width: 48px; height: 45px; border-radius: 48% 48% 44% 44%; background: #8a55df; left: 12px; top: 2px; box-shadow: 0 0 28px #8b55df88; }
 .magic-body { position: absolute; width: 32px; height: 31px; border-radius: 13px 13px 16px 16px; background: #6a32ca; left: 20px; bottom: 1px; }
@@ -611,4 +640,5 @@
   .youshie-logo {
     font-size: 25px;
   }
+  .youshie-logo-img { width: 180px; height: 50px; }
 }
