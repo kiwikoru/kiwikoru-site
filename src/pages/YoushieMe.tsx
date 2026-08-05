@@ -20,6 +20,7 @@ export default function YoushieMe() {
   const [error, setError] = useState<string>()
   const [hasCreated, setHasCreated] = useState(() => localStorage.getItem(usageKey) === 'yes')
   const [magicStep, setMagicStep] = useState(0)
+  const [revealCount, setRevealCount] = useState<number | 'BOOM' | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => () => { if (photo) URL.revokeObjectURL(photo) }, [photo])
@@ -68,7 +69,15 @@ export default function YoushieMe() {
       })
       const result = await response.json() as { image?: string; mimeType?: string; error?: string }
       if (!response.ok || !result.image) throw new Error(result.error || 'Could not create your Youshie.')
-      setGeneratedPhoto(`data:${result.mimeType || 'image/png'};base64,${result.image}`)
+      const finishedImage = `data:${result.mimeType || 'image/png'};base64,${result.image}`
+      for (const count of [3, 2, 1]) {
+        setRevealCount(count)
+        await new Promise(resolve => window.setTimeout(resolve, 720))
+      }
+      setRevealCount('BOOM')
+      await new Promise(resolve => window.setTimeout(resolve, 520))
+      setGeneratedPhoto(finishedImage)
+      setRevealCount(null)
       localStorage.setItem(usageKey, 'yes')
       setHasCreated(true)
       window.setTimeout(() => document.getElementById('youshie-result')?.scrollIntoView({ behavior: 'smooth' }), 100)
@@ -112,7 +121,7 @@ export default function YoushieMe() {
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
           <p className="generation-limit">One magical Youshie creation per device</p>
           <button className="create-button" onClick={createYoushie} disabled={creating || hasCreated}>{creating ? <><span className="spinner" /> {magicMessages[magicStep]}</> : <><Sparkles size={20} /> {hasCreated ? 'Your Youshie has been created' : photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>
-          {creating && <div className="magic-stage" aria-live="polite"><div className="magic-figure"><span>✦</span><span>✦</span><span>✦</span><div className="magic-head" /><div className="magic-body" /></div><div className="magic-progress"><i style={{ width: `${25 * (magicStep + 1)}%` }} /></div><small>Please keep this page open. Your reveal can take about a minute.</small></div>}
+          {creating && <div className={`magic-stage ${revealCount !== null ? 'is-revealing' : ''}`} aria-live="polite">{revealCount !== null ? <div key={revealCount} className={`magic-count ${revealCount === 'BOOM' ? 'boom' : ''}`}><span>✦</span>{revealCount}<span>✦</span></div> : <><div className="magic-figure"><span>✦</span><span>✦</span><span>✦</span><div className="magic-head" /><div className="magic-body" /></div><div className="magic-progress"><i style={{ width: `${25 * (magicStep + 1)}%` }} /></div><small>Please keep this page open. Your reveal can take about a minute.</small></>}</div>}
           {error && <p className="generation-error" role="alert">{error}</p>}
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used only to create your Youshie</p>
         </section>

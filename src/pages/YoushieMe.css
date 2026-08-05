@@ -399,8 +399,15 @@
 .magic-progress { height: 7px; overflow: hidden; border-radius: 99px; background: #e8ddf5; }
 .magic-progress i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f1bd2b, #7a45d5); transition: width 1s ease; }
 .magic-stage small { display: block; margin-top: 10px; color: #8d75a4; font-size: 10px; }
+.magic-stage.is-revealing { min-height: 155px; display: grid; place-items: center; overflow: hidden; }
+.magic-count { display: flex; align-items: center; justify-content: center; gap: 18px; color: #6932c8; font: 800 68px/1 "Baloo 2"; animation: countdown-pop .72s ease both; }
+.magic-count span { color: #efb928; font-size: 28px; animation: magic-spark .7s ease-in-out infinite; }
+.magic-count.boom { color: #fff; font-size: clamp(46px, 10vw, 76px); text-shadow: 0 4px 18px #3e1778; animation: boom .52s ease both; }
+.magic-stage.is-revealing:has(.boom) { background: radial-gradient(circle, #f4c735 0, #8a50df 45%, #5e27ba 100%); }
 @keyframes magic-float { 50% { transform: translateY(-6px) rotate(2deg); } }
 @keyframes magic-spark { 50% { transform: scale(1.7) rotate(25deg); opacity: .45; } }
+@keyframes countdown-pop { from { opacity: 0; transform: scale(.55) rotate(-7deg); } 55% { transform: scale(1.15) rotate(3deg); } to { opacity: 1; transform: scale(1); } }
+@keyframes boom { from { opacity: 0; transform: scale(.25) rotate(-12deg); } 70% { transform: scale(1.25) rotate(3deg); } to { opacity: 1; transform: scale(1); } }
 .gemini-star {
   color: #4b78de;
 }
@@ -411,7 +418,9 @@
   grid-template-columns: 0.85fr 1.15fr;
   gap: 60px;
   align-items: center;
+  animation: youshie-reveal .75s cubic-bezier(.2, .85, .25, 1.25) both;
 }
+@keyframes youshie-reveal { from { opacity: 0; transform: translateY(35px) scale(.88); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
 .result-copy h2 {
   font-size: 47px;
   line-height: 1.05;
