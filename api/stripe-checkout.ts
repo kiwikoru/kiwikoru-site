@@ -1,5 +1,8 @@
 import { put } from '@vercel/blob'
 import Stripe from 'stripe'
+import type { IncomingMessage, ServerResponse } from 'node:http'
+
+export const maxDuration = 60
 
 type Destination = 'north' | 'south' | 'australia'
 
@@ -111,5 +114,36 @@ export async function createYoushieCheckout(request: Request) {
   } catch (error) {
     console.error('Unable to create Youshie checkout', error)
     return Response.json({ error: error instanceof Error ? error.message : 'Unable to start secure checkout.' }, { status: 500 })
+  }
+}
+
+export default async function handler(request: IncomingMessage, response: ServerResponse) {
+  if (request.method !== 'POST') {
+    response.statusCode = 405
+    response.setHeader('Content-Type', 'application/json')
+    response.end(JSON.stringify({ error: 'Method not allowed.' }))
+    return
+  }
+
+  try {
+    const chunks: Buffer[] = []
+    for await (const chunk of request) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    const body = Buffer.concat(chunks)
+    const protocol = request.headers['x-forwarded-proto'] || 'https'
+    const host = request.headers.host || 'www.kiwikoru.co.nz'
+    const webRequest = new Request(`${protocol}://${host}${request.url || '/api/youshie-checkout'}`, {
+      method: 'POST',
+      headers: { 'Content-Type': request.headers['content-type'] || 'application/json' },
+      body,
+    })
+    const checkoutResponse = await createYoushieCheckout(webRequest)
+    response.statusCode = checkoutResponse.status
+    response.setHeader('Content-Type', checkoutResponse.headers.get('content-type') || 'application/json')
+    response.end(await checkoutResponse.text())
+  } catch (error) {
+    console.error('Youshie checkout handler failed', error)
+    response.statusCode = 500
+    response.setHeader('Content-Type', 'application/json')
+    response.end(JSON.stringify({ error: 'Secure checkout could not open. Please try again.' }))
   }
 }

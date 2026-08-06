@@ -30,6 +30,10 @@ export default function YoushieOrder() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ destination, rural, generatedPhoto }),
       })
+      const contentType = response.headers.get('content-type') || ''
+      if (!contentType.includes('application/json')) {
+        throw new Error('Secure checkout is temporarily unavailable. Please try again shortly.')
+      }
       const result = await response.json() as { url?: string; error?: string }
       if (!response.ok || !result.url) throw new Error(result.error || 'Unable to start secure checkout.')
       window.location.assign(result.url)
