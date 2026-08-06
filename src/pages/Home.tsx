@@ -181,57 +181,36 @@ function StepsSection() {
 /* ─────────── FIND MODELS SECTION ─────────── */
 function FindModelsSection() {
   return (
-    <section className="bg-kiwi-dark py-20 lg:py-28">
+    <section className="gradient-hero py-20 lg:py-28 border-y border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-[.9fr_1.1fr] gap-12 lg:gap-16 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 mb-6">
-              <Info className="w-3 h-3 text-kiwi-gold" />
-              <span className="text-xs text-kiwi-gold font-medium">Need a design?</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 mb-6">
+              <Info className="w-4 h-4 text-gold-light" />
+              <span className="text-xs text-gold-light font-semibold tracking-wide">Need a design?</span>
             </div>
-            <h2 className="text-3xl lg:text-4xl font-heading font-semibold text-white mb-6">
-              Where Can I Find<br />3D Models?
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight text-white mb-5">
+              Find the right model.<br /><span className="text-gold-light">We’ll bring it to life.</span>
             </h2>
-            <p className="text-white/60 mb-8 leading-relaxed">
-              You don't need to be a CAD expert to 3D print. There are millions of free designs available online. Find something you love, download the STL file, and send it to us.
+            <p className="text-white/75 text-base leading-relaxed max-w-xl mb-8">
+              You don’t need to be a CAD expert. Choose a ready-made design, create your own, or talk to us about developing it—then send us the STL file for printing.
             </p>
-            <ul className="space-y-4">
-              {[
-                { text: 'Search repositories like', link: 'Thingiverse', url: 'https://www.thingiverse.com', desc: ' or ' },
-                { text: '', link: 'Printables', url: 'https://www.printables.com', desc: '' },
-                { text: 'Generate custom models using AI tools', link: '', url: '', desc: '' },
-                { text: 'Upload the file', link: 'here', url: '/quote', desc: ' for an instant quote' },
-              ].map((item, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 flex-shrink-0 mt-0.5">
-                    <CheckCircle className="w-4 h-4 text-kiwi-gold" />
-                  </div>
-                  <span className="text-white/70 text-sm">
-                    {item.text}{' '}
-                    {item.link && (
-                      <a
-                        href={item.url}
-                        target={item.url.startsWith('http') ? '_blank' : undefined}
-                        rel="noopener noreferrer"
-                        className="text-kiwi-gold hover:underline"
-                      >
-                        {item.link}
-                      </a>
-                    )}
-                    {item.desc}
-                  </span>
-                </li>
-              ))}
+            <ul className="space-y-4 text-sm sm:text-base">
+              <li className="flex items-center gap-3 text-white/80"><span className="flex items-center justify-center w-8 h-8 rounded-full bg-gold/15 shrink-0"><CheckCircle className="w-4 h-4 text-gold-light" /></span><span>Browse models on <a className="text-gold-light font-semibold hover:underline" href="https://www.thingiverse.com" target="_blank" rel="noopener noreferrer">Thingiverse</a> or <a className="text-gold-light font-semibold hover:underline" href="https://www.printables.com" target="_blank" rel="noopener noreferrer">Printables</a></span></li>
+              <li className="flex items-center gap-3 text-white/80"><span className="flex items-center justify-center w-8 h-8 rounded-full bg-gold/15 shrink-0"><CheckCircle className="w-4 h-4 text-gold-light" /></span><span>Create or adapt a custom model using AI tools</span></li>
+              <li className="flex items-center gap-3 text-white/80"><span className="flex items-center justify-center w-8 h-8 rounded-full bg-gold/15 shrink-0"><CheckCircle className="w-4 h-4 text-gold-light" /></span><span>Need an original design? <Link className="text-gold-light font-semibold hover:underline" to="/contact">Discuss it with KiwiKoru</Link></span></li>
             </ul>
+            <Link to="/quote" className="mt-9 inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3.5 text-forest-dark font-bold shadow-lg transition hover:bg-gold-light hover:-translate-y-0.5">Upload your STL & get a quote <ArrowRight className="w-4 h-4" /></Link>
           </div>
           <div className="relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl">
+            <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white/5 p-2">
               <img
-                src="/images/hero-3d.jpg"
-                alt="3D Printing Studio"
-                className="w-full h-auto object-cover"
+                src="/images/printer-workshop-real.jpg"
+                alt="Professional KiwiKoru 3D printing workshop with varied printers and filament"
+                className="w-full aspect-[4/3] object-cover rounded-xl"
               />
             </div>
+            <p className="mt-3 text-center text-xs text-white/45">Professional FDM printing · Whangārei, New Zealand</p>
           </div>
         </div>
       </div>

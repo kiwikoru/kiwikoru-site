@@ -141,7 +141,7 @@ export default function Services() {
             </div>
             <div className="rounded-xl overflow-hidden">
               <img
-                src="/images/hero-3d.jpg"
+                src="/images/printer-workshop-real.jpg"
                 alt="Our 3D Printing Studio"
                 className="w-full h-48 object-cover"
               />
