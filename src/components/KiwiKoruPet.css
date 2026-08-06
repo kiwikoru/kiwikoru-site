@@ -3,8 +3,8 @@
   right: 14px;
   bottom: 8px;
   z-index: 42;
-  width: 116px;
-  height: 126px;
+  width: 104px;
+  height: 113px;
   pointer-events: auto;
   filter: drop-shadow(0 13px 14px rgba(20, 34, 26, .25));
 }
@@ -22,12 +22,12 @@
 }
 
 .kiwikoru-pet-float.is-tantrum .kiwikoru-pet-sprite {
-  animation: kiwikoru-tantrum .1s steps(2, end) infinite;
+  animation: kiwikoru-tantrum .16s ease-in-out infinite;
 }
 
 .kiwikoru-pet-bubble {
   position: absolute;
-  right: 88px;
+  right: 80px;
   top: -42px;
   width: 245px;
   padding: 13px 16px;
@@ -62,9 +62,9 @@
 }
 
 @keyframes kiwikoru-tantrum {
-  0% { transform: translateX(-4px) rotate(-3deg); }
-  50% { transform: translateX(4px) rotate(3deg); }
-  100% { transform: translateX(-3px) rotate(-2deg); }
+  0% { transform: translateX(-2px) rotate(-1.5deg); }
+  50% { transform: translateX(2px) rotate(1.5deg); }
+  100% { transform: translateX(-1px) rotate(-1deg); }
 }
 
 @keyframes kiwikoru-bubble-in {
@@ -81,11 +81,7 @@
     z-index: 38;
   }
   .kiwikoru-pet-bubble {
-    right: 40px;
-    top: -60px;
-    width: 205px;
-    padding: 11px 13px;
-    font-size: 12px;
+    display: none;
   }
   .kiwikoru-pet-bubble strong { font-size: 14px; }
 }

@@ -3,12 +3,9 @@ import './KiwiKoruPet.css'
 
 const IDLE_DURATIONS = [280, 110, 110, 140, 140, 320]
 const TANTRUM = [
-  { row: 5, column: 0, duration: 110 },
-  { row: 5, column: 1, duration: 100 },
-  { row: 5, column: 2, duration: 130 },
-  { row: 7, column: 3, duration: 280 },
-  { row: 5, column: 3, duration: 100 },
-  { row: 5, column: 4, duration: 110 },
+  { row: 5, column: 0, duration: 120 },
+  { row: 5, column: 1, duration: 120 },
+  { row: 5, column: 2, duration: 150 },
   { row: 0, column: 0, duration: 180 },
 ]
 
@@ -20,6 +17,7 @@ export default function KiwiKoruPet() {
   const [showIntro, setShowIntro] = useState(false)
   const tantrumTimer = useRef<number | null>(null)
   const introTimer = useRef<number | null>(null)
+  const isHovered = useRef(false)
 
   useEffect(() => {
     let timeout = 0
@@ -39,7 +37,19 @@ export default function KiwiKoruPet() {
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
   }, [])
 
-  const startTantrum = () => {
+  const stopInteraction = () => {
+    isHovered.current = false
+    if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
+    if (introTimer.current !== null) window.clearTimeout(introTimer.current)
+    tantrumTimer.current = null
+    introTimer.current = null
+    setTantrumFrame(null)
+    setShowIntro(false)
+  }
+
+  const startTantrum = (event: React.PointerEvent) => {
+    if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
+    isHovered.current = true
     if (tantrumTimer.current !== null) return
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
     setShowIntro(false)
@@ -49,11 +59,12 @@ export default function KiwiKoruPet() {
       if (frame >= TANTRUM.length - 1) {
         setTantrumFrame(null)
         tantrumTimer.current = null
+        if (!isHovered.current) return
         setShowIntro(true)
         introTimer.current = window.setTimeout(() => {
           setShowIntro(false)
           introTimer.current = null
-        }, 5600)
+        }, 1600)
         return
       }
       frame += 1
@@ -94,7 +105,7 @@ export default function KiwiKoruPet() {
 
   return (
     <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot">
-      {showIntro && <div className="kiwikoru-pet-bubble"><strong>Soy Kiwi Grumpy.</strong><span>Próximamente seré tu asistente virtual.</span></div>}
+      {showIntro && <div className="kiwikoru-pet-bubble"><strong>I’m Kiwi Grumpy.</strong><span>Soon I’ll be your virtual assistant.</span></div>}
       <div
         ref={petRef}
         className="kiwikoru-pet-sprite"
@@ -102,6 +113,7 @@ export default function KiwiKoruPet() {
         aria-label="Kiwi Grumpy watching the pointer"
         title="Kiwi Grumpy · Your KiwiKoru helper is waking up"
         onPointerEnter={startTantrum}
+        onPointerLeave={stopInteraction}
         style={{
           backgroundPosition: `${(column / 7) * 100}% ${(row / 10) * 100}%`,
         }}
