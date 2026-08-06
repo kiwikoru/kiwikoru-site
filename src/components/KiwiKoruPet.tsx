@@ -44,6 +44,41 @@ function makePocketPetChirp(context: AudioContext, variant: number) {
   })
 }
 
+function makePocketPetPoof(context: AudioContext) {
+  const now = context.currentTime
+  const duration = .48
+  const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * duration), context.sampleRate)
+  const data = buffer.getChannelData(0)
+  for (let index = 0; index < data.length; index += 1) {
+    const fade = 1 - index / data.length
+    data[index] = (Math.random() * 2 - 1) * fade * fade
+  }
+  const noise = context.createBufferSource()
+  const filter = context.createBiquadFilter()
+  const gain = context.createGain()
+  noise.buffer = buffer
+  filter.type = 'lowpass'
+  filter.frequency.setValueAtTime(1450, now)
+  filter.frequency.exponentialRampToValueAtTime(180, now + duration)
+  gain.gain.setValueAtTime(.0001, now)
+  gain.gain.exponentialRampToValueAtTime(.16, now + .018)
+  gain.gain.exponentialRampToValueAtTime(.0001, now + duration)
+  noise.connect(filter).connect(gain).connect(context.destination)
+  noise.start(now)
+  noise.stop(now + duration)
+
+  const blip = context.createOscillator()
+  const blipGain = context.createGain()
+  blip.type = 'square'
+  blip.frequency.setValueAtTime(520, now)
+  blip.frequency.exponentialRampToValueAtTime(130, now + .22)
+  blipGain.gain.setValueAtTime(.09, now)
+  blipGain.gain.exponentialRampToValueAtTime(.0001, now + .24)
+  blip.connect(blipGain).connect(context.destination)
+  blip.start(now)
+  blip.stop(now + .25)
+}
+
 export default function KiwiKoruPet() {
   const petRef = useRef<HTMLDivElement>(null)
   const [idleFrame, setIdleFrame] = useState(0)
@@ -51,6 +86,8 @@ export default function KiwiKoruPet() {
   const [tantrumFrame, setTantrumFrame] = useState<number | null>(null)
   const [showIntro, setShowIntro] = useState(false)
   const [showArmsJoke, setShowArmsJoke] = useState(false)
+  const [isPoofing, setIsPoofing] = useState(false)
+  const [isVanished, setIsVanished] = useState(false)
   const tantrumTimer = useRef<number | null>(null)
   const introTimer = useRef<number | null>(null)
   const isHovered = useRef(false)
@@ -58,6 +95,9 @@ export default function KiwiKoruPet() {
   const audioContext = useRef<AudioContext | null>(null)
   const soundIndex = useRef(0)
   const interactionCount = useRef(0)
+  const clickStreak = useRef<number[]>([])
+  const poofTimer = useRef<number | null>(null)
+  const returnTimer = useRef<number | null>(null)
 
   useEffect(() => {
     const unlockAudio = () => {
@@ -92,6 +132,8 @@ export default function KiwiKoruPet() {
   useEffect(() => () => {
     if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
+    if (poofTimer.current !== null) window.clearTimeout(poofTimer.current)
+    if (returnTimer.current !== null) window.clearTimeout(returnTimer.current)
     void audioContext.current?.close()
   }, [])
 
@@ -112,6 +154,35 @@ export default function KiwiKoruPet() {
     }
   }
 
+  const playPoofSound = () => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as AudioWindow).webkitAudioContext
+      if (!AudioContextClass) return
+      if (!audioContext.current) audioContext.current = new AudioContextClass()
+      const context = audioContext.current
+      const play = () => makePocketPetPoof(context)
+      if (context.state === 'suspended') void context.resume().then(play).catch(() => undefined)
+      else play()
+    } catch { /* The visual Easter egg still works if audio is blocked. */ }
+  }
+
+  const triggerPoof = () => {
+    reactionRun.current += 1
+    isHovered.current = false
+    if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
+    if (introTimer.current !== null) window.clearTimeout(introTimer.current)
+    setTantrumFrame(null)
+    setShowIntro(false)
+    setIsPoofing(true)
+    setIsVanished(true)
+    playPoofSound()
+    poofTimer.current = window.setTimeout(() => setIsPoofing(false), 850)
+    returnTimer.current = window.setTimeout(() => {
+      setIsVanished(false)
+      returnTimer.current = null
+    }, 5000)
+  }
+
   const stopInteraction = (event: React.PointerEvent) => {
     if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
     reactionRun.current += 1
@@ -125,6 +196,7 @@ export default function KiwiKoruPet() {
   }
 
   const playReaction = (withSound = false) => {
+    if (isVanished) return
     reactionRun.current += 1
     const run = reactionRun.current
     isHovered.current = true
@@ -161,11 +233,19 @@ export default function KiwiKoruPet() {
 
   const startTantrum = (event: React.PointerEvent) => {
     if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
-    playReaction(false)
+    playReaction(true)
   }
 
   const startTouchTantrum = (event: React.PointerEvent) => {
     event.stopPropagation()
+    if (isVanished || event.button !== 0) return
+    const now = performance.now()
+    clickStreak.current = [...clickStreak.current.filter(time => now - time < 1800), now]
+    if (clickStreak.current.length >= 5) {
+      clickStreak.current = []
+      triggerPoof()
+      return
+    }
     playReaction(true)
   }
 
@@ -199,7 +279,8 @@ export default function KiwiKoruPet() {
   const column = tantrumPose ? tantrumPose.column : showIntro ? 0 : lookDirection === null ? idleFrame : lookDirection % 8
 
   return (
-    <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot" onPointerEnter={startTantrum} onPointerLeave={stopInteraction}>
+    <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''} ${isVanished ? 'is-vanished' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot" onPointerEnter={startTantrum} onPointerLeave={stopInteraction}>
+      {isPoofing && <div className="kiwikoru-pet-poof" aria-label="Kiwi Grumpy vanished in a puff of smoke" role="status">{Array.from({ length: 9 }, (_, index) => <span key={index} />)}</div>}
       {showIntro && <div className="kiwikoru-pet-bubble" role="status"><strong>{showArmsJoke ? 'They’re not wings. They’re arms.' : 'I’m Kiwi Grumpy.'}</strong><span>{showArmsJoke ? 'Kiwis can’t fly — but I evolved. I’m a maker kiwi.' : 'Soon I’ll be your virtual assistant.'}</span><a href="https://wa.me/64274365339?text=Hi%20KiwiKoru!%20I%20have%20a%20project%20in%20mind.%20How%20can%20we%20get%20started%3F" target="_blank" rel="noopener noreferrer" aria-label="Message KiwiKoru 3D on WhatsApp">Message us on WhatsApp</a></div>}
       <div
         ref={petRef}

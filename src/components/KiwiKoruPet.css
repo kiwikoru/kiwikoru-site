@@ -18,8 +18,40 @@
   image-rendering: auto;
   transform-origin: 50% 100%;
   animation: kiwikoru-arrive .65s cubic-bezier(.2, .85, .3, 1.2) both;
-  will-change: transform;
+  will-change: transform, opacity;
+  transition: opacity .12s ease;
 }
+.kiwikoru-pet-float.is-vanished .kiwikoru-pet-sprite { opacity: 0; pointer-events: none; }
+.kiwikoru-pet-float.is-vanished .kiwikoru-pet-bubble { display: none; }
+
+.kiwikoru-pet-poof {
+  position: absolute;
+  inset: 15% 4% 0;
+  z-index: 3;
+  pointer-events: none;
+}
+.kiwikoru-pet-poof span {
+  --poof-x: 0px;
+  --poof-y: -35px;
+  position: absolute;
+  left: 50%;
+  bottom: 22%;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fffdf5 0 18%, #d7dbd2 52%, #7f897e 100%);
+  box-shadow: 0 2px 7px rgba(28, 43, 33, .18);
+  animation: kiwikoru-poof .78s cubic-bezier(.18, .75, .25, 1) both;
+}
+.kiwikoru-pet-poof span:nth-child(1) { --poof-x: -47px; --poof-y: -24px; animation-delay: .02s; }
+.kiwikoru-pet-poof span:nth-child(2) { --poof-x: -35px; --poof-y: -58px; width: 20px; height: 20px; }
+.kiwikoru-pet-poof span:nth-child(3) { --poof-x: -10px; --poof-y: -72px; width: 30px; height: 30px; animation-delay: .04s; }
+.kiwikoru-pet-poof span:nth-child(4) { --poof-x: 25px; --poof-y: -63px; width: 19px; height: 19px; }
+.kiwikoru-pet-poof span:nth-child(5) { --poof-x: 48px; --poof-y: -31px; width: 27px; height: 27px; animation-delay: .03s; }
+.kiwikoru-pet-poof span:nth-child(6) { --poof-x: 39px; --poof-y: 2px; width: 17px; height: 17px; }
+.kiwikoru-pet-poof span:nth-child(7) { --poof-x: 4px; --poof-y: -19px; width: 35px; height: 35px; }
+.kiwikoru-pet-poof span:nth-child(8) { --poof-x: -34px; --poof-y: 4px; width: 18px; height: 18px; animation-delay: .05s; }
+.kiwikoru-pet-poof span:nth-child(9) { --poof-x: 9px; --poof-y: 8px; width: 22px; height: 22px; animation-delay: .02s; }
 .kiwikoru-pet-sprite:focus-visible { outline: 3px solid #d5b66f; outline-offset: 3px; border-radius: 38%; }
 
 .kiwikoru-pet-float.is-tantrum .kiwikoru-pet-sprite {
@@ -73,6 +105,12 @@
 @keyframes kiwikoru-bubble-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
+}
+
+@keyframes kiwikoru-poof {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(.15); }
+  18% { opacity: .95; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--poof-x)), var(--poof-y)) scale(1.18); }
 }
 
 @media (max-width: 767px) {
