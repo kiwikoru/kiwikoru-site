@@ -15,6 +15,7 @@ export default function YoushieMe() {
   const [photo, setPhoto] = useState<string>()
   const [photoFile, setPhotoFile] = useState<File>()
   const [generatedPhoto, setGeneratedPhoto] = useState<string>()
+  const [specialRequest, setSpecialRequest] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string>()
   const [magicStep, setMagicStep] = useState(0)
@@ -68,7 +69,7 @@ export default function YoushieMe() {
       const response = await fetch('/api/youshie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image, styleReference, faceReference, mimeType: 'image/jpeg' }),
+        body: JSON.stringify({ image, styleReference, faceReference, mimeType: 'image/jpeg', specialRequest }),
       })
       const result = await response.json() as { image?: string; mimeType?: string; error?: string }
       if (!response.ok || !result.image) throw new Error(result.error || 'Could not create your Youshie.')
@@ -190,6 +191,20 @@ export default function YoushieMe() {
             {photo && !creating && !generatedPhoto && <span className="change-photo">Change photo</span>}
             {creating && <div className={`magic-stage magic-overlay ${revealCount !== null ? 'is-revealing' : ''}`} aria-live="polite">{revealCount !== null ? <div key={revealCount} className={`magic-count ${revealCount === 'BOOM' ? 'boom' : ''}`}><span>✦</span>{revealCount}<span>✦</span></div> : <><div className="magic-figure"><span>✦</span><span>✦</span><span>✦</span><div className="magic-head" /><div className="magic-body" /></div><strong>{magicMessages[magicStep]}</strong><div className="magic-progress"><i style={{ width: `${25 * (magicStep + 1)}%` }} /></div><small>Please keep this page open. Your reveal can take about a minute.</small></>}</div>}
           </button>
+          {!generatedPhoto && <div className="special-request">
+            <div className="request-example"><Sparkles size={15} /><span><b>Funny example:</b> “Dress me like Luke Skywalker… but let me keep my Crocs.”</span></div>
+            <label htmlFor="youshie-request">Add one little twist <small>(optional)</small></label>
+            <input
+              id="youshie-request"
+              type="text"
+              value={specialRequest}
+              onChange={event => setSpecialRequest(event.target.value.slice(0, 180))}
+              placeholder="e.g. Make me smile, give me Wolverine-style hands…"
+              maxLength={180}
+              disabled={creating}
+            />
+            <span className="request-counter">{specialRequest.length}/180</span>
+          </div>}
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
           <p className="generation-limit">Unlimited testing is temporarily enabled</p>
           {!generatedPhoto && <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Making magic…</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>}
