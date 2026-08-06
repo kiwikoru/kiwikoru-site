@@ -64,7 +64,7 @@ export default function KiwiKoruPet() {
         introTimer.current = window.setTimeout(() => {
           setShowIntro(false)
           introTimer.current = null
-        }, 1600)
+        }, 3200)
         return
       }
       frame += 1
