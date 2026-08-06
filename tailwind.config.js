@@ -57,6 +57,12 @@ module.exports = {
           DEFAULT: "#d4b896",
           light: "#e8c9a0",
         },
+        kiwi: {
+          dark: "#1b281e",
+          base: "#3f4a2f",
+          gold: "#e8c9a0",
+          light: "#f5f5f0",
+        },
         charcoal: {
           DEFAULT: "#1a1a1a",
           light: "#4a4a4a",

@@ -68,7 +68,7 @@ function HeroSection() {
           <div className="hero-card flex justify-center lg:justify-end">
             <Link
               to="/quote"
-              className="group relative bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 w-full max-w-sm hover:border-kiwi-gold/50 transition-all hover:shadow-glow"
+              className="group relative bg-white/10 border border-white/25 rounded-2xl p-8 w-full max-w-sm shadow-[0_18px_55px_rgba(0,0,0,.22)] hover:border-kiwi-gold/70 transition-all hover:shadow-glow"
             >
               <div className="flex items-center justify-center w-16 h-16 rounded-xl bg-kiwi-gold/20 mb-6">
                 <Upload className="w-8 h-8 text-kiwi-gold" />
@@ -76,7 +76,7 @@ function HeroSection() {
               <h3 className="text-xl font-heading font-semibold text-white mb-2">
                 Get an Instant Quote
               </h3>
-              <p className="text-white/60 text-sm mb-6">
+              <p className="text-white/80 text-sm mb-6">
                 Click here to upload your STL files and calculate price immediately.
               </p>
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-kiwi-gold text-kiwi-dark mx-auto group-hover:scale-110 transition-transform">
@@ -95,14 +95,14 @@ function HeroSection() {
           ].map((feature) => (
             <div
               key={feature.title}
-              className="flex items-center gap-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-6 py-4"
+              className="flex items-center gap-4 bg-white/10 border border-white/20 rounded-xl px-6 py-4 shadow-sm"
             >
               <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-kiwi-gold/20 flex-shrink-0">
                 <feature.icon className="w-5 h-5 text-kiwi-gold" />
               </div>
               <div>
                 <h4 className="text-white font-medium text-sm">{feature.title}</h4>
-                <p className="text-white/50 text-xs">{feature.desc}</p>
+                <p className="text-white/75 text-xs">{feature.desc}</p>
               </div>
             </div>
           ))}
@@ -203,14 +203,14 @@ function FindModelsSection() {
             <Link to="/quote" className="mt-9 inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-6 py-3.5 text-forest-dark font-bold shadow-lg transition hover:bg-gold-light hover:-translate-y-0.5">Upload your STL & get a quote <ArrowRight className="w-4 h-4" /></Link>
           </div>
           <div className="relative">
-            <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/10 bg-white/5 p-2">
+            <div className="rounded-2xl overflow-hidden shadow-2xl border border-white/25 bg-white/10 p-2">
               <img
                 src="/images/printer-workshop-real.jpg"
                 alt="Professional KiwiKoru 3D printing workshop with varied printers and filament"
                 className="w-full aspect-[4/3] object-cover rounded-xl"
               />
             </div>
-            <p className="mt-3 text-center text-xs text-white/45">Professional FDM printing · Whangārei, New Zealand</p>
+            <p className="mt-3 text-center text-xs text-white/70">Professional FDM printing · Whangārei, New Zealand</p>
           </div>
         </div>
       </div>
@@ -342,7 +342,7 @@ function WhoWeAreSection() {
   return (
     <section className="bg-forest-dark py-20 lg:py-28">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl">
+        <div className="relative overflow-hidden rounded-3xl border border-white/25 bg-white/10 shadow-2xl">
           <img src="/images/printer-workshop-real.jpg" alt="KiwiKoru 3D workshop in Whangārei" className="aspect-[4/3] h-full w-full object-cover grayscale contrast-[1.08]" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-dark/45 via-transparent to-transparent" />
         </div>
@@ -352,7 +352,7 @@ function WhoWeAreSection() {
           <p className="mt-6 text-lg leading-relaxed text-white/72">
             KiwiKoru 3D is connected to <strong className="font-semibold text-gold-light">D.i.t. with a D.</strong>, an interdisciplinary design team that brings together creative thinking, technical knowledge and hands-on production.
           </p>
-          <p className="mt-4 leading-relaxed text-white/62">
+          <p className="mt-4 leading-relaxed text-white/75">
             From an early idea to a finished object, we look at how a product works, how it is made and how it can be improved. Our Whangārei workshop turns that thinking into prototypes, replacement parts, short production runs and useful objects made for real people and industry.
           </p>
           <Link to="/contact" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3.5 text-sm font-bold text-forest-dark shadow-md transition hover:-translate-y-0.5 hover:bg-gold-light">

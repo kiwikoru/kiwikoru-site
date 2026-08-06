@@ -12,7 +12,7 @@ export default function Footer() {
               <img src="/images/kiwikoru-logo-moss.png" alt="KiwiKoru 3D" width="34" height="34" className="object-contain" />
               <span className="text-gold font-bold text-base">KiwiKoru 3D</span>
             </Link>
-            <p className="text-sm text-white/50 leading-relaxed">
+            <p className="text-sm text-white/75 leading-relaxed">
               Northland's precision 3D printing studio. Turning digital designs into physical reality with local reliability.
             </p>
             <span className="inline-flex items-center gap-1.5 mt-4 px-3 py-1 border border-white/20 rounded-pill text-[11px] font-medium tracking-[0.1em] text-white/70 uppercase">
@@ -33,7 +33,7 @@ export default function Footer() {
                 { label: 'Get a Quote', path: '/quote' },
               ].map((link) => (
                 <li key={link.path}>
-                  <Link to={link.path} className="text-sm text-white/50 hover:text-white transition-colors duration-200 focus-gold">
+                  <Link to={link.path} className="text-sm text-white/75 hover:text-gold-light transition-colors duration-200 focus-gold">
                     {link.label}
                   </Link>
                 </li>
@@ -47,7 +47,7 @@ export default function Footer() {
             <ul className="space-y-2.5" role="list">
               {['3D Printing', 'Product Development', 'CAD Design', 'Prototyping', 'Replacement Parts', 'Custom Manufacturing'].map((s) => (
                 <li key={s}>
-                  <Link to="/services" className="text-sm text-white/50 hover:text-white transition-colors duration-200 focus-gold">{s}</Link>
+                  <Link to="/services" className="text-sm text-white/75 hover:text-gold-light transition-colors duration-200 focus-gold">{s}</Link>
                 </li>
               ))}
             </ul>
@@ -58,12 +58,12 @@ export default function Footer() {
             <h4 className="text-xs font-semibold tracking-[0.1em] text-white uppercase mb-4">Contact</h4>
             <ul className="space-y-3" role="list">
               <li>
-                <a href="mailto:kiwikoru3d@gmail.com" className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors duration-200 focus-gold">
+                <a href="mailto:kiwikoru3d@gmail.com" className="flex items-center gap-2 text-sm text-white/75 hover:text-gold-light transition-colors duration-200 focus-gold">
                   <Mail size={16} className="text-gold shrink-0" />kiwikoru3d@gmail.com
                 </a>
               </li>
               <li>
-                <a href="tel:+64274365339" className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors duration-200 focus-gold">
+                <a href="tel:+64274365339" className="flex items-center gap-2 text-sm text-white/75 hover:text-gold-light transition-colors duration-200 focus-gold">
                   <Phone size={16} className="text-gold shrink-0" />027 436 5339
                 </a>
               </li>
@@ -73,7 +73,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <span className="flex items-center gap-2 text-sm text-white/50">
+                <span className="flex items-center gap-2 text-sm text-white/75">
                   <MapPin size={16} className="text-gold shrink-0" />Morningside, Whangārei, New Zealand
                 </span>
               </li>
@@ -82,8 +82,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-[11px] text-white/40 tracking-wide">© {new Date().getFullYear()} KiwiKoru3D.com. All rights reserved.</p>
-          <p className="text-[11px] text-white/40 tracking-wide uppercase">Terms of Service · Privacy Policy · All Prices in NZD · Whangārei, New Zealand</p>
+          <p className="text-[11px] text-white/65 tracking-wide">© {new Date().getFullYear()} KiwiKoru3D.com. All rights reserved.</p>
+          <p className="text-[11px] text-white/65 tracking-wide uppercase">Terms of Service · Privacy Policy · All Prices in NZD · Whangārei, New Zealand</p>
         </div>
       </div>
     </footer>
