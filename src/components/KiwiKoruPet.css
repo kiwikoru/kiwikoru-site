@@ -76,14 +76,20 @@
   .kiwikoru-pet-float {
     right: 4px;
     bottom: 4px;
-    width: 48px;
-    height: 52px;
+    width: 60px;
+    height: 65px;
     z-index: 38;
   }
   .kiwikoru-pet-bubble {
-    display: none;
+    right: 49px;
+    top: -69px;
+    width: 188px;
+    padding: 10px 12px;
+    border-width: 1.5px;
+    border-radius: 16px 16px 4px 16px;
+    font-size: 11px;
   }
-  .kiwikoru-pet-bubble strong { font-size: 14px; }
+  .kiwikoru-pet-bubble strong { font-size: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

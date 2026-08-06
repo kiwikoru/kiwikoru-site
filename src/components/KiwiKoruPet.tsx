@@ -37,7 +37,8 @@ export default function KiwiKoruPet() {
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
   }, [])
 
-  const stopInteraction = () => {
+  const stopInteraction = (event: React.PointerEvent) => {
+    if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
     isHovered.current = false
     if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
@@ -47,8 +48,7 @@ export default function KiwiKoruPet() {
     setShowIntro(false)
   }
 
-  const startTantrum = (event: React.PointerEvent) => {
-    if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
+  const playReaction = () => {
     isHovered.current = true
     if (tantrumTimer.current !== null) return
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
@@ -72,6 +72,16 @@ export default function KiwiKoruPet() {
       tantrumTimer.current = window.setTimeout(advance, TANTRUM[frame].duration)
     }
     tantrumTimer.current = window.setTimeout(advance, TANTRUM[0].duration)
+  }
+
+  const startTantrum = (event: React.PointerEvent) => {
+    if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
+    playReaction()
+  }
+
+  const startTouchTantrum = (event: React.PointerEvent) => {
+    if (event.pointerType !== 'touch' && !window.matchMedia('(max-width: 767px)').matches) return
+    playReaction()
   }
 
   useEffect(() => {
@@ -113,6 +123,7 @@ export default function KiwiKoruPet() {
         aria-label="Kiwi Grumpy watching the pointer"
         title="Kiwi Grumpy · Your KiwiKoru helper is waking up"
         onPointerEnter={startTantrum}
+        onPointerDown={startTouchTantrum}
         onPointerLeave={stopInteraction}
         style={{
           backgroundPosition: `${(column / 7) * 100}% ${(row / 10) * 100}%`,
