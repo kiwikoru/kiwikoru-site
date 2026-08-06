@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stage } from '@react-three/drei'
 import * as THREE from 'three'
 import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js'
-import { Upload, X, Box, RotateCcw, Palette, ZoomIn, Move } from 'lucide-react'
+import { Upload, X, Box, RotateCcw, Palette, ZoomIn, Move, Scaling } from 'lucide-react'
 
 interface MeshData {
   geometry: THREE.BufferGeometry
@@ -24,6 +24,8 @@ interface STLViewerProps {
   onFileLoad?: (volume: number, dimensions: { x: number; y: number; z: number }) => void
   onFileSelect?: (file: File) => void
   onClear?: () => void
+  onScaleChange?: (volume: number, dimensions: { x: number; y: number; z: number }, scale: number) => void
+  onPreviewColorChange?: (color: string) => void
 }
 
 function Model({ meshData, color }: { meshData: MeshData; color: string }) {
@@ -57,12 +59,19 @@ function Scene({ meshData, color, controlsRef }: { meshData: MeshData; color: st
   )
 }
 
-export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLViewerProps) {
+const AXES = {
+  x: { label: 'X', className: 'text-red-400', ring: 'focus:border-red-400' },
+  y: { label: 'Y', className: 'text-emerald-400', ring: 'focus:border-emerald-400' },
+  z: { label: 'Z', className: 'text-sky-400', ring: 'focus:border-sky-400' },
+} as const
+
+export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleChange, onPreviewColorChange }: STLViewerProps) {
   const [meshData, setMeshData] = useState<MeshData | null>(null)
   const [fileName, setFileName] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const [loading, setLoading] = useState(false)
   const [previewColor, setPreviewColor] = useState(PREVIEW_COLORS[0].hex)
+  const [uniformScale, setUniformScale] = useState(1)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const controlsRef = useRef<any>(null)
 
@@ -121,6 +130,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
         const volCm3 = Math.abs(volume) / 1000
 
         setMeshData({ geometry, volume: volCm3, dimensions: dimsMm })
+        setUniformScale(1)
         onFileLoad?.(volCm3, dimsMm)
       } catch (err) {
         console.error('Error parsing 3D file:', err)
@@ -146,8 +156,30 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
   const clearModel = () => {
     setMeshData(null)
     setFileName('')
+    setUniformScale(1)
     if (fileInputRef.current) fileInputRef.current.value = ''
     onClear?.()
+  }
+
+  const scaledDimensions = meshData ? {
+    x: +(meshData.dimensions.x * uniformScale).toFixed(1),
+    y: +(meshData.dimensions.y * uniformScale).toFixed(1),
+    z: +(meshData.dimensions.z * uniformScale).toFixed(1),
+  } : null
+  const scaledVolume = meshData ? meshData.volume * Math.pow(uniformScale, 3) : 0
+
+  const updateScaleFromAxis = (axis: keyof typeof AXES, rawValue: string) => {
+    if (!meshData) return
+    const nextDimension = Number(rawValue)
+    if (!Number.isFinite(nextDimension) || nextDimension <= 0) return
+    const nextScale = Math.max(0.05, Math.min(10, nextDimension / meshData.dimensions[axis]))
+    setUniformScale(nextScale)
+    const nextDimensions = {
+      x: +(meshData.dimensions.x * nextScale).toFixed(1),
+      y: +(meshData.dimensions.y * nextScale).toFixed(1),
+      z: +(meshData.dimensions.z * nextScale).toFixed(1),
+    }
+    onScaleChange?.(meshData.volume * Math.pow(nextScale, 3), nextDimensions, nextScale)
   }
 
   const resetCamera = () => {
@@ -203,7 +235,9 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
 
             {/* Dimensions overlay */}
             <div className="absolute top-12 left-3 bg-[#253126]/70 backdrop-blur-sm rounded-lg px-3 py-1 text-[11px] text-white/60 pointer-events-none">
-              {meshData.dimensions.x} × {meshData.dimensions.y} × {meshData.dimensions.z} mm · {meshData.volume.toFixed(1)} cm³
+              <span className="font-semibold text-red-400">X</span> {scaledDimensions?.x} ×{' '}
+              <span className="font-semibold text-emerald-400">Y</span> {scaledDimensions?.y} ×{' '}
+              <span className="font-semibold text-sky-400">Z</span> {scaledDimensions?.z} mm · {scaledVolume.toFixed(1)} cm³
             </div>
 
             {/* Color picker overlay */}
@@ -217,7 +251,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
                       {PREVIEW_COLORS.map((c) => (
                         <button
                           key={c.name}
-                          onClick={() => setPreviewColor(c.hex)}
+                          onClick={() => { setPreviewColor(c.hex); onPreviewColorChange?.(c.name) }}
                           className={`w-5 h-5 rounded-full border-2 transition-all duration-200 focus-gold ${
                             previewColor === c.hex ? 'border-gold scale-110' : 'border-white/20 hover:border-white/50'
                           }`}
@@ -288,6 +322,42 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
           <span className="flex items-center gap-1"><RotateCcw size={10} /> Auto-rotate</span>
           <span className="flex items-center gap-1"><Move size={10} /> Drag to orbit</span>
           <span className="flex items-center gap-1"><ZoomIn size={10} /> Scroll to zoom</span>
+        </div>
+      )}
+
+      {meshData && scaledDimensions && (
+        <div className="mt-4 rounded-xl border border-forest/10 bg-white p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-forest/[0.06] p-2 text-forest"><Scaling size={17} /></div>
+            <div>
+              <p className="text-sm font-semibold text-charcoal">Uniform print scale</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-charcoal-light">Change any axis. The other two remain proportional and the estimate updates automatically.</p>
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-3 gap-2.5">
+            {(Object.keys(AXES) as Array<keyof typeof AXES>).map((axis) => (
+              <label key={axis} className="block">
+                <span className={`mb-1 block text-[11px] font-bold ${AXES[axis].className}`}>{AXES[axis].label} axis</span>
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="0.1"
+                    max="5000"
+                    step="0.1"
+                    value={scaledDimensions[axis]}
+                    onChange={(event) => updateScaleFromAxis(axis, event.target.value)}
+                    className={`w-full rounded-lg border border-border-light bg-off-white px-2.5 py-2 pr-8 text-sm font-semibold text-charcoal outline-none transition ${AXES[axis].ring}`}
+                    aria-label={`${AXES[axis].label} dimension in millimetres`}
+                  />
+                  <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-charcoal-light">mm</span>
+                </div>
+              </label>
+            ))}
+          </div>
+          <div className="mt-3 flex items-center justify-between rounded-lg bg-forest/[0.04] px-3 py-2 text-[11px]">
+            <span className="text-charcoal-light">Uniform scale</span>
+            <span className="font-semibold text-forest">{(uniformScale * 100).toFixed(0)}% · {scaledVolume.toFixed(1)} cm³</span>
+          </div>
         </div>
       )}
     </div>

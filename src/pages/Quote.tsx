@@ -4,11 +4,18 @@ import { ShoppingCart, MessageCircle, ChevronDown, Info, Trash2, ArrowRight } fr
 import STLViewer from '../components/STLViewer';
 
 const MATERIALS = {
-  pla: { name: 'PLA - Standard', basePrice: 0.08, colors: ['White', 'Black', 'Grey', 'Green', 'Blue', 'Red', 'Orange', 'Yellow'] },
-  petg: { name: 'PETG - Durable', basePrice: 0.12, colors: ['White', 'Black', 'Clear', 'Blue', 'Green'] },
-  asa: { name: 'ASA - Weather Resistant', basePrice: 0.15, colors: ['White', 'Black', 'Grey'] },
-  tpu: { name: 'TPU - Flexible', basePrice: 0.18, colors: ['Black', 'Clear'] },
+  pla: { name: 'PLA - Standard', multiplier: 1.00 },
+  petg: { name: 'PETG - Durable', multiplier: 1.20 },
+  asa: { name: 'ASA - Weather Resistant', multiplier: 1.35 },
+  tpu: { name: 'TPU - Flexible', multiplier: 1.50 },
 };
+
+const SETUP_FEE = 12;
+const PLA_RATE_PER_CM3 = 0.38;
+const MINIMUM_PRINT_SUBTOTAL = 15;
+const GST_RATE = 0.15;
+const STRIPE_RATE = 0.0265;
+const STRIPE_FIXED_FEE = 0.30;
 
 const INFILL_OPTIONS = [
   { value: 15, label: '15% - Light', multiplier: 0.7 },
@@ -46,16 +53,20 @@ export default function Quote() {
     setInCart(false);
   };
 
-  // Simulated price calculation
   const matData = MATERIALS[material];
   const infillData = INFILL_OPTIONS.find(i => i.value === infill)!;
   const qualityData = QUALITY_OPTIONS.find(q => q.value === quality)!;
 
   // Estimate volume from file size (rough approximation)
   const estimatedVolume = measuredVolume ?? (fileSize > 0 ? (fileSize / 1024) * 0.5 : 0);
-  const basePrice = estimatedVolume * matData.basePrice * infillData.multiplier * qualityData.multiplier;
-  const gst = basePrice * 0.15;
-  const totalPrice = basePrice + gst;
+  const operatingSubtotal = Math.max(
+    MINIMUM_PRINT_SUBTOTAL,
+    SETUP_FEE + estimatedVolume * PLA_RATE_PER_CM3 * matData.multiplier * infillData.multiplier * qualityData.multiplier,
+  );
+  const grossBeforeProcessing = operatingSubtotal * (1 + GST_RATE);
+  const totalPrice = (grossBeforeProcessing + STRIPE_FIXED_FEE) / (1 - STRIPE_RATE);
+  const basePrice = totalPrice / (1 + GST_RATE);
+  const gst = totalPrice - basePrice;
 
   const hasFile = uploadedFile !== null;
 
@@ -96,6 +107,8 @@ export default function Quote() {
             <STLViewer
               onFileSelect={handleModelFile}
               onFileLoad={(volume) => setMeasuredVolume(volume)}
+              onScaleChange={(volume) => { setMeasuredVolume(volume); setInCart(false); }}
+              onPreviewColorChange={(nextColor) => { setColor(nextColor); setInCart(false); }}
               onClear={() => {
                 setUploadedFile(null);
                 setModelFile(null);
@@ -120,33 +133,11 @@ export default function Quote() {
                 <div className="relative">
                   <select
                     value={material}
-                    onChange={(e) => {
-                      setMaterial(e.target.value as keyof typeof MATERIALS);
-                      setColor(MATERIALS[e.target.value as keyof typeof MATERIALS].colors[0]);
-                    }}
+                    onChange={(e) => setMaterial(e.target.value as keyof typeof MATERIALS)}
                     className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-kiwi-dark text-sm focus:outline-none focus:ring-2 focus:ring-kiwi-base/20"
                   >
                     {Object.entries(MATERIALS).map(([key, data]) => (
                       <option key={key} value={key}>{data.name}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-kiwi-base/40 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Colour */}
-              <div className="mb-6">
-                <label className="text-xs font-medium tracking-wider uppercase text-kiwi-base/60 mb-2 block">
-                  Colour
-                </label>
-                <div className="relative">
-                  <select
-                    value={color}
-                    onChange={(e) => setColor(e.target.value)}
-                    className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-kiwi-dark text-sm focus:outline-none focus:ring-2 focus:ring-kiwi-base/20"
-                  >
-                    {matData.colors.map((c) => (
-                      <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-kiwi-base/40 pointer-events-none" />
@@ -229,10 +220,6 @@ export default function Quote() {
                     <div className="flex justify-between">
                       <span className="text-kiwi-base/60">Material</span>
                       <span className="text-kiwi-dark">{matData.name}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-kiwi-base/60">Colour</span>
-                      <span className="text-kiwi-dark">{color}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-kiwi-base/60">Infill</span>
