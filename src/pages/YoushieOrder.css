@@ -35,6 +35,12 @@
 .order-details select { width: 100%; height: 50px; border: 1px solid #dbcbed; border-radius: 13px; padding: 0 14px; background: #fbf9fe; color: #4e3761; font: 700 13px Nunito; }
 .rural-option { display: flex; align-items: center; gap: 10px; margin-top: 11px; padding: 11px 13px; border-radius: 12px; background: #f8f3fd; color: #5b416d; cursor: pointer; }
 .rural-option input { accent-color: #7140c2; width: 17px; height: 17px; }.rural-option span { display: flex; flex: 1; flex-direction: column; }.rural-option small { color: #927fa2; }.rural-option b { color: #6f3eb9; font-size: 12px; }
-.checkout-placeholder { width: 100%; height: 55px; border: 0; border-radius: 15px; background: linear-gradient(135deg,#7e49d4,#5c28ae); color: #fff; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; opacity: .58; }
+.checkout-placeholder { width: 100%; height: 55px; border: 0; border-radius: 15px; background: linear-gradient(135deg,#7e49d4,#5c28ae); color: #fff; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; cursor: pointer; box-shadow: 0 12px 25px rgba(104,52,183,.24); transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease; }
+.checkout-placeholder:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 16px 30px rgba(104,52,183,.34); }
+.checkout-placeholder:disabled { cursor: not-allowed; opacity: .5; box-shadow: none; }
 .checkout-note { color: #9a87aa; text-align: center; font-size: 10px; }
+.checkout-error { margin: 9px 0 0; color: #a13c61; text-align: center; font-size: 12px; font-weight: 700; }
+.checkout-status { max-width: 760px; margin: 0 auto 24px; padding: 16px 20px; border-radius: 17px; display: flex; align-items: center; justify-content: center; gap: 10px; text-align: center; }
+.checkout-status.success { color: #3f2860; background: #f0e7ff; border: 1px solid #d4bbf8; }
+.checkout-status.cancelled { color: #705c81; background: #fffaf0; border: 1px solid #f0dfb3; }
 @media (max-width: 800px) { .order-main { margin-top: 30px; }.order-card { grid-template-columns: 1fr; }.order-visual { min-height: 480px; }.order-details { padding: 30px 22px; }.figure-measure { transform: scale(.82); }.order-heading h1 { font-size: 48px; } }

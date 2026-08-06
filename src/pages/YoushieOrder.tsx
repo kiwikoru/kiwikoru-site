@@ -1,5 +1,5 @@
 import { ArrowLeft, Check, Home, PackageCheck, Palette, Sparkles } from 'lucide-react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
 import './YoushieMe.css'
 import './YoushieOrder.css'
@@ -8,13 +8,36 @@ type OrderState = { generatedPhoto?: string }
 
 export default function YoushieOrder() {
   const { state } = useLocation()
+  const [searchParams] = useSearchParams()
   const generatedPhoto = (state as OrderState | null)?.generatedPhoto || sessionStorage.getItem('youshie-order-image') || undefined
   const [destination, setDestination] = useState('north')
   const [rural, setRural] = useState(false)
+  const [checkingOut, setCheckingOut] = useState(false)
+  const [checkoutError, setCheckoutError] = useState<string>()
   const productPrice = 30
   const shippingPrices: Record<string, number> = { north: 15, south: 15, australia: 30 }
   const shipping = shippingPrices[destination] + (destination !== 'australia' && rural ? 6 : 0)
   const total = productPrice + shipping
+
+  async function startCheckout() {
+    if (!generatedPhoto || checkingOut) return
+    setCheckingOut(true)
+    setCheckoutError(undefined)
+
+    try {
+      const response = await fetch('/api/youshie-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ destination, rural, generatedPhoto }),
+      })
+      const result = await response.json() as { url?: string; error?: string }
+      if (!response.ok || !result.url) throw new Error(result.error || 'Unable to start secure checkout.')
+      window.location.assign(result.url)
+    } catch (error) {
+      setCheckoutError(error instanceof Error ? error.message : 'Unable to start secure checkout.')
+      setCheckingOut(false)
+    }
+  }
 
   return <div className="youshie-page order-page">
     <header className="youshie-header">
@@ -24,6 +47,8 @@ export default function YoushieOrder() {
     </header>
 
     <main className="order-main">
+      {searchParams.get('payment') === 'success' && <div className="checkout-status success"><Check size={20} /><span><strong>Payment received!</strong> Your Youshie order is safely with KiwiKoru 3D.</span></div>}
+      {searchParams.get('payment') === 'cancelled' && <div className="checkout-status cancelled"><span>No worries — your order wasn’t charged. Your Youshie is still here when you’re ready.</span></div>}
       <section className="order-heading">
         <div className="eyebrow"><Sparkles size={16} /> From magical picture to real figure</div>
         <h1>Bring your little<br /><em>Youshie home.</em></h1>
@@ -56,8 +81,12 @@ export default function YoushieOrder() {
           {destination !== 'australia' && <label className="rural-option"><input type="checkbox" checked={rural} onChange={event => setRural(event.target.checked)} /><span><strong>Rural delivery</strong><small>NZ Post rural surcharge</small></span><b>+ NZ$6.00</b></label>}
           <div className="shipping-quote"><span>Estimated delivery</span><strong>NZ${shipping.toFixed(2)}</strong></div>
           <div className="order-total"><span>Figure + delivery</span><strong>NZ${total.toFixed(2)}</strong></div>
-          <button className="checkout-placeholder" disabled><Check size={20} /> Secure ordering coming next</button>
-          <p className="checkout-note">Secure payment will be activated after final checkout confirmation.</p>
+          <button className="checkout-placeholder" disabled={!generatedPhoto || checkingOut} onClick={startCheckout}>
+            <Check size={20} /> {checkingOut ? 'Opening secure checkout…' : `Pay NZ$${total.toFixed(2)} securely`}
+          </button>
+          {!generatedPhoto && <p className="checkout-error">Create your Youshie first so we can attach the correct figure to your order.</p>}
+          {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
+          <p className="checkout-note">Secure payment powered by Stripe. Your payment details are never stored by KiwiKoru.</p>
         </div>
       </section>
     </main>
