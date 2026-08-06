@@ -8,6 +8,25 @@ import './YoushieOrder.css'
 
 type OrderState = { generatedPhoto?: string }
 
+async function prepareOrderImage(source: string) {
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const element = new Image()
+    element.onload = () => resolve(element)
+    element.onerror = reject
+    element.src = source
+  })
+  const scale = Math.min(1, 1000 / Math.max(image.naturalWidth, image.naturalHeight))
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(image.naturalWidth * scale)
+  canvas.height = Math.round(image.naturalHeight * scale)
+  const context = canvas.getContext('2d')
+  if (!context) throw new Error('We could not prepare your Youshie for checkout. Please try again.')
+  context.fillStyle = '#ffffff'
+  context.fillRect(0, 0, canvas.width, canvas.height)
+  context.drawImage(image, 0, 0, canvas.width, canvas.height)
+  return canvas.toDataURL('image/jpeg', .86)
+}
+
 export default function YoushieOrder() {
   const { state } = useLocation()
   const [searchParams] = useSearchParams()
@@ -39,10 +58,11 @@ export default function YoushieOrder() {
     setCheckoutError(undefined)
 
     try {
+      const checkoutImage = await prepareOrderImage(generatedPhoto)
       const response = await fetch('/api/stripe-checkout?action=youshie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ destination, rural, generatedPhoto, customer }),
+        body: JSON.stringify({ destination, rural, generatedPhoto: checkoutImage, customer }),
       })
       const contentType = response.headers.get('content-type') || ''
       if (!contentType.includes('application/json')) {
