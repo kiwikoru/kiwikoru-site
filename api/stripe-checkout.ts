@@ -174,6 +174,22 @@ export async function createPrintCheckout(request: Request) {
 
 function safe(value: unknown) { return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!)) }
 
+async function orderAttachment(metadata: Record<string, string>) {
+  const url = metadata.youshie_image_url || metadata.model_url
+  if (!url || !process.env.BLOB_READ_WRITE_TOKEN) return undefined
+  try {
+    const response = await fetch(url, { headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` } })
+    if (!response.ok) throw new Error(`Blob download returned ${response.status}`)
+    const content = Buffer.from(await response.arrayBuffer())
+    if (!content.length || content.length > 25 * 1024 * 1024) return undefined
+    const isYoushie = Boolean(metadata.youshie_image_url)
+    return { filename: isYoushie ? 'customer-youshie.jpg' : (metadata.model_name || 'customer-model.stl'), content, ...(isYoushie ? { contentId: 'customer-youshie' } : {}) }
+  } catch (error) {
+    console.error('[order-confirmation] unable to attach customer file', { error })
+    return undefined
+  }
+}
+
 export async function confirmCheckout(request: Request) {
   const secretKey = process.env.STRIPE_SECRET_KEY
   if (!secretKey) return Response.json({ error: 'Confirmation unavailable.' }, { status: 503 })
@@ -191,7 +207,8 @@ export async function confirmCheckout(request: Request) {
       const typeName = m.order_type === 'youshie_test' ? 'NZ$0.50 checkout system test (no product)' : m.order_type === 'youshie' ? 'personalised Youshie' : 'custom 3D print'
       const details = `<p><strong>Order:</strong> ${safe(typeName)}</p><p><strong>Total paid:</strong> NZ$${((session.amount_total || 0) / 100).toFixed(2)}</p><p><strong>Delivery:</strong> ${safe(m.delivery_address)}, ${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}</p><p><strong>Phone:</strong> ${safe(m.customer_phone)}</p>`
       const sender = process.env.RESEND_FROM || process.env.EMAIL_FROM || 'onboarding@resend.dev'
-      const owner = process.env.RESEND_TO || process.env.EMAIL_TO || 'kiwikoru3d@gmail.com'
+      const owner = [...new Set([process.env.RESEND_TO, process.env.EMAIL_TO, 'kiwikoru3d@gmail.com'].filter(Boolean) as string[])]
+      const orderNumber = `KK-${new Date(session.created * 1000).toISOString().slice(0, 10).replaceAll('-', '')}-${session.id.slice(-6).toUpperCase()}`
       const customerMessage = await resend.emails.send(
         { from: `KiwiKoru 3D <${sender}>`, to: email, subject: 'Your KiwiKoru 3D order is confirmed', html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#24453b"><h1>Thank you, ${safe(m.customer_name)}!</h1><p>Your payment has been received and your order is now with KiwiKoru 3D.</p>${details}<p>We’ll contact you by email when your product is ready to dispatch. If anything needs changing, reply to this email or call <strong>027 436 5339</strong>.</p></div>` },
         { headers: { 'Idempotency-Key': `order-customer-${session.id}` } },
@@ -201,9 +218,25 @@ export async function confirmCheckout(request: Request) {
         throw new Error(`Customer confirmation rejected: ${customerMessage.error?.message || 'No delivery ID returned.'}`)
       }
 
+      const attachment = await orderAttachment(m)
+      const isYoushie = m.order_type === 'youshie' || m.order_type === 'youshie_test'
+      const fileName = isYoushie ? 'Youshie customer image' : (m.model_name || '3D model')
+      const ownerHtml = `<div style="font-family:Arial,sans-serif;max-width:720px;margin:auto;color:#223126;background:#f7f5ef;padding:28px;border-radius:18px">
+        <p style="margin:0;color:#876b43;font-weight:700;letter-spacing:1.5px">NEW PAID ORDER</p><h1 style="margin:8px 0 4px">${safe(orderNumber)}</h1><p style="margin:0 0 24px;color:#59665d">Payment confirmed by Stripe. Ready to organise production.</p>
+        ${isYoushie && attachment ? '<img src="cid:customer-youshie" alt="Customer Youshie" style="display:block;width:100%;max-width:440px;margin:0 auto 24px;border-radius:16px" />' : ''}
+        <table role="presentation" style="width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden">
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Customer</td><td style="padding:12px 16px;border-bottom:1px solid #eee;font-weight:700">${safe(m.customer_name)}</td></tr>
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Email</td><td style="padding:12px 16px;border-bottom:1px solid #eee"><a href="mailto:${safe(email)}">${safe(email)}</a></td></tr>
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Phone</td><td style="padding:12px 16px;border-bottom:1px solid #eee"><a href="tel:${safe(m.customer_phone)}">${safe(m.customer_phone)}</a></td></tr>
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Product</td><td style="padding:12px 16px;border-bottom:1px solid #eee;font-weight:700">${safe(typeName)}</td></tr>
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Customer file</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${safe(fileName)}${attachment ? ' — attached to this email' : ''}</td></tr>
+        ${!isYoushie ? `<tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Print settings</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${safe(m.material)} · ${safe(m.colour)} · ${safe(m.infill)}% infill · ${safe(m.layer_height)} mm</td></tr>` : ''}
+        <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Delivery</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${safe(m.delivery_address)}<br>${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}<br>${safe(destinationLabels[m.destination as Destination] || m.destination)}${m.rural === 'true' ? ' — Rural delivery' : ''}</td></tr>
+        <tr><td style="padding:12px 16px;color:#687269">Total paid</td><td style="padding:12px 16px;font-size:20px;font-weight:800">NZ$${((session.amount_total || 0) / 100).toFixed(2)}</td></tr></table>
+        <p style="margin:22px 0 5px"><strong>Stripe reference:</strong> ${safe(session.id)}</p><p style="margin:0;color:#687269;font-size:13px">Keep this email as the production and dispatch record for this order.</p></div>`
       const ownerMessage = await resend.emails.send(
-        { from: `KiwiKoru 3D Orders <${sender}>`, to: owner, subject: `Paid order — ${safe(m.customer_name)} — ${safe(typeName)}`, html: `<div style="font-family:Arial,sans-serif;max-width:650px"><h1>New paid order</h1>${details}<p><strong>Email:</strong> ${safe(email)}</p><p><strong>Model:</strong> ${safe(m.model_name || 'Youshie image attached to Stripe metadata')}</p><p><strong>Material / colour:</strong> ${safe(m.material)} ${safe(m.colour)}</p><p><strong>Stripe session:</strong> ${safe(session.id)}</p></div>` },
-        { headers: { 'Idempotency-Key': `order-owner-${session.id}` } },
+        { from: `KiwiKoru 3D Orders <${sender}>`, to: owner, replyTo: email, subject: `PAID ${orderNumber} — ${safe(m.customer_name)} — ${safe(typeName)}`, html: ownerHtml, attachments: attachment ? [attachment] : undefined },
+        { headers: { 'Idempotency-Key': `order-owner-v2-${session.id}` } },
       )
       if (ownerMessage.error || !ownerMessage.data?.id) {
         console.error('[order-confirmation] owner email rejected', { sessionId: session.id, error: ownerMessage.error })
