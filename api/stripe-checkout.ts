@@ -190,10 +190,29 @@ export async function confirmCheckout(request: Request) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       const typeName = m.order_type === 'youshie_test' ? 'NZ$0.50 checkout system test (no product)' : m.order_type === 'youshie' ? 'personalised Youshie' : 'custom 3D print'
       const details = `<p><strong>Order:</strong> ${safe(typeName)}</p><p><strong>Total paid:</strong> NZ$${((session.amount_total || 0) / 100).toFixed(2)}</p><p><strong>Delivery:</strong> ${safe(m.delivery_address)}, ${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}</p><p><strong>Phone:</strong> ${safe(m.customer_phone)}</p>`
-      await resend.batch.send([
-        { from: `KiwiKoru 3D <${process.env.EMAIL_FROM || 'quotes@kiwikoru3d.com'}>`, to: email, subject: 'Your KiwiKoru 3D order is confirmed', html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#24453b"><h1>Thank you, ${safe(m.customer_name)}!</h1><p>Your payment has been received and your order is now with KiwiKoru 3D.</p>${details}<p>We’ll contact you by email when your product is ready to dispatch. If anything needs changing, reply to this email or call <strong>027 436 5339</strong>.</p></div>` },
-        { from: `KiwiKoru 3D Orders <${process.env.EMAIL_FROM || 'quotes@kiwikoru3d.com'}>`, to: process.env.EMAIL_TO || 'kiwikoru3d@gmail.com', subject: `Paid order — ${safe(m.customer_name)} — ${safe(typeName)}`, html: `<div style="font-family:Arial,sans-serif;max-width:650px"><h1>New paid order</h1>${details}<p><strong>Email:</strong> ${safe(email)}</p><p><strong>Model:</strong> ${safe(m.model_name || 'Youshie image attached to Stripe metadata')}</p><p><strong>Material / colour:</strong> ${safe(m.material)} ${safe(m.colour)}</p><p><strong>Stripe session:</strong> ${safe(session.id)}</p></div>` },
-      ], { headers: { 'Idempotency-Key': `order-confirmation-${session.id}` } })
+      const sender = process.env.RESEND_FROM || process.env.EMAIL_FROM || 'onboarding@resend.dev'
+      const owner = process.env.RESEND_TO || process.env.EMAIL_TO || 'kiwikoru3d@gmail.com'
+      const customerMessage = await resend.emails.send(
+        { from: `KiwiKoru 3D <${sender}>`, to: email, subject: 'Your KiwiKoru 3D order is confirmed', html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#24453b"><h1>Thank you, ${safe(m.customer_name)}!</h1><p>Your payment has been received and your order is now with KiwiKoru 3D.</p>${details}<p>We’ll contact you by email when your product is ready to dispatch. If anything needs changing, reply to this email or call <strong>027 436 5339</strong>.</p></div>` },
+        { headers: { 'Idempotency-Key': `order-customer-${session.id}` } },
+      )
+      if (customerMessage.error || !customerMessage.data?.id) {
+        console.error('[order-confirmation] customer email rejected', { sessionId: session.id, error: customerMessage.error })
+        throw new Error(`Customer confirmation rejected: ${customerMessage.error?.message || 'No delivery ID returned.'}`)
+      }
+
+      const ownerMessage = await resend.emails.send(
+        { from: `KiwiKoru 3D Orders <${sender}>`, to: owner, subject: `Paid order — ${safe(m.customer_name)} — ${safe(typeName)}`, html: `<div style="font-family:Arial,sans-serif;max-width:650px"><h1>New paid order</h1>${details}<p><strong>Email:</strong> ${safe(email)}</p><p><strong>Model:</strong> ${safe(m.model_name || 'Youshie image attached to Stripe metadata')}</p><p><strong>Material / colour:</strong> ${safe(m.material)} ${safe(m.colour)}</p><p><strong>Stripe session:</strong> ${safe(session.id)}</p></div>` },
+        { headers: { 'Idempotency-Key': `order-owner-${session.id}` } },
+      )
+      if (ownerMessage.error || !ownerMessage.data?.id) {
+        console.error('[order-confirmation] owner email rejected', { sessionId: session.id, error: ownerMessage.error })
+        throw new Error(`Owner notification rejected: ${ownerMessage.error?.message || 'No delivery ID returned.'}`)
+      }
+      console.log('[order-confirmation] both emails accepted', { sessionId: session.id, customerMessageId: customerMessage.data.id, ownerMessageId: ownerMessage.data.id })
+    } else {
+      console.error('[order-confirmation] RESEND_API_KEY is missing', { sessionId: session.id })
+      throw new Error('Email service is not configured.')
     }
     return Response.json({ success: true, email })
   } catch (error) {
