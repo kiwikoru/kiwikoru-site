@@ -217,6 +217,11 @@ export default function YoushieMe() {
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used only to create your Youshie</p>
         </section>
 
+        <section className="kiwikoru-contact-cta" aria-label="Contact KiwiKoru 3D">
+          <div><small>MORE THAN ONE LITTLE IDEA?</small><strong>Questions or a custom project?</strong><p>Tell KiwiKoru 3D what you have in mind and we’ll help bring it to life.</p></div>
+          <Link to="/contact">Contact KiwiKoru 3D <span>→</span></Link>
+        </section>
+
       </main>
       <footer className="youshie-footer"><img className="youshie-logo-img mini" src="/youshies-logo-transparent.png" alt="Youshies" /><p>A playful KiwiKoru 3D experience · Whangārei, New Zealand</p></footer>
     </div>
