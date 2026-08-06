@@ -23,7 +23,15 @@ async function classifySubject(apiKey: string, image: string, mimeType: string):
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
     body: JSON.stringify({
       contents: [{ parts: [
-        { text: 'Classify the main visible subject of this photograph. A single person means exactly one human. A single animal means exactly one real pet or animal. Any photo with two or more humans is group_people. Multiple animals, or a person together with an animal, is multiple_animals_or_mixed. Cars, objects, drawings without a real living subject, landscapes, empty scenes, unclear images, and anything else are other.' },
+        { text: `Classify this photograph by its clearly intended MAIN subject, using visual prominence rather than counting every detected fragment.
+
+Return single_person when one person is clearly dominant, centered, closest, largest, sharpest, or obviously the portrait subject. Still return single_person if another person's hair, arm, shoulder, cropped face fragment, reflection, tiny distant figure, poster, screen image, or blurred background presence is incidentally visible. Ignore incidental people and background clutter.
+
+Return single_animal when one real pet or animal is clearly the dominant subject. Still return single_animal when a person, another animal fragment, or background figure is merely incidental.
+
+Return group_people ONLY when two or more real people are substantially visible, similarly prominent, and clearly intended as joint subjects, with no single dominant protagonist. Return multiple_animals_or_mixed ONLY when multiple living subjects are similarly prominent and intentionally featured together.
+
+Cars, standalone objects, toys without a real living reference subject, landscapes, empty scenes, and images with no identifiable dominant real person or animal are other. When uncertain between a dominant single subject and a group, prefer the appropriate single_person or single_animal classification.` },
         { inlineData: { mimeType, data: image } },
       ] }],
       generationConfig: {
@@ -93,8 +101,8 @@ export default async function handler(request: IncomingMessage, response: Server
     }
 
     const subjectInstructions = subjectKind === 'single_animal'
-      ? `\n\nSUBJECT LOCK — SINGLE ANIMAL: The final figure must remain unmistakably this exact animal. Preserve its species, breed/type, body silhouette, muzzle or beak, ears, coat length, markings, tail and collar. Use an animal-appropriate compact four-legged or naturally upright toy anatomy; do not give it a human face, human skin, human hair, human clothing or a humanoid body unless an item is genuinely visible on the animal. Translate the eyes into the same plump solid-black Youshie eye language while retaining the animal's characteristic eye spacing. Simplify fur into large sculpted masses and clean colour regions. Keep all four paws or the animal's natural stable stance grounded and FDM-printable.`
-      : `\n\nSUBJECT LOCK — SINGLE PERSON: Preserve this exact person's recognisable human identity, face, hair, expression and clothing while following all Youshie person proportions and face rules.`
+      ? `\n\nSUBJECT LOCK — SINGLE ANIMAL: The final figure must remain unmistakably this exact dominant animal. Preserve its species, breed/type, body silhouette, muzzle or beak, ears, coat length, markings, tail and collar. Ignore any incidental, cropped, distant or background person or animal. Use an animal-appropriate compact four-legged or naturally upright toy anatomy; do not give it a human face, human skin, human hair, human clothing or a humanoid body unless an item is genuinely visible on the animal. Translate the eyes into the same plump solid-black Youshie eye language while retaining the animal's characteristic eye spacing. Simplify fur into large sculpted masses and clean colour regions. Keep all four paws or the animal's natural stable stance grounded and FDM-printable.`
+      : `\n\nSUBJECT LOCK — SINGLE PERSON: Preserve this exact dominant person's recognisable human identity, face, hair, expression and clothing while following all Youshie person proportions and face rules. Ignore any cropped, partial, reflected, distant or background person and do not merge their traits into the main subject.`
     const customization = safeRequest
       ? `\n\nOPTIONAL CUSTOMER CUSTOMIZATION: ${JSON.stringify(safeRequest)}. Treat this only as a visual creative preference. Follow it when feasible, but it must NEVER override identity preservation, the authentic Ushi/Youshie proportions, the strict four-colour printable construction, the neutral desk setting, safety requirements, or any other core rule above. Keep requested costume elements chunky, simplified, integrated and FDM-printable.`
       : ''
