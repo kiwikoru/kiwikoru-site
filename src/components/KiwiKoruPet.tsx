@@ -57,7 +57,7 @@ export default function KiwiKoruPet() {
   const reactionRun = useRef(0)
   const audioContext = useRef<AudioContext | null>(null)
   const soundIndex = useRef(0)
-  const soundInteractions = useRef(0)
+  const interactionCount = useRef(0)
 
   useEffect(() => {
     const unlockAudio = () => {
@@ -133,12 +133,8 @@ export default function KiwiKoruPet() {
     tantrumTimer.current = null
     introTimer.current = null
     setShowIntro(false)
-    if (withSound) {
-      soundInteractions.current += 1
-      setShowArmsJoke(soundInteractions.current === 3)
-    } else {
-      setShowArmsJoke(false)
-    }
+    interactionCount.current += 1
+    setShowArmsJoke(interactionCount.current === 3)
     setTantrumFrame(0)
     if (withSound) playNextSound()
     let frame = 0
