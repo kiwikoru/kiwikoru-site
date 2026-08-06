@@ -50,7 +50,7 @@ function decodeImage(dataUrl: string) {
   return { bytes, contentType: match[1] }
 }
 
-export async function createYoushieCheckout(request: Request) {
+export async function createYoushieCheckout(request: Request, testPurchase = false) {
   const secretKey = process.env.STRIPE_SECRET_KEY
   if (!secretKey) {
     return Response.json({ error: 'Secure checkout is being connected. Please try again shortly.' }, { status: 503 })
@@ -79,36 +79,29 @@ export async function createYoushieCheckout(request: Request) {
     const origin = new URL(request.url).origin
     const shippingAmount = shippingByDestination[body.destination] + (rural ? 600 : 0)
     const stripe = new Stripe(secretKey)
+    const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = testPurchase ? [{
+      quantity: 1,
+      price_data: {
+        currency: 'nzd',
+        unit_amount: 50,
+        product_data: {
+          name: 'KiwiKoru checkout system test',
+          description: 'Payment-flow test only — no physical product or delivery is included.',
+        },
+      },
+    }] : [
+      { quantity: 1, price_data: { currency: 'nzd', unit_amount: 3000, product_data: { name: 'Personalised 10 cm Youshie', description: 'Custom four-colour collectible figure made from your generated Youshie image.' } } },
+      { quantity: 1, price_data: { currency: 'nzd', unit_amount: shippingAmount, product_data: { name: `Delivery — ${destinationLabels[body.destination]}${rural ? ' (rural)' : ''}` } } },
+    ]
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       customer_creation: 'always',
       customer_email: customer.email,
       billing_address_collection: 'required',
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: 'nzd',
-            unit_amount: 3000,
-            product_data: {
-              name: 'Personalised 10 cm Youshie',
-              description: 'Custom four-colour collectible figure made from your generated Youshie image.',
-            },
-          },
-        },
-        {
-          quantity: 1,
-          price_data: {
-            currency: 'nzd',
-            unit_amount: shippingAmount,
-            product_data: {
-              name: `Delivery — ${destinationLabels[body.destination]}${rural ? ' (rural)' : ''}`,
-            },
-          },
-        },
-      ],
+      line_items: lineItems,
       metadata: {
-        order_type: 'youshie',
+        order_type: testPurchase ? 'youshie_test' : 'youshie',
+        test_purchase: String(testPurchase),
         ...addressMetadata(customer),
         youshie_image_url: imageBlob.url,
         destination: body.destination,
@@ -118,7 +111,8 @@ export async function createYoushieCheckout(request: Request) {
         receipt_email: customer.email,
         shipping: { name: customer.name, phone: customer.phone, address: { line1: customer.address, line2: customer.address2 || undefined, city: customer.city, state: customer.region, postal_code: customer.postalCode, country: body.destination === 'australia' ? 'AU' : 'NZ' } },
         metadata: {
-          order_type: 'youshie',
+          order_type: testPurchase ? 'youshie_test' : 'youshie',
+          test_purchase: String(testPurchase),
           youshie_image_url: imageBlob.url,
           destination: body.destination,
           rural: String(rural),
@@ -194,7 +188,7 @@ export async function confirmCheckout(request: Request) {
     if (!email) throw new Error('Customer email is missing.')
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY)
-      const typeName = m.order_type === 'youshie' ? 'personalised Youshie' : 'custom 3D print'
+      const typeName = m.order_type === 'youshie_test' ? 'NZ$0.50 checkout system test (no product)' : m.order_type === 'youshie' ? 'personalised Youshie' : 'custom 3D print'
       const details = `<p><strong>Order:</strong> ${safe(typeName)}</p><p><strong>Total paid:</strong> NZ$${((session.amount_total || 0) / 100).toFixed(2)}</p><p><strong>Delivery:</strong> ${safe(m.delivery_address)}, ${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}</p><p><strong>Phone:</strong> ${safe(m.customer_phone)}</p>`
       await resend.batch.send([
         { from: `KiwiKoru 3D <${process.env.EMAIL_FROM || 'quotes@kiwikoru3d.com'}>`, to: email, subject: 'Your KiwiKoru 3D order is confirmed', html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;color:#24453b"><h1>Thank you, ${safe(m.customer_name)}!</h1><p>Your payment has been received and your order is now with KiwiKoru 3D.</p>${details}<p>We’ll contact you by email when your product is ready to dispatch. If anything needs changing, reply to this email or call <strong>027 436 5339</strong>.</p></div>` },
@@ -229,7 +223,7 @@ export default async function handler(request: IncomingMessage, response: Server
       body,
     })
     const action = new URL(requestUrl).searchParams.get('action')
-    const checkoutResponse = action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : await createYoushieCheckout(webRequest)
+    const checkoutResponse = action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : await createYoushieCheckout(webRequest, action === 'youshie-test')
     response.statusCode = checkoutResponse.status
     response.setHeader('Content-Type', checkoutResponse.headers.get('content-type') || 'application/json')
     response.end(await checkoutResponse.text())

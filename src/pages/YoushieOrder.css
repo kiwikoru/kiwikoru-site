@@ -38,6 +38,11 @@
 .checkout-placeholder { width: 100%; height: 55px; border: 0; border-radius: 15px; background: linear-gradient(135deg,#7e49d4,#5c28ae); color: #fff; display: flex; justify-content: center; align-items: center; gap: 8px; font-weight: 900; cursor: pointer; box-shadow: 0 12px 25px rgba(104,52,183,.24); transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease; }
 .checkout-placeholder:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 16px 30px rgba(104,52,183,.34); }
 .checkout-placeholder:disabled { cursor: not-allowed; opacity: .5; box-shadow: none; }
+.test-checkout-box { margin-top: 4px; padding: 14px; border: 1px dashed #bda5d4; border-radius: 14px; background: #faf7fd; display: grid; gap: 11px; }
+.test-checkout-box div { display: flex; flex-direction: column; gap: 3px; color: #5b416d; }
+.test-checkout-box strong { font-size: 12px; }.test-checkout-box small { color: #8f7b9f; font-size: 10px; line-height: 1.45; }
+.test-checkout-box button { min-height: 42px; border: 1px solid #7440c3; border-radius: 11px; background: #fff; color: #6332ad; font-weight: 900; font-size: 12px; cursor: pointer; transition: background .2s ease, color .2s ease; }
+.test-checkout-box button:hover:not(:disabled) { background: #7440c3; color: #fff; }.test-checkout-box button:disabled { opacity: .5; cursor: not-allowed; }
 .checkout-note { color: #9a87aa; text-align: center; font-size: 10px; }
 .checkout-error { margin: 9px 0 0; color: #a13c61; text-align: center; font-size: 12px; font-weight: 700; }
 .checkout-status { max-width: 760px; margin: 0 auto 24px; padding: 16px 20px; border-radius: 17px; display: flex; align-items: center; justify-content: center; gap: 10px; text-align: center; }
