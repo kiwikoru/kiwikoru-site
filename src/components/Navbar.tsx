@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, ShoppingCart, X } from 'lucide-react'
 import { WhatsAppLogo, WHATSAPP_URL } from './WhatsAppFloat'
+import { CART_UPDATED_EVENT, getPrintCartCount } from '../lib/printCart'
 
 const pageLinks = [
   { label: 'Home', path: '/' },
@@ -13,6 +14,7 @@ const pageLinks = [
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -41,6 +43,13 @@ export default function Navbar() {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [mobileOpen])
+
+  useEffect(() => {
+    const refresh = () => void getPrintCartCount().then(setCartCount).catch(() => setCartCount(0))
+    refresh()
+    window.addEventListener(CART_UPDATED_EVENT, refresh)
+    return () => window.removeEventListener(CART_UPDATED_EVENT, refresh)
+  }, [])
 
   return (
     <>
@@ -93,8 +102,9 @@ export default function Navbar() {
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/quote" aria-label="Open shopping cart" title="Shopping cart" className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gold/35 bg-white/10 text-white shadow-md transition-all hover:-translate-y-0.5 hover:border-gold hover:bg-white/15 hover:text-gold focus-gold">
+            <Link to="/cart" aria-label={`Open shopping cart with ${cartCount} items`} title="Shopping cart" className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gold/35 bg-white/10 text-white shadow-md transition-all hover:-translate-y-0.5 hover:border-gold hover:bg-white/15 hover:text-gold focus-gold">
               <ShoppingCart className="h-5 w-5" />
+              {cartCount > 0 && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-[10px] font-black text-forest-dark">{cartCount}</span>}
             </Link>
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Chat with KiwiKoru on WhatsApp" className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-md transition-colors hover:bg-[#20bd5a] focus-gold">
               <WhatsAppLogo className="w-5 h-5" />
@@ -106,8 +116,9 @@ export default function Navbar() {
 
           {/* Mobile Hamburger */}
           <div className="flex items-center gap-1 md:hidden">
-            <Link to="/quote" aria-label="Open shopping cart" className="grid h-10 w-10 place-items-center rounded-full text-gold transition-colors hover:bg-white/10 focus-gold">
+            <Link to="/cart" aria-label={`Open shopping cart with ${cartCount} items`} className="relative grid h-10 w-10 place-items-center rounded-full text-gold transition-colors hover:bg-white/10 focus-gold">
               <ShoppingCart size={21} />
+              {cartCount > 0 && <span className="absolute right-0 top-0 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-[10px] font-black text-forest-dark">{cartCount}</span>}
             </Link>
             <button className="text-gold p-2 focus-gold" onClick={() => setMobileOpen(true)} aria-label="Open navigation menu" aria-expanded={mobileOpen}>
               <Menu size={24} />

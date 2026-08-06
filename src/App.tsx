@@ -10,6 +10,7 @@ import YoushieMe from './pages/YoushieMe'
 import YoushieOrder from './pages/YoushieOrder'
 import PrintOrder from './pages/PrintOrder'
 import PrintCategory from './pages/PrintCategory'
+import Cart from './pages/Cart'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/materials" element={<Materials />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/quote" element={<Quote />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/print-order" element={<PrintOrder />} />
           <Route path="/what-we-print/:category" element={<PrintCategory />} />
         </Routes>

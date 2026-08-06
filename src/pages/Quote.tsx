@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, MessageCircle, ChevronDown, Info, Trash2, ArrowRight } from 'lucide-react';
 import STLViewer from '../components/STLViewer';
+import { addPrintCartItem } from '../lib/printCart';
 
 const MATERIALS = {
   pla: { name: 'PLA - Standard', multiplier: 1.00 },
@@ -43,8 +44,11 @@ export default function Quote() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [inCart, setInCart] = useState(false);
   const [measuredVolume, setMeasuredVolume] = useState<number | null>(null);
-  const cartRef = useRef<HTMLDivElement>(null);
+  const [modelDimensions, setModelDimensions] = useState<{ x: number; y: number; z: number }>();
+  const [modelScale, setModelScale] = useState(1);
+  const [thumbnail, setThumbnail] = useState<string>();
   const navigate = useNavigate();
+  const handleThumbnail = useCallback((image: string) => setThumbnail(image), []);
 
   const handleModelFile = (file: File) => {
     setUploadedFile(file.name);
@@ -70,6 +74,16 @@ export default function Quote() {
 
   const hasFile = uploadedFile !== null;
 
+  const addCurrentItem = async () => {
+    if (!modelFile || !uploadedFile) return;
+    await addPrintCartItem({
+      id: crypto.randomUUID(), fileName: uploadedFile, file: modelFile, thumbnail, price: totalPrice,
+      material: matData.name, color, infill, quality, estimatedVolume, dimensions: modelDimensions,
+      scale: modelScale, createdAt: Date.now(),
+    });
+    setInCart(true);
+  };
+
   return (
     <main className="min-h-screen bg-kiwi-light pt-24 pb-16">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -89,7 +103,7 @@ export default function Quote() {
           </p>
           <button
             type="button"
-            onClick={() => cartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+            onClick={() => navigate('/cart')}
             className="mt-5 lg:absolute lg:right-0 lg:top-0 inline-flex items-center gap-2 rounded-full border border-forest/15 bg-white px-4 py-2 text-sm font-semibold text-forest shadow-sm hover:border-gold hover:shadow-md transition-all"
             aria-label={`Shopping cart with ${inCart ? 1 : 0} item`}
           >
@@ -106,14 +120,18 @@ export default function Quote() {
           <div className="lg:col-span-3">
             <STLViewer
               onFileSelect={handleModelFile}
-              onFileLoad={(volume) => setMeasuredVolume(volume)}
-              onScaleChange={(volume) => { setMeasuredVolume(volume); setInCart(false); }}
+              onFileLoad={(volume, dimensions) => { setMeasuredVolume(volume); setModelDimensions(dimensions); setModelScale(1); }}
+              onScaleChange={(volume, dimensions, scale) => { setMeasuredVolume(volume); setModelDimensions(dimensions); setModelScale(scale); setInCart(false); }}
               onPreviewColorChange={(nextColor) => { setColor(nextColor); setInCart(false); }}
+              onThumbnailChange={handleThumbnail}
               onClear={() => {
                 setUploadedFile(null);
                 setModelFile(null);
                 setFileSize(0);
                 setMeasuredVolume(null);
+                setModelDimensions(undefined);
+                setModelScale(1);
+                setThumbnail(undefined);
                 setInCart(false);
               }}
             />
@@ -200,7 +218,7 @@ export default function Quote() {
           {/* Right - Price Card */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl p-6 border border-gray-200 sticky top-24">
-              <div ref={cartRef} className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-6">
                 <h3 className="font-heading font-semibold text-kiwi-dark">Estimated Price</h3>
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-forest/70">
                   <ShoppingCart className="h-4 w-4" /> {inCart ? '1 item' : 'Cart empty'}
@@ -244,7 +262,7 @@ export default function Quote() {
                   </div>
 
                   <button
-                    onClick={() => setInCart(true)}
+                    onClick={() => void addCurrentItem()}
                     className="w-full mt-4 flex items-center justify-center gap-2 bg-gold hover:bg-gold-light text-forest-dark py-3.5 rounded-xl font-bold shadow-sm hover:shadow-md transition-all"
                   >
                     <ShoppingCart className="w-4 h-4" />
@@ -266,10 +284,10 @@ export default function Quote() {
                         <span>Total</span><span>NZ${totalPrice.toFixed(2)}</span>
                       </div>
                       <button
-                        onClick={() => navigate('/print-order', { state: { modelFile, quote: { fileName: uploadedFile, price: totalPrice, material: matData.name, color, infill, quality, estimatedVolume } } })}
+                        onClick={() => navigate('/cart')}
                         className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3.5 font-bold text-white shadow-sm transition-all hover:bg-forest-light hover:shadow-md"
                       >
-                        Proceed to purchase <ArrowRight className="h-4 w-4" />
+                        Open cart <ArrowRight className="h-4 w-4" />
                       </button>
                     </div>
                   )}

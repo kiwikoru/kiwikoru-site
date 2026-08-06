@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, Suspense } from 'react'
+import { useState, useRef, useCallback, Suspense, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Stage } from '@react-three/drei'
 import * as THREE from 'three'
@@ -26,6 +26,7 @@ interface STLViewerProps {
   onClear?: () => void
   onScaleChange?: (volume: number, dimensions: { x: number; y: number; z: number }, scale: number) => void
   onPreviewColorChange?: (color: string) => void
+  onThumbnailChange?: (thumbnail: string) => void
 }
 
 function Model({ meshData, color }: { meshData: MeshData; color: string }) {
@@ -65,15 +66,18 @@ const AXES = {
   z: { label: 'Z', className: 'text-sky-400', ring: 'focus:border-sky-400' },
 } as const
 
-export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleChange, onPreviewColorChange }: STLViewerProps) {
+export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleChange, onPreviewColorChange, onThumbnailChange }: STLViewerProps) {
   const [meshData, setMeshData] = useState<MeshData | null>(null)
   const [fileName, setFileName] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const [loading, setLoading] = useState(false)
   const [previewColor, setPreviewColor] = useState(PREVIEW_COLORS[0].hex)
   const [uniformScale, setUniformScale] = useState(1)
+  const [dimensionInputs, setDimensionInputs] = useState({ x: '', y: '', z: '' })
+  const [percentInput, setPercentInput] = useState('100')
   const fileInputRef = useRef<HTMLInputElement>(null)
   const controlsRef = useRef<any>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   const processFile = useCallback((file: File) => {
     if (!file.name.match(/\.(stl|obj)$/i)) return
@@ -131,6 +135,8 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
 
         setMeshData({ geometry, volume: volCm3, dimensions: dimsMm })
         setUniformScale(1)
+        setDimensionInputs({ x: String(dimsMm.x), y: String(dimsMm.y), z: String(dimsMm.z) })
+        setPercentInput('100')
         onFileLoad?.(volCm3, dimsMm)
       } catch (err) {
         console.error('Error parsing 3D file:', err)
@@ -157,6 +163,8 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
     setMeshData(null)
     setFileName('')
     setUniformScale(1)
+    setDimensionInputs({ x: '', y: '', z: '' })
+    setPercentInput('100')
     if (fileInputRef.current) fileInputRef.current.value = ''
     onClear?.()
   }
@@ -168,9 +176,26 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
   } : null
   const scaledVolume = meshData ? meshData.volume * Math.pow(uniformScale, 3) : 0
 
-  const updateScaleFromAxis = (axis: keyof typeof AXES, rawValue: string) => {
+  const applyScale = (nextScale: number, syncPercentInput = true) => {
     if (!meshData) return
-    const nextDimension = Number(rawValue)
+    const safeScale = Math.max(0.05, Math.min(10, nextScale))
+    const nextDimensions = {
+      x: +(meshData.dimensions.x * safeScale).toFixed(1),
+      y: +(meshData.dimensions.y * safeScale).toFixed(1),
+      z: +(meshData.dimensions.z * safeScale).toFixed(1),
+    }
+    setUniformScale(safeScale)
+    setDimensionInputs({ x: String(nextDimensions.x), y: String(nextDimensions.y), z: String(nextDimensions.z) })
+    if (syncPercentInput) setPercentInput(String(Math.round(safeScale * 100)))
+    onScaleChange?.(meshData.volume * Math.pow(safeScale, 3), nextDimensions, safeScale)
+  }
+
+  const parseDecimal = (rawValue: string) => Number(rawValue.replace(',', '.'))
+
+  const updateScaleFromAxis = (axis: keyof typeof AXES, rawValue: string) => {
+    setDimensionInputs(current => ({ ...current, [axis]: rawValue }))
+    if (!meshData || rawValue.trim() === '') return
+    const nextDimension = parseDecimal(rawValue)
     if (!Number.isFinite(nextDimension) || nextDimension <= 0) return
     const nextScale = Math.max(0.05, Math.min(10, nextDimension / meshData.dimensions[axis]))
     setUniformScale(nextScale)
@@ -179,8 +204,26 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
       y: +(meshData.dimensions.y * nextScale).toFixed(1),
       z: +(meshData.dimensions.z * nextScale).toFixed(1),
     }
+    setDimensionInputs(current => ({ ...current, ...Object.fromEntries(Object.entries(nextDimensions).filter(([key]) => key !== axis)) }))
+    setPercentInput(String(Math.round(nextScale * 100)))
     onScaleChange?.(meshData.volume * Math.pow(nextScale, 3), nextDimensions, nextScale)
   }
+
+  const updateScaleFromPercent = (rawValue: string) => {
+    setPercentInput(rawValue)
+    if (rawValue.trim() === '') return
+    const percent = parseDecimal(rawValue)
+    if (!Number.isFinite(percent) || percent <= 0) return
+    applyScale(percent / 100, false)
+  }
+
+  useEffect(() => {
+    if (!meshData || !onThumbnailChange) return
+    const timer = window.setTimeout(() => {
+      try { if (canvasRef.current) onThumbnailChange(canvasRef.current.toDataURL('image/webp', .72)) } catch { /* Thumbnail is optional. */ }
+    }, 650)
+    return () => window.clearTimeout(timer)
+  }, [meshData, previewColor, onThumbnailChange])
 
   const resetCamera = () => {
     if (controlsRef.current) {
@@ -195,7 +238,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
       <div className="relative w-full h-[400px] md:h-[500px] bg-gradient-to-b from-[#253126] to-[#3f4a2f] rounded-xl overflow-hidden border border-white/[0.06]">
         {meshData ? (
           <>
-            <Canvas camera={{ position: [15, 10, 15], fov: 40 }} shadows dpr={[1, 2]} gl={{ antialias: true, alpha: false }}>
+            <Canvas camera={{ position: [15, 10, 15], fov: 40 }} shadows dpr={[1, 2]} gl={{ antialias: true, alpha: false, preserveDrawingBuffer: true }} onCreated={({ gl }) => { canvasRef.current = gl.domElement }}>
               <color attach="background" args={['#253126']} />
               <ambientLight intensity={0.4} />
               <directionalLight position={[10, 10, 5]} intensity={0.8} />
@@ -340,12 +383,11 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
                 <span className={`mb-1 block text-[11px] font-bold ${AXES[axis].className}`}>{AXES[axis].label} axis</span>
                 <div className="relative">
                   <input
-                    type="number"
-                    min="0.1"
-                    max="5000"
-                    step="0.1"
-                    value={scaledDimensions[axis]}
+                    type="text"
+                    inputMode="decimal"
+                    value={dimensionInputs[axis]}
                     onChange={(event) => updateScaleFromAxis(axis, event.target.value)}
+                    onBlur={() => setDimensionInputs(current => ({ ...current, [axis]: String(scaledDimensions[axis]) }))}
                     className={`w-full rounded-lg border border-border-light bg-off-white px-2.5 py-2 pr-8 text-sm font-semibold text-charcoal outline-none transition ${AXES[axis].ring}`}
                     aria-label={`${AXES[axis].label} dimension in millimetres`}
                   />
@@ -354,9 +396,9 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
               </label>
             ))}
           </div>
-          <div className="mt-3 flex items-center justify-between rounded-lg bg-forest/[0.04] px-3 py-2 text-[11px]">
-            <span className="text-charcoal-light">Uniform scale</span>
-            <span className="font-semibold text-forest">{(uniformScale * 100).toFixed(0)}% · {scaledVolume.toFixed(1)} cm³</span>
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-forest/[0.04] px-3 py-2 text-[11px]">
+            <label className="flex items-center gap-2 text-charcoal-light"><span>Uniform scale</span><span className="relative"><input type="text" inputMode="decimal" value={percentInput} onChange={event => updateScaleFromPercent(event.target.value)} onBlur={() => setPercentInput(String(Math.round(uniformScale * 100)))} className="w-20 rounded-md border border-forest/15 bg-white py-1.5 pl-2 pr-6 text-right font-bold text-forest outline-none focus:border-gold" aria-label="Uniform scale percentage"/><b className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-forest/60">%</b></span></label>
+            <span className="font-semibold text-forest">{uniformScale < 1 ? `${Math.round((1 - uniformScale) * 100)}% smaller` : uniformScale > 1 ? `${Math.round((uniformScale - 1) * 100)}% larger` : 'Original size'} · {scaledVolume.toFixed(1)} cm³</span>
           </div>
         </div>
       )}
