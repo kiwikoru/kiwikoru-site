@@ -20,6 +20,7 @@
   animation: kiwikoru-arrive .65s cubic-bezier(.2, .85, .3, 1.2) both;
   will-change: transform;
 }
+.kiwikoru-pet-sprite:focus-visible { outline: 3px solid #d5b66f; outline-offset: 3px; border-radius: 38%; }
 
 .kiwikoru-pet-float.is-tantrum .kiwikoru-pet-sprite {
   animation: kiwikoru-tantrum .16s ease-in-out infinite;

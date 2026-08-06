@@ -11,64 +11,37 @@ const TANTRUM = [
 
 type AudioWindow = Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }
 
-function makeCuteGrumble(context: AudioContext, variant: number) {
+function makePocketPetChirp(context: AudioContext, variant: number) {
   const now = context.currentTime
-  const profiles = [
-    { pitch: 168, end: 105, duration: 0.66, tone: 920, wobble: 13 },
-    { pitch: 196, end: 265, duration: 0.54, tone: 1250, wobble: 19 },
-    { pitch: 145, end: 118, duration: 0.78, tone: 760, wobble: 10 },
+  const melodies = [
+    [{ note: 587, length: .075 }, { note: 784, length: .08 }, { note: 698, length: .11 }],
+    [{ note: 494, length: .07 }, { note: 622, length: .07 }, { note: 831, length: .085 }, { note: 622, length: .11 }],
+    [{ note: 880, length: .065 }, { note: 740, length: .075 }, { note: 988, length: .08 }, { note: 831, length: .12 }],
   ]
-  const profile = profiles[variant % profiles.length]
+  const melody = melodies[variant % melodies.length]
   const master = context.createGain()
-  master.gain.setValueAtTime(0.0001, now)
-  master.gain.exponentialRampToValueAtTime(0.34, now + 0.035)
-  master.gain.setValueAtTime(0.3, now + profile.duration * 0.62)
-  master.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration)
-  master.connect(context.destination)
+  const filter = context.createBiquadFilter()
+  master.gain.value = .075
+  filter.type = 'lowpass'
+  filter.frequency.value = 2200
+  filter.Q.value = .7
+  master.connect(filter).connect(context.destination)
 
-  // A rounded, pitch-bending little voice. Sine waves avoid the electronic
-  // buzz of the old sawtooth sound, while a quiet breath layer adds warmth.
-  const voice = context.createOscillator()
-  const harmonic = context.createOscillator()
-  const vibrato = context.createOscillator()
-  const vibratoDepth = context.createGain()
-  const formant = context.createBiquadFilter()
-  const voiceGain = context.createGain()
-  voice.type = 'sine'
-  harmonic.type = 'sine'
-  voice.frequency.setValueAtTime(profile.pitch, now)
-  voice.frequency.exponentialRampToValueAtTime(profile.end, now + profile.duration)
-  harmonic.frequency.setValueAtTime(profile.pitch * 2.02, now)
-  harmonic.frequency.exponentialRampToValueAtTime(profile.end * 2, now + profile.duration)
-  vibrato.frequency.value = profile.wobble
-  vibratoDepth.gain.value = variant === 1 ? 8 : 5
-  vibrato.connect(vibratoDepth)
-  vibratoDepth.connect(voice.frequency)
-  vibratoDepth.connect(harmonic.frequency)
-  formant.type = 'lowpass'
-  formant.frequency.value = profile.tone
-  formant.Q.value = 0.35
-  voiceGain.gain.value = 0.72
-  voice.connect(voiceGain)
-  harmonic.connect(voiceGain)
-  voiceGain.connect(formant).connect(master)
-
-  const noiseLength = Math.ceil(context.sampleRate * profile.duration)
-  const noiseBuffer = context.createBuffer(1, noiseLength, context.sampleRate)
-  const noiseData = noiseBuffer.getChannelData(0)
-  for (let i = 0; i < noiseLength; i += 1) noiseData[i] = (Math.random() * 2 - 1) * (1 - i / noiseLength)
-  const breath = context.createBufferSource()
-  const breathFilter = context.createBiquadFilter()
-  const breathGain = context.createGain()
-  breath.buffer = noiseBuffer
-  breathFilter.type = 'lowpass'
-  breathFilter.frequency.value = variant === 2 ? 430 : 620
-  breathGain.gain.value = variant === 1 ? 0.08 : 0.13
-  breath.connect(breathFilter).connect(breathGain).connect(master)
-
-  ;[voice, harmonic, vibrato, breath].forEach(source => source.start(now))
-  ;[voice, harmonic, vibrato].forEach(source => source.stop(now + profile.duration))
-  breath.stop(now + profile.duration)
+  let offset = 0
+  melody.forEach(({ note, length }, index) => {
+    const voice = context.createOscillator()
+    const envelope = context.createGain()
+    voice.type = index % 2 === 0 ? 'square' : 'triangle'
+    voice.frequency.setValueAtTime(note, now + offset)
+    voice.frequency.exponentialRampToValueAtTime(note * (variant === 1 ? 1.035 : .975), now + offset + length)
+    envelope.gain.setValueAtTime(.0001, now + offset)
+    envelope.gain.exponentialRampToValueAtTime(index === 0 ? .9 : .66, now + offset + .009)
+    envelope.gain.exponentialRampToValueAtTime(.0001, now + offset + length)
+    voice.connect(envelope).connect(master)
+    voice.start(now + offset)
+    voice.stop(now + offset + length + .012)
+    offset += length + .018
+  })
 }
 
 export default function KiwiKoruPet() {
@@ -127,7 +100,7 @@ export default function KiwiKoruPet() {
       if (!audioContext.current) audioContext.current = new AudioContextClass()
       const context = audioContext.current
       const play = () => {
-        makeCuteGrumble(context, soundIndex.current)
+        makePocketPetChirp(context, soundIndex.current)
         soundIndex.current = (soundIndex.current + 1) % 3
       }
       if (context.state === 'suspended') void context.resume().then(play).catch(() => undefined)
@@ -149,7 +122,7 @@ export default function KiwiKoruPet() {
     setShowIntro(false)
   }
 
-  const playReaction = () => {
+  const playReaction = (withSound = false) => {
     reactionRun.current += 1
     const run = reactionRun.current
     isHovered.current = true
@@ -159,7 +132,7 @@ export default function KiwiKoruPet() {
     introTimer.current = null
     setShowIntro(false)
     setTantrumFrame(0)
-    playNextSound()
+    if (withSound) playNextSound()
     let frame = 0
     const advance = () => {
       if (run !== reactionRun.current || !isHovered.current) return
@@ -184,12 +157,12 @@ export default function KiwiKoruPet() {
 
   const startTantrum = (event: React.PointerEvent) => {
     if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
-    playReaction()
+    playReaction(false)
   }
 
   const startTouchTantrum = (event: React.PointerEvent) => {
     event.stopPropagation()
-    playReaction()
+    playReaction(true)
   }
 
   useEffect(() => {
@@ -227,10 +200,12 @@ export default function KiwiKoruPet() {
       <div
         ref={petRef}
         className="kiwikoru-pet-sprite"
-        role="img"
-        aria-label="Kiwi Grumpy watching the pointer"
-        title="Kiwi Grumpy · Your KiwiKoru helper is waking up"
+        role="button"
+        tabIndex={0}
+        aria-label="Play a little Kiwi Grumpy sound"
+        title="Kiwi Grumpy · Click for a tiny surprise"
         onPointerDown={startTouchTantrum}
+        onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); playReaction(true) } }}
         style={{
           backgroundPosition: `${(column / 7) * 100}% ${(row / 10) * 100}%`,
         }}
