@@ -160,11 +160,11 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
   return (
     <div className="w-full">
       {/* Viewer Canvas */}
-      <div className="relative w-full h-[400px] md:h-[500px] bg-gradient-to-b from-[#1e3329] to-[#2d4a3e] rounded-xl overflow-hidden border border-white/[0.06]">
+      <div className="relative w-full h-[400px] md:h-[500px] bg-gradient-to-b from-[#253126] to-[#3f4a2f] rounded-xl overflow-hidden border border-white/[0.06]">
         {meshData ? (
           <>
             <Canvas camera={{ position: [15, 10, 15], fov: 40 }} shadows dpr={[1, 2]} gl={{ antialias: true, alpha: false }}>
-              <color attach="background" args={['#1e3329']} />
+              <color attach="background" args={['#253126']} />
               <ambientLight intensity={0.4} />
               <directionalLight position={[10, 10, 5]} intensity={0.8} />
               <Suspense fallback={null}>
@@ -175,7 +175,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
             {/* Top bar overlays */}
             <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
               {/* File name */}
-              <div className="bg-[#1e3329]/80 backdrop-blur-sm rounded-lg px-3 py-1.5 text-xs text-white/80 pointer-events-auto flex items-center gap-2">
+              <div className="bg-[#253126]/80 backdrop-blur-sm rounded-lg px-3 py-1.5 text-xs text-white/80 pointer-events-auto flex items-center gap-2">
                 <Box size={12} className="text-gold" />
                 <span className="max-w-[160px] truncate">{fileName}</span>
               </div>
@@ -183,7 +183,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
               {/* Reset camera button */}
               <button
                 onClick={resetCamera}
-                className="bg-[#1e3329]/80 backdrop-blur-sm rounded-lg px-3 py-1.5 text-white/70 hover:text-gold transition-colors text-xs pointer-events-auto flex items-center gap-1.5 focus-gold"
+                className="bg-[#253126]/80 backdrop-blur-sm rounded-lg px-3 py-1.5 text-white/70 hover:text-gold transition-colors text-xs pointer-events-auto flex items-center gap-1.5 focus-gold"
                 title="Reset camera"
                 aria-label="Reset camera view"
               >
@@ -194,7 +194,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
               {/* Clear */}
               <button
                 onClick={clearModel}
-                className="bg-[#1e3329]/80 backdrop-blur-sm rounded-lg p-1.5 text-white/70 hover:text-red-400 transition-colors pointer-events-auto focus-gold"
+                className="bg-[#253126]/80 backdrop-blur-sm rounded-lg p-1.5 text-white/70 hover:text-red-400 transition-colors pointer-events-auto focus-gold"
                 aria-label="Clear model"
               >
                 <X size={14} />
@@ -202,13 +202,13 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLView
             </div>
 
             {/* Dimensions overlay */}
-            <div className="absolute top-12 left-3 bg-[#1e3329]/70 backdrop-blur-sm rounded-lg px-3 py-1 text-[11px] text-white/60 pointer-events-none">
+            <div className="absolute top-12 left-3 bg-[#253126]/70 backdrop-blur-sm rounded-lg px-3 py-1 text-[11px] text-white/60 pointer-events-none">
               {meshData.dimensions.x} × {meshData.dimensions.y} × {meshData.dimensions.z} mm · {meshData.volume.toFixed(1)} cm³
             </div>
 
             {/* Color picker overlay */}
             <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
-              <div className="bg-[#1e3329]/85 backdrop-blur-sm rounded-lg px-3 py-2.5 pointer-events-auto">
+              <div className="bg-[#253126]/85 backdrop-blur-sm rounded-lg px-3 py-2.5 pointer-events-auto">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-2">
                     <Palette size={12} className="text-gold shrink-0" />

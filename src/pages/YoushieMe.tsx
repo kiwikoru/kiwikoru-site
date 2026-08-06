@@ -99,7 +99,7 @@ export default function YoushieMe() {
       image.onerror = reject
       image.src = src
     })
-    const [figure, logo, kiwiKoruLogo] = await Promise.all([load(source), load('/youshies-logo-transparent.png'), load('/images/kiwikoru-logo-transparent.png')])
+    const [figure, logo, kiwiKoruLogo] = await Promise.all([load(source), load('/youshies-logo-transparent.png'), load('/images/kiwikoru-logo-moss.png')])
     const canvas = document.createElement('canvas')
     canvas.width = 1200
     canvas.height = 1500

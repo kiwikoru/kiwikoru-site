@@ -49,9 +49,9 @@ module.exports = {
           ring: "hsl(var(--sidebar-ring))",
         },
         forest: {
-          DEFAULT: "#2d4a3e",
-          dark: "#1e3329",
-          light: "#3d5a4e",
+          DEFAULT: "#3f4a2f",
+          dark: "#253126",
+          light: "#5e6946",
         },
         gold: {
           DEFAULT: "#d4b896",

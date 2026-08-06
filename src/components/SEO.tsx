@@ -64,7 +64,7 @@ export function generateOrganizationSchema() {
     name: 'KiwiKoru 3D',
     description: 'Professional 3D printing service in Whangārei, New Zealand. Custom 3D printing, rapid prototyping, and product development.',
     url: SITE_URL,
-    logo: `${SITE_URL}/images/og-image.jpg`,
+    logo: `${SITE_URL}/images/kiwikoru-logo-moss.png`,
     email: 'kiwikoru3d@gmail.com',
     telephone: '+64-27-436-5339',
     address: {

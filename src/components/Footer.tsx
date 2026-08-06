@@ -9,7 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link to="/" className="inline-flex items-center gap-2.5 mb-3 focus-gold">
-              <img src="/images/logo.png" alt="KiwiKoru 3D" width="28" height="28" className="rounded-md" />
+              <img src="/images/kiwikoru-logo-moss.png" alt="KiwiKoru 3D" width="34" height="34" className="object-contain" />
               <span className="text-gold font-bold text-base">KiwiKoru 3D</span>
             </Link>
             <p className="text-sm text-white/50 leading-relaxed">

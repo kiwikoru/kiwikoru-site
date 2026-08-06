@@ -47,15 +47,17 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center transition-all duration-500 ${
           scrolled
-            ? 'bg-[#1e3329]/90 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.15)]'
-            : 'bg-[#2d4a3e]/60 backdrop-blur-md'
+            ? 'bg-[#253126]/92 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.15)]'
+            : 'bg-[#3f4a2f]/72 backdrop-blur-md'
         }`}
         style={{ borderBottom: scrolled ? '1px solid rgba(212,184,150,0.08)' : '1px solid transparent' }}
       >
         <nav className="w-full max-w-[1200px] mx-auto px-6 flex items-center justify-between" aria-label="Main navigation">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 focus-gold shrink-0" aria-label="KiwiKoru 3D Home">
-            <img src="/images/logo.png" alt="" width="36" height="36" className="rounded-lg" style={{ objectFit: 'contain' }} />
+            <span className="grid h-11 w-11 place-items-center rounded-xl bg-[#17231c]/75 p-1.5 shadow-inner ring-1 ring-white/5">
+              <img src="/images/kiwikoru-logo-moss.png" alt="" width="36" height="36" className="h-full w-full object-contain" />
+            </span>
             <span className="text-gold font-bold text-lg tracking-tight hidden sm:inline">KiwiKoru 3D</span>
           </Link>
 
@@ -108,7 +110,7 @@ export default function Navbar() {
 
       {/* Mobile Overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-[60] bg-[#1e3329]/95 backdrop-blur-xl flex flex-col items-center justify-center" role="dialog" aria-label="Mobile navigation">
+        <div className="fixed inset-0 z-[60] bg-[#253126]/95 backdrop-blur-xl flex flex-col items-center justify-center" role="dialog" aria-label="Mobile navigation">
           <button className="absolute top-5 right-6 text-gold p-2 focus-gold" onClick={() => setMobileOpen(false)} aria-label="Close navigation menu">
             <X size={28} />
           </button>
