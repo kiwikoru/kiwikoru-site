@@ -285,40 +285,50 @@ function WhatWePrintSection() {
 /* ─────────── MATERIALS SECTION ─────────── */
 function MaterialsSection() {
   return (
-    <section className="bg-kiwi-light py-20 lg:py-28">
+    <section className="bg-off-white py-20 lg:py-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-heading font-semibold text-kiwi-dark">
+          <h2 className="text-3xl lg:text-4xl font-semibold text-forest-dark">
             Materials at a Glance
           </h2>
-          <p className="mt-4 text-kiwi-base/70 max-w-xl mx-auto">
+          <p className="mt-4 text-forest/70 max-w-xl mx-auto">
             Choosing the right material is key to a successful print.
           </p>
         </div>
-        <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {/* PLA Card */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-            <span className="inline-block px-3 py-1 rounded-full bg-kiwi-base/10 text-kiwi-base text-xs font-medium tracking-wide mb-4">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 transition hover:-translate-y-1 hover:shadow-card">
+            <span className="inline-block px-3 py-1 rounded-full bg-forest/10 text-forest text-xs font-semibold tracking-wide mb-4">
               MOST POPULAR
             </span>
-            <h3 className="text-xl font-heading font-semibold text-kiwi-dark mb-3">PLA - Standard</h3>
-            <p className="text-kiwi-base/60 text-sm mb-6">
+            <h3 className="text-xl font-semibold text-forest-dark mb-3">PLA - Standard</h3>
+            <p className="text-forest/65 text-sm">
               Best value. Perfect for display models and indoor items.
             </p>
           </div>
           {/* PETG Card */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 transition hover:-translate-y-1 hover:shadow-card">
             <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium tracking-wide mb-4">
               IMPACT RESISTANT
             </span>
-            <h3 className="text-xl font-heading font-semibold text-kiwi-dark mb-3">PETG - Durable</h3>
-            <p className="text-kiwi-base/60 text-sm mb-6">
+            <h3 className="text-xl font-semibold text-forest-dark mb-3">PETG - Durable</h3>
+            <p className="text-forest/65 text-sm">
               Strong and snap-resistant. Great for functional clips.
+            </p>
+          </div>
+          {/* TPU Card */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 transition hover:-translate-y-1 hover:shadow-card">
+            <span className="inline-block px-3 py-1 rounded-full bg-gold/25 text-forest-dark text-xs font-semibold tracking-wide mb-4">
+              FLEXIBLE
+            </span>
+            <h3 className="text-xl font-semibold text-forest-dark mb-3">TPU - Flexible</h3>
+            <p className="text-forest/65 text-sm">
+              Tough and elastic. Ideal for grips, protective parts, seals and flexible components.
             </p>
           </div>
         </div>
         <div className="text-center mt-8">
-          <Link to="/materials" className="inline-flex items-center gap-2 text-kiwi-base hover:text-kiwi-gold font-medium text-sm transition-colors">
+          <Link to="/materials" className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-6 py-3.5 text-white font-semibold text-sm shadow-md transition hover:bg-forest-dark hover:-translate-y-0.5 hover:shadow-lg">
             Compare all materials <ChevronRight className="w-4 h-4" />
           </Link>
         </div>
