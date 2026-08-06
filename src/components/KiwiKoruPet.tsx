@@ -3,10 +3,10 @@ import './KiwiKoruPet.css'
 
 const IDLE_DURATIONS = [280, 110, 110, 140, 140, 320]
 const TANTRUM = [
-  { row: 5, column: 0, duration: 120 },
-  { row: 5, column: 1, duration: 120 },
-  { row: 5, column: 2, duration: 150 },
-  { row: 0, column: 0, duration: 180 },
+  { row: 3, column: 1, duration: 130 },
+  { row: 3, column: 2, duration: 150 },
+  { row: 3, column: 1, duration: 130 },
+  { row: 3, column: 2, duration: 180 },
 ]
 
 export default function KiwiKoruPet() {
@@ -100,8 +100,8 @@ export default function KiwiKoruPet() {
   }, [])
 
   const tantrumPose = tantrumFrame !== null ? TANTRUM[tantrumFrame] : null
-  const row = tantrumPose ? tantrumPose.row : showIntro ? 0 : lookDirection === null ? 0 : lookDirection < 8 ? 9 : 10
-  const column = tantrumPose ? tantrumPose.column : showIntro ? 0 : lookDirection === null ? idleFrame : lookDirection % 8
+  const row = tantrumPose ? tantrumPose.row : showIntro ? 3 : lookDirection === null ? 0 : lookDirection < 8 ? 9 : 10
+  const column = tantrumPose ? tantrumPose.column : showIntro ? 2 : lookDirection === null ? idleFrame : lookDirection % 8
 
   return (
     <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot">
