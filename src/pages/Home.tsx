@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import {
   Upload, Clock, MapPin, Zap, ArrowRight, ChevronRight,
-  Gamepad2, HomeIcon, Wrench, Lightbulb, CheckCircle, Info
+  Gamepad2, HomeIcon, Wrench, Lightbulb, CheckCircle, Info, HelpCircle, PencilRuler, MessageCircle
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
@@ -341,42 +341,50 @@ function MaterialsSection() {
 function FAQSection() {
   const faqs = [
     {
+      icon: MapPin,
       q: 'Where is pickup located?',
       a: 'We are located in Morningside, Whangārei. You\'ll receive the exact address via email once your print is ready for collection.',
     },
     {
+      icon: Clock,
       q: 'How long does it take?',
       a: 'Standard prints typically ship or are ready for collection in 24-48 hours. Larger batches or highly complex parts may take longer.',
     },
     {
+      icon: PencilRuler,
       q: 'Do you do design work?',
-      a: 'We focus exclusively on high-quality printing of ready-to-print files (STL). If you need help with design, we can recommend local CAD designers who can assist you.',
+      a: 'Yes. Send us your idea through the contact form and we can discuss the design, requirements and best path to production.',
     },
   ];
 
   return (
     <section className="bg-white py-20 lg:py-28">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-heading font-semibold text-kiwi-dark">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="rounded-3xl border border-forest/10 bg-off-white p-6 sm:p-10 lg:p-12 shadow-sm">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <span className="inline-flex items-center gap-2 rounded-full bg-forest/10 px-4 py-2 text-xs font-bold tracking-wider uppercase text-forest"><HelpCircle className="w-4 h-4" /> Quick answers</span>
+          <h2 className="mt-5 text-3xl lg:text-4xl font-semibold text-forest-dark">
             Frequently Asked Questions
           </h2>
-          <p className="mt-4 text-kiwi-base/70">
+          <p className="mt-4 text-forest/70">
             Everything you need to know about our local Whangārei service.
           </p>
         </div>
-        <div className="space-y-4">
+        <div className="grid md:grid-cols-3 gap-5">
           {faqs.map((faq) => (
-            <div key={faq.q} className="bg-kiwi-light rounded-xl p-6">
-              <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-kiwi-gold mt-2 flex-shrink-0" />
-                <div>
-                  <h4 className="font-heading font-semibold text-kiwi-dark mb-2">{faq.q}</h4>
-                  <p className="text-kiwi-base/60 text-sm leading-relaxed">{faq.a}</p>
-                </div>
+            <article key={faq.q} className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-gold hover:shadow-card">
+              <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-forest/10 text-forest mb-5 transition group-hover:bg-gold/30">
+                <faq.icon className="w-5 h-5" />
               </div>
-            </div>
+              <h3 className="text-lg font-semibold text-forest-dark mb-3">{faq.q}</h3>
+              <p className="text-forest/65 text-sm leading-relaxed">{faq.a}</p>
+            </article>
           ))}
+        </div>
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl bg-forest-dark px-6 py-5 text-center sm:text-left">
+          <div><strong className="block text-white">Still have a question?</strong><span className="text-sm text-white/65">Tell us about your print or design project.</span></div>
+          <Link to="/contact" className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 text-sm font-bold text-forest-dark transition hover:bg-gold-light hover:-translate-y-0.5"><MessageCircle className="w-4 h-4" /> Contact KiwiKoru</Link>
+        </div>
         </div>
       </div>
     </section>
