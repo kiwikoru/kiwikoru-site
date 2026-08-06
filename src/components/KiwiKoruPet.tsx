@@ -9,6 +9,45 @@ const TANTRUM = [
   { row: 0, column: 0, duration: 180 },
 ]
 
+type AudioWindow = Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }
+
+function makeCuteGrumble(context: AudioContext, variant: number) {
+  const now = context.currentTime
+  const master = context.createGain()
+  master.gain.setValueAtTime(0.0001, now)
+  master.gain.exponentialRampToValueAtTime(0.11, now + 0.018)
+  master.gain.exponentialRampToValueAtTime(0.0001, now + 0.36)
+  master.connect(context.destination)
+
+  const notes = variant === 0 ? [185, 145] : variant === 1 ? [220, 310] : [275, 190, 235]
+  notes.forEach((frequency, index) => {
+    const oscillator = context.createOscillator()
+    const voice = context.createGain()
+    const start = now + index * 0.085
+    oscillator.type = variant === 1 ? 'triangle' : 'sawtooth'
+    oscillator.frequency.setValueAtTime(frequency, start)
+    oscillator.frequency.exponentialRampToValueAtTime(frequency * (variant === 1 ? 1.16 : 0.82), start + 0.11)
+    voice.gain.setValueAtTime(0.0001, start)
+    voice.gain.exponentialRampToValueAtTime(0.42, start + 0.012)
+    voice.gain.exponentialRampToValueAtTime(0.0001, start + 0.13)
+    oscillator.connect(voice).connect(master)
+    oscillator.start(start)
+    oscillator.stop(start + 0.14)
+  })
+
+  const wobble = context.createOscillator()
+  const wobbleGain = context.createGain()
+  wobble.type = 'sine'
+  wobble.frequency.setValueAtTime(variant === 2 ? 520 : 390, now)
+  wobble.frequency.exponentialRampToValueAtTime(variant === 2 ? 330 : 470, now + 0.2)
+  wobbleGain.gain.setValueAtTime(0.0001, now)
+  wobbleGain.gain.exponentialRampToValueAtTime(0.12, now + 0.03)
+  wobbleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24)
+  wobble.connect(wobbleGain).connect(master)
+  wobble.start(now)
+  wobble.stop(now + 0.25)
+}
+
 export default function KiwiKoruPet() {
   const petRef = useRef<HTMLDivElement>(null)
   const [idleFrame, setIdleFrame] = useState(0)
@@ -19,6 +58,8 @@ export default function KiwiKoruPet() {
   const introTimer = useRef<number | null>(null)
   const isHovered = useRef(false)
   const reactionRun = useRef(0)
+  const audioContext = useRef<AudioContext | null>(null)
+  const soundIndex = useRef(0)
 
   useEffect(() => {
     let timeout = 0
@@ -36,7 +77,25 @@ export default function KiwiKoruPet() {
   useEffect(() => () => {
     if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
+    void audioContext.current?.close()
   }, [])
+
+  const playNextSound = () => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as AudioWindow).webkitAudioContext
+      if (!AudioContextClass) return
+      if (!audioContext.current) audioContext.current = new AudioContextClass()
+      const context = audioContext.current
+      const play = () => {
+        makeCuteGrumble(context, soundIndex.current)
+        soundIndex.current = (soundIndex.current + 1) % 3
+      }
+      if (context.state === 'suspended') void context.resume().then(play).catch(() => undefined)
+      else play()
+    } catch {
+      // Sound is a playful enhancement; the mascot must still work when audio is blocked.
+    }
+  }
 
   const stopInteraction = (event: React.PointerEvent) => {
     if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
@@ -60,6 +119,7 @@ export default function KiwiKoruPet() {
     introTimer.current = null
     setShowIntro(false)
     setTantrumFrame(0)
+    playNextSound()
     let frame = 0
     const advance = () => {
       if (run !== reactionRun.current || !isHovered.current) return
