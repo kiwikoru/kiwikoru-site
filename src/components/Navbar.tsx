@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, X } from 'lucide-react'
+import { Menu, ShoppingCart, X } from 'lucide-react'
 import { WhatsAppLogo, WHATSAPP_URL } from './WhatsAppFloat'
 
 const pageLinks = [
@@ -93,6 +93,9 @@ export default function Navbar() {
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-3">
+            <Link to="/quote" aria-label="Open shopping cart" title="Shopping cart" className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gold/35 bg-white/10 text-white shadow-md transition-all hover:-translate-y-0.5 hover:border-gold hover:bg-white/15 hover:text-gold focus-gold">
+              <ShoppingCart className="h-5 w-5" />
+            </Link>
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Chat with KiwiKoru on WhatsApp" className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-md transition-colors hover:bg-[#20bd5a] focus-gold">
               <WhatsAppLogo className="w-5 h-5" />
             </a>
@@ -102,9 +105,14 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Hamburger */}
-          <button className="md:hidden text-gold p-2 focus-gold" onClick={() => setMobileOpen(true)} aria-label="Open navigation menu" aria-expanded={mobileOpen}>
-            <Menu size={24} />
-          </button>
+          <div className="flex items-center gap-1 md:hidden">
+            <Link to="/quote" aria-label="Open shopping cart" className="grid h-10 w-10 place-items-center rounded-full text-gold transition-colors hover:bg-white/10 focus-gold">
+              <ShoppingCart size={21} />
+            </Link>
+            <button className="text-gold p-2 focus-gold" onClick={() => setMobileOpen(true)} aria-label="Open navigation menu" aria-expanded={mobileOpen}>
+              <Menu size={24} />
+            </button>
+          </div>
         </nav>
       </header>
 
