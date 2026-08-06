@@ -20,12 +20,12 @@ export default function WhatsAppFloat() {
   const [showTooltip, setShowTooltip] = useState(false)
 
   return (
-    <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2">
+    <div className="fixed top-[88px] right-6 max-md:top-[82px] max-md:right-3 z-40 flex flex-col items-end gap-2">
       {/* Tooltip */}
       {showTooltip && (
         <button
           onClick={() => setShowTooltip(false)}
-          className="bg-white text-charcoal text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg border border-border-light mb-1 animate-in fade-in slide-in-from-bottom-2 duration-200 focus-gold flex items-center gap-2"
+          className="bg-white text-charcoal text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg border border-border-light mt-1 animate-in fade-in slide-in-from-top-2 duration-200 focus-gold flex items-center gap-2 order-2"
         >
           Need help? Chat with us
           <X size={12} className="text-charcoal-light" />
