@@ -81,7 +81,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="font-heading font-semibold text-kiwi-dark text-sm mb-1">Location</h4>
-                  <p className="text-kiwi-base/70 text-sm">Morningside, Whangārei, New Zealand</p>
+                  <p className="text-kiwi-base/70 text-sm">Whangārei, Northland, New Zealand</p>
                   <p className="text-kiwi-base/50 text-xs mt-1">
                     Full address provided after order confirmation.
                   </p>
@@ -103,19 +103,32 @@ export default function Contact() {
               </div>
             </a>
 
-            {/* Map placeholder */}
-            <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white aspect-video flex items-center justify-center">
-              <div className="text-center p-8">
-                <MapPin className="w-10 h-10 text-kiwi-base/30 mx-auto mb-3" />
-                <p className="text-kiwi-dark font-heading font-semibold mb-1">Our Local Presence</p>
-                <p className="text-kiwi-base/50 text-sm">Morningside, Whangārei</p>
+            {/* City-level map — intentionally does not expose the collection address. */}
+            <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+              <div className="border-b border-gray-100 px-5 py-4">
+                <p className="flex items-center gap-2 font-heading font-semibold text-kiwi-dark">
+                  <MapPin className="h-5 w-5 text-gold" />
+                  Our Local Presence
+                </p>
+                <p className="mt-1 text-sm text-kiwi-base/60">Whangārei, Northland</p>
+              </div>
+              <iframe
+                title="Map of Whangārei, Northland"
+                src="https://www.google.com/maps?q=Whangarei%2C%20Northland%2C%20New%20Zealand&z=12&output=embed"
+                className="h-72 w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+              <div className="flex items-center justify-between gap-4 px-5 py-3 text-xs text-kiwi-base/55">
+                <span>Exact collection address provided after order confirmation.</span>
                 <a
-                  href="https://www.google.com/maps/search/Morningside,+Whangārei,+New+Zealand"
+                  href="https://www.google.com/maps/search/Whangarei,+Northland,+New+Zealand"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-kiwi-base hover:text-kiwi-gold text-sm mt-2 inline-block underline"
+                  className="shrink-0 font-semibold text-forest underline decoration-gold underline-offset-4 hover:text-forest-light"
                 >
-                  View on Google Maps
+                  Open map
                 </a>
               </div>
             </div>
