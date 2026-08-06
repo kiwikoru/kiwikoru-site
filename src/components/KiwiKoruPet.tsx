@@ -123,7 +123,7 @@ export default function KiwiKoruPet() {
 
   return (
     <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot" onPointerEnter={startTantrum} onPointerLeave={stopInteraction}>
-      {showIntro && <div className="kiwikoru-pet-bubble"><strong>I’m Kiwi Grumpy.</strong><span>Soon I’ll be your virtual assistant.</span><a href="https://wa.me/64274365339?text=Hi%20KiwiKoru%203D!%20I%27d%20like%20to%20ask%20you%20something." target="_blank" rel="noopener noreferrer" aria-label="Message KiwiKoru 3D on WhatsApp">Message us on WhatsApp</a></div>}
+      {showIntro && <div className="kiwikoru-pet-bubble"><strong>I’m Kiwi Grumpy.</strong><span>Soon I’ll be your virtual assistant.</span><a href="https://wa.me/64274365339?text=Hi%20KiwiKoru!%20I%20have%20a%20project%20in%20mind.%20How%20can%20we%20get%20started%3F" target="_blank" rel="noopener noreferrer" aria-label="Message KiwiKoru 3D on WhatsApp">Message us on WhatsApp</a></div>}
       <div
         ref={petRef}
         className="kiwikoru-pet-sprite"

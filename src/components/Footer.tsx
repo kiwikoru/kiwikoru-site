@@ -68,7 +68,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a href="https://wa.me/64274365339" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors duration-200 focus-gold">
+                <a href="https://wa.me/64274365339?text=Hi%20KiwiKoru!%20I%20have%20a%20project%20in%20mind.%20How%20can%20we%20get%20started%3F" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-gold hover:text-gold-light transition-colors duration-200 focus-gold">
                   <MessageCircle size={16} className="shrink-0" />WhatsApp
                 </a>
               </li>

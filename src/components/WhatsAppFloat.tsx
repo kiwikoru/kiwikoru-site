@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 
-export const WHATSAPP_URL = 'https://wa.me/64274365339'
+export const WHATSAPP_URL = 'https://wa.me/64274365339?text=Hi%20KiwiKoru!%20I%20have%20a%20project%20in%20mind.%20How%20can%20we%20get%20started%3F'
 
 export function WhatsAppLogo({ className }: { className?: string }) {
   return (
