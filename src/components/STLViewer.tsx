@@ -22,6 +22,8 @@ const PREVIEW_COLORS = [
 
 interface STLViewerProps {
   onFileLoad?: (volume: number, dimensions: { x: number; y: number; z: number }) => void
+  onFileSelect?: (file: File) => void
+  onClear?: () => void
 }
 
 function Model({ meshData, color }: { meshData: MeshData; color: string }) {
@@ -55,7 +57,7 @@ function Scene({ meshData, color, controlsRef }: { meshData: MeshData; color: st
   )
 }
 
-export default function STLViewer({ onFileLoad }: STLViewerProps) {
+export default function STLViewer({ onFileLoad, onFileSelect, onClear }: STLViewerProps) {
   const [meshData, setMeshData] = useState<MeshData | null>(null)
   const [fileName, setFileName] = useState('')
   const [dragOver, setDragOver] = useState(false)
@@ -66,6 +68,7 @@ export default function STLViewer({ onFileLoad }: STLViewerProps) {
 
   const processFile = useCallback((file: File) => {
     if (!file.name.match(/\.(stl|obj)$/i)) return
+    onFileSelect?.(file)
     setLoading(true)
     setFileName(file.name)
 
@@ -126,7 +129,7 @@ export default function STLViewer({ onFileLoad }: STLViewerProps) {
       }
     }
     reader.readAsArrayBuffer(file)
-  }, [onFileLoad])
+  }, [onFileLoad, onFileSelect])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -144,6 +147,7 @@ export default function STLViewer({ onFileLoad }: STLViewerProps) {
     setMeshData(null)
     setFileName('')
     if (fileInputRef.current) fileInputRef.current.value = ''
+    onClear?.()
   }
 
   const resetCamera = () => {

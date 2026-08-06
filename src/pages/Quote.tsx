@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Upload, ShoppingCart, MessageCircle, ChevronDown, Info } from 'lucide-react';
+import { ShoppingCart, MessageCircle, ChevronDown, Info, Trash2, ArrowRight } from 'lucide-react';
+import STLViewer from '../components/STLViewer';
 
 const MATERIALS = {
   pla: { name: 'PLA - Standard', basePrice: 0.08, colors: ['White', 'Black', 'Grey', 'Green', 'Blue', 'Red', 'Orange', 'Yellow'] },
@@ -32,39 +33,18 @@ export default function Quote() {
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [modelFile, setModelFile] = useState<File | null>(null);
   const [fileSize, setFileSize] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [inCart, setInCart] = useState(false);
+  const [measuredVolume, setMeasuredVolume] = useState<number | null>(null);
+  const cartRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file && file.name.endsWith('.stl')) {
-      setUploadedFile(file.name);
-      setFileSize(file.size);
-      setModelFile(file);
-    }
-  }, []);
-
-  const handleFileInput = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setUploadedFile(file.name);
-      setFileSize(file.size);
-      setModelFile(file);
-    }
-  }, []);
+  const handleModelFile = (file: File) => {
+    setUploadedFile(file.name);
+    setFileSize(file.size);
+    setModelFile(file);
+    setInCart(false);
+  };
 
   // Simulated price calculation
   const matData = MATERIALS[material];
@@ -72,7 +52,7 @@ export default function Quote() {
   const qualityData = QUALITY_OPTIONS.find(q => q.value === quality)!;
 
   // Estimate volume from file size (rough approximation)
-  const estimatedVolume = fileSize > 0 ? (fileSize / 1024) * 0.5 : 0; // cm³ approx
+  const estimatedVolume = measuredVolume ?? (fileSize > 0 ? (fileSize / 1024) * 0.5 : 0);
   const basePrice = estimatedVolume * matData.basePrice * infillData.multiplier * qualityData.multiplier;
   const gst = basePrice * 0.15;
   const totalPrice = basePrice + gst;
@@ -83,7 +63,7 @@ export default function Quote() {
     <main className="min-h-screen bg-kiwi-light pt-24 pb-16">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="relative text-center mb-12">
           <h1 className="text-3xl lg:text-4xl font-heading font-semibold text-kiwi-dark">
             Instant 3D Quote
           </h1>
@@ -96,55 +76,34 @@ export default function Quote() {
               Get in touch
             </Link>
           </p>
+          <button
+            type="button"
+            onClick={() => cartRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+            className="mt-5 lg:absolute lg:right-0 lg:top-0 inline-flex items-center gap-2 rounded-full border border-forest/15 bg-white px-4 py-2 text-sm font-semibold text-forest shadow-sm hover:border-gold hover:shadow-md transition-all"
+            aria-label={`Shopping cart with ${inCart ? 1 : 0} item`}
+          >
+            <span className="relative">
+              <ShoppingCart className="h-5 w-5" />
+              {inCart && <span className="absolute -right-2 -top-2 grid h-4 min-w-4 place-items-center rounded-full bg-gold px-1 text-[10px] font-bold text-forest">1</span>}
+            </span>
+            Cart
+          </button>
         </div>
 
         <div className="grid lg:grid-cols-5 gap-8">
           {/* Left - Upload */}
           <div className="lg:col-span-3">
-            {/* Upload Zone */}
-            <div
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-              className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all cursor-pointer ${
-                isDragging
-                  ? 'border-kiwi-gold bg-kiwi-gold/5'
-                  : hasFile
-                  ? 'border-kiwi-base bg-kiwi-base/5'
-                  : 'border-gray-300 hover:border-kiwi-base/50 bg-white'
-              }`}
-              onClick={() => document.getElementById('stl-upload')?.click()}
-            >
-              <input
-                id="stl-upload"
-                type="file"
-                accept=".stl"
-                className="hidden"
-                onChange={handleFileInput}
-              />
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-kiwi-base/10 mx-auto mb-4">
-                <Upload className="w-8 h-8 text-kiwi-base" />
-              </div>
-              {hasFile ? (
-                <div>
-                  <p className="text-kiwi-dark font-medium">{uploadedFile}</p>
-                  <p className="text-kiwi-base/50 text-sm mt-1">
-                    {(fileSize / 1024 / 1024).toFixed(2)} MB
-                  </p>
-                  <p className="text-kiwi-base/40 text-xs mt-2">Click to change file</p>
-                </div>
-              ) : (
-                <div>
-                  <p className="text-kiwi-dark font-medium">Upload your 3D model</p>
-                  <p className="text-kiwi-base/50 text-sm mt-1">
-                    Drag and drop an STL file, or click to browse
-                  </p>
-                  <p className="text-kiwi-base/30 text-xs mt-3">
-                    Maximum build size: 420 × 420 × 500 mm
-                  </p>
-                </div>
-              )}
-            </div>
+            <STLViewer
+              onFileSelect={handleModelFile}
+              onFileLoad={(volume) => setMeasuredVolume(volume)}
+              onClear={() => {
+                setUploadedFile(null);
+                setModelFile(null);
+                setFileSize(0);
+                setMeasuredVolume(null);
+                setInCart(false);
+              }}
+            />
 
             {/* Material Selection */}
             <div className="mt-8 bg-white rounded-2xl p-6 border border-gray-200">
@@ -250,7 +209,12 @@ export default function Quote() {
           {/* Right - Price Card */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl p-6 border border-gray-200 sticky top-24">
-              <h3 className="font-heading font-semibold text-kiwi-dark mb-6">Estimated Price</h3>
+              <div ref={cartRef} className="flex items-center justify-between mb-6">
+                <h3 className="font-heading font-semibold text-kiwi-dark">Estimated Price</h3>
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-forest/70">
+                  <ShoppingCart className="h-4 w-4" /> {inCart ? '1 item' : 'Cart empty'}
+                </span>
+              </div>
 
               {hasFile ? (
                 <div className="space-y-4">
@@ -293,12 +257,35 @@ export default function Quote() {
                   </div>
 
                   <button
-                    onClick={() => navigate('/print-order', { state: { modelFile, quote: { fileName: uploadedFile, price: totalPrice, material: matData.name, color, infill, quality, estimatedVolume } } })}
-                    className="w-full mt-4 flex items-center justify-center gap-2 bg-kiwi-gold hover:bg-kiwi-goldDark text-kiwi-dark py-3 rounded-lg font-medium transition-colors"
+                    onClick={() => setInCart(true)}
+                    className="w-full mt-4 flex items-center justify-center gap-2 bg-gold hover:bg-gold-light text-forest-dark py-3.5 rounded-xl font-bold shadow-sm hover:shadow-md transition-all"
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    Place this order
+                    {inCart ? 'Added to cart' : 'Add to cart'}
                   </button>
+
+                  {inCart && (
+                    <div className="rounded-xl border border-forest/15 bg-off-white p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold text-forest-dark">{uploadedFile}</p>
+                          <p className="mt-1 text-xs text-forest/60">{matData.name} · {color}</p>
+                        </div>
+                        <button type="button" onClick={() => setInCart(false)} className="rounded-lg p-1.5 text-forest/50 hover:bg-white hover:text-red-600" aria-label="Remove item from cart">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <div className="mt-3 flex items-center justify-between border-t border-forest/10 pt-3 text-sm font-bold text-forest-dark">
+                        <span>Total</span><span>NZ${totalPrice.toFixed(2)}</span>
+                      </div>
+                      <button
+                        onClick={() => navigate('/print-order', { state: { modelFile, quote: { fileName: uploadedFile, price: totalPrice, material: matData.name, color, infill, quality, estimatedVolume } } })}
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-forest px-4 py-3.5 font-bold text-white shadow-sm transition-all hover:bg-forest-light hover:shadow-md"
+                      >
+                        Proceed to purchase <ArrowRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
 
                   <a
                     href="https://wa.me/64274365339?text=Hi%20KiwiKoru!%20I%20have%20a%20project%20in%20mind.%20How%20can%20we%20get%20started%3F"
@@ -307,7 +294,7 @@ export default function Quote() {
                     className="w-full mt-2 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium transition-colors"
                   >
                     <MessageCircle className="w-4 h-4" />
-                    Order via WhatsApp
+                    Discuss the design via WhatsApp
                   </a>
                 </div>
               ) : (
