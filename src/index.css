@@ -58,6 +58,31 @@ html {
   background: linear-gradient(to right, #E8C892, #D4AF37);
 }
 
+.hero-particle {
+  --particle-x: 30px;
+  --particle-y: -35px;
+  --particle-opacity: .28;
+  --particle-faint: .2;
+  position: absolute;
+  border-radius: 999px;
+  background: #e8c892;
+  opacity: var(--particle-opacity);
+  box-shadow: 0 0 8px rgba(232, 200, 146, .16);
+  animation: hero-particle-drift 14s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes hero-particle-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(.85); opacity: var(--particle-faint); }
+  28% { transform: translate3d(calc(var(--particle-x) * .42), calc(var(--particle-y) * -.25), 0) scale(1.08); opacity: var(--particle-opacity); }
+  58% { transform: translate3d(var(--particle-x), var(--particle-y), 0) scale(.94); opacity: var(--particle-faint); }
+  82% { transform: translate3d(calc(var(--particle-x) * -.2), calc(var(--particle-y) * .38), 0) scale(1.14); opacity: var(--particle-opacity); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-particle { animation: none; }
+}
+
 .gradient-hero {
   background: linear-gradient(to bottom, #3f4a2f 0%, #101710 100%);
 }

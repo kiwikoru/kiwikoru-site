@@ -4,10 +4,27 @@ import {
   Gamepad2, HomeIcon, Wrench, Lightbulb, CheckCircle, Info, HelpCircle, PencilRuler, MessageCircle
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+import type { CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const seeded = (index: number, salt: number) => {
+  const value = Math.sin(index * 91.731 + salt * 47.293) * 10000;
+  return value - Math.floor(value);
+};
+
+const heroParticles = Array.from({ length: 28 }, (_, index) => ({
+  left: seeded(index, 1) * 100,
+  top: seeded(index, 2) * 100,
+  size: 2 + seeded(index, 3) * 5,
+  duration: 10 + seeded(index, 4) * 10,
+  delay: seeded(index, 5) * -18,
+  driftX: -45 + seeded(index, 6) * 90,
+  driftY: -55 + seeded(index, 7) * 110,
+  opacity: .16 + seeded(index, 8) * .3,
+}));
 
 /* ─────────── HERO SECTION ─────────── */
 function HeroSection() {
@@ -28,16 +45,15 @@ function HeroSection() {
     <section ref={heroRef} className="relative min-h-screen gradient-hero flex items-center pt-20">
       {/* Animated background particles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {heroParticles.map((particle, index) => (
           <div
-            key={i}
-            className="absolute w-1 h-1 bg-kiwi-gold/30 rounded-full animate-float"
+            key={index}
+            className="hero-particle"
             style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${3 + Math.random() * 4}s`,
-            }}
+              left: `${particle.left}%`, top: `${particle.top}%`, width: particle.size, height: particle.size,
+              animationDelay: `${particle.delay}s`, animationDuration: `${particle.duration}s`,
+              '--particle-x': `${particle.driftX}px`, '--particle-y': `${particle.driftY}px`, '--particle-opacity': particle.opacity, '--particle-faint': particle.opacity * .7,
+            } as CSSProperties}
           />
         ))}
       </div>
