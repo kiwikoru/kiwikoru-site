@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Home, PackageCheck, Palette, Sparkles } from 'lucide-react'
+import { ArrowLeft, Check, Clock3, Home, PackageCheck, Palette, Sparkles } from 'lucide-react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
 import './YoushieMe.css'
@@ -69,6 +69,7 @@ export default function YoushieOrder() {
           <small className="order-kicker">YOUR REAL COLLECTIBLE</small>
           <h2>One tiny version of you</h2>
           <ul className="product-points">
+            <li><Clock3 /><span><strong>Production time: 3 days</strong><small>Your personalised Youshie is prepared especially for you before dispatch</small></span></li>
             <li><Home /><span><strong>Printed by KiwiKoru 3D</strong><small>Made locally in Whangārei</small></span></li>
             <li><Palette /><span><strong>Four filament colours</strong><small>Selected to preserve your most recognisable features</small></span></li>
             <li><Sparkles /><span><strong>Hand-finished when needed</strong><small>A fifth or sixth small detail may be carefully painted by hand</small></span></li>
