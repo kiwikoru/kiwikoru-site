@@ -47,10 +47,10 @@ export default function Navbar() {
       <header
         className={`fixed top-0 left-0 right-0 z-50 h-[72px] flex items-center transition-all duration-500 ${
           scrolled
-            ? 'bg-[#253126]/92 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.15)]'
-            : 'bg-[#3f4a2f]/72 backdrop-blur-md'
+            ? 'bg-[#253126] shadow-[0_4px_30px_rgba(0,0,0,0.18)]'
+            : 'bg-[#34412f] shadow-[0_2px_18px_rgba(0,0,0,0.12)]'
         }`}
-        style={{ borderBottom: scrolled ? '1px solid rgba(212,184,150,0.08)' : '1px solid transparent' }}
+        style={{ borderBottom: '1px solid rgba(212,184,150,0.18)' }}
       >
         <nav className="w-full max-w-[1200px] mx-auto px-6 flex items-center justify-between" aria-label="Main navigation">
           {/* Logo */}
