@@ -120,17 +120,19 @@ export default function YoushieMe() {
     context.fillRect(0, 1250, canvas.width, 250)
     context.fillStyle = '#7541c5'
     context.fillRect(0, 1250, canvas.width, 5)
-    context.drawImage(kiwiKoruLogo, 108, 1291, 150, 116)
-    context.textAlign = 'left'
+    const kiwiWidth = 92
+    const kiwiHeight = kiwiWidth * kiwiKoruLogo.height / kiwiKoruLogo.width
+    context.drawImage(kiwiKoruLogo, (canvas.width - kiwiWidth) / 2, 1271, kiwiWidth, kiwiHeight)
+    context.textAlign = 'center'
     context.fillStyle = '#173e2c'
-    context.font = '800 43px Nunito, Arial, sans-serif'
-    context.fillText('KiwiKoru 3D', 288, 1338)
+    context.font = '800 37px Nunito, Arial, sans-serif'
+    context.fillText('KiwiKoru 3D', 600, 1382)
     context.fillStyle = '#6f6578'
-    context.font = '600 23px Nunito, Arial, sans-serif'
-    context.fillText('3D solutions for people and industry', 288, 1381)
+    context.font = '600 20px Nunito, Arial, sans-serif'
+    context.fillText('3D solutions for people and industry', 600, 1417)
     context.fillStyle = '#7040bd'
-    context.font = '700 22px Nunito, Arial, sans-serif'
-    context.fillText('kiwikoru.co.nz   ·   027 436 5339', 288, 1423)
+    context.font = '700 20px Nunito, Arial, sans-serif'
+    context.fillText('kiwikoru.co.nz   ·   027 436 5339', 600, 1454)
     return canvas.toDataURL('image/png')
   }
 

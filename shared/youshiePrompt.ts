@@ -20,10 +20,10 @@ FACE
 - Preserve apparent age range, face shape, skin tone, hairstyle, hairline or bald areas, eyebrows, glasses, facial hair, smile, and defining traits, simplified into toy geometry.
 - USHI EYES ARE THE STYLE ANCHOR. Use exactly two simple solid-BLACK softly vertical ovals, pleasantly plump and only slightly taller than wide, approximately a 1.18–1.25:1 height-to-width ratio. They should feel like two smooth flattened black beans, not circles and never narrow capsules. Place them fairly close together in the upper-middle of the face, level with each other, leaving generous cheek space below. No sclera, iris, pupil, eyelashes, catchlight, reflection, or white highlight.
 - Keep the whole face compact: the eyes, tiny nose and tiny mouth occupy only the central area. Preserve broad empty cheeks and a simple forehead. Do not spread features across the full head.
-- Very small simplified nose. The mouth is small, understated, and toy-like: use one short friendly curved opening or compact smile, never a wide cartoon grin extending across the face.
-- Prefer a tiny dark curved mouth with gently lifted corners. Keep it narrower than the space between the two eyes and avoid a floating white tooth strip.
-- A tiny open smile, one or two uneven simplified teeth, or a small tooth gap is welcome only when it strengthens the person's recognizable charm. It must remain compact, friendly, and physically printable.
-- Avoid prominent white teeth, realistic lips, lipstick, tongue, individually separated teeth, or a large open mouth. Only preserve visible teeth when they are essential to recognizing the person, and then reduce them to one tiny clean printable shape that counts as WHITE in the four-colour palette.
+- Very small simplified nose. Treat the mouth as a minor sculpted feature, never a focal point. It is primarily formed from the SAME skin-tone material as the face, using only a shallow indentation or tiny softly curved opening.
+- Do not draw a black mouth line and do not assign the lips a separate filament colour. If the source expression requires an open mouth, show only a very small recessed cavity whose darkness comes from natural shadow inside the sculpt, not from black paint or black filament.
+- At most, allow a tiny glimpse of one simple joined tooth shape when essential to the person's recognisable smile. Keep it subtle; WHITE then counts as one of the four filament colours.
+- No detailed lips, lipstick, tongue, gum, individually separated teeth, deep black opening, floating tooth strip, or wide cartoon grin. The mouth must remain narrower than the space between the eyes and visually secondary to the Ushi eyes and cheeks.
 
 HAIR AND CLOTHING
 - Hair becomes a few large sculpted masses. Preserve curls, fringe, buns, spikes, baldness, length, and important hair accessories; never show individual strands.
