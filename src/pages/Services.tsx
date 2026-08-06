@@ -78,7 +78,7 @@ export default function Services() {
         </div>
 
         {/* Production Workflow */}
-        <div className="animate-in mb-20 bg-kiwi-light rounded-2xl p-8 lg:p-12">
+        <div className="animate-in mb-20 rounded-2xl border border-kiwi-base/10 bg-gradient-to-br from-[#f3f6ee] via-[#eef3e8] to-[#e7eee0] p-8 shadow-sm lg:p-12">
           <div className="text-center mb-10">
             <h2 className="text-2xl lg:text-3xl font-heading font-semibold text-kiwi-dark">
               Our Production Workflow
@@ -88,16 +88,21 @@ export default function Services() {
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {workflow.map((step) => (
-              <div key={step.num} className="text-center">
+            {workflow.map((step, index) => (
+              <div key={step.num} className={`rounded-2xl border p-5 text-center shadow-sm transition-transform hover:-translate-y-1 ${[
+                'border-[#dbe5d0] bg-[#f8faf5]',
+                'border-[#cfddc4] bg-[#eef4e9]',
+                'border-[#c5d6b9] bg-[#e6efdf]',
+                'border-[#bacdae] bg-[#dde9d5]',
+              ][index]}`}>
                 <div className="flex items-center justify-center mb-4">
-                  <span className="text-5xl font-heading font-bold text-gray-200 mr-2">{step.num}</span>
-                  <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-white shadow-sm">
-                    <step.icon className="w-6 h-6 text-kiwi-base" />
+                  <span className="mr-2 text-5xl font-heading font-bold text-kiwi-base/20">{step.num}</span>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-kiwi-base/10 bg-white/90 shadow-sm">
+                    <step.icon className="w-6 h-6 text-kiwi-dark" />
                   </div>
                 </div>
                 <h4 className="font-heading font-semibold text-kiwi-dark text-sm mb-1">{step.title}</h4>
-                <p className="text-kiwi-base/50 text-xs">{step.desc}</p>
+                <p className="text-kiwi-dark/65 text-xs leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -109,13 +114,17 @@ export default function Services() {
             Tailored Requirements
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
-            {tailored.map((item) => (
-              <div key={item.title} className="bg-white rounded-xl p-6 border border-gray-200 hover:border-kiwi-base/30 hover:shadow-md transition-all">
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-kiwi-base/10 mb-4">
-                  <item.icon className="w-5 h-5 text-kiwi-base" />
+            {tailored.map((item, index) => (
+              <div key={item.title} className={`rounded-xl border p-6 transition-all hover:-translate-y-0.5 hover:border-kiwi-base/35 hover:shadow-md ${[
+                'border-[#dbe5d0] bg-[#f8faf5]',
+                'border-[#d4e1ca] bg-[#f1f6ed]',
+                'border-[#cadbc0] bg-[#eaf2e5]',
+              ][index]}`}>
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg border border-kiwi-base/10 bg-white/80">
+                  <item.icon className="w-5 h-5 text-kiwi-dark" />
                 </div>
                 <h4 className="font-heading font-semibold text-kiwi-dark mb-2">{item.title}</h4>
-                <p className="text-kiwi-base/60 text-sm">{item.desc}</p>
+                <p className="text-kiwi-dark/65 text-sm">{item.desc}</p>
               </div>
             ))}
           </div>
