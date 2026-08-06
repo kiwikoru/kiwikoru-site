@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { WhatsAppLogo, WHATSAPP_URL } from './WhatsAppFloat'
 
@@ -10,22 +10,18 @@ const pageLinks = [
   { label: 'Contact', path: '/contact' },
 ]
 
-function scrollToProjects() {
-  if (window.location.hash === '#/' || window.location.hash === '') {
-    const el = document.getElementById('projects-section')
-    if (el) { el.scrollIntoView({ behavior: 'smooth' }); return }
-  }
-  window.location.hash = '/'
-  setTimeout(() => {
-    const el = document.getElementById('projects-section')
-    if (el) el.scrollIntoView({ behavior: 'smooth' })
-  }, 300)
-}
-
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+  const navigate = useNavigate()
+
+  const scrollToProjects = () => {
+    const scroll = () => document.getElementById('projects-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (location.pathname === '/') { scroll(); return }
+    navigate('/#projects-section')
+    window.setTimeout(scroll, 350)
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -34,6 +30,12 @@ export default function Navbar() {
   }, [])
 
   useEffect(() => { setMobileOpen(false) }, [location.pathname])
+
+  useEffect(() => {
+    if (location.pathname === '/' && location.hash === '#projects-section') {
+      window.setTimeout(() => document.getElementById('projects-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+    }
+  }, [location.pathname, location.hash])
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? 'hidden' : ''
