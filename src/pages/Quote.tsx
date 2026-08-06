@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router-dom';
 import { Upload, ShoppingCart, MessageCircle, ChevronDown, Info } from 'lucide-react';
 
 const MATERIALS = {
@@ -30,9 +30,11 @@ export default function Quote() {
   const [infill, setInfill] = useState(25);
   const [quality, setQuality] = useState(0.2);
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
+  const [modelFile, setModelFile] = useState<File | null>(null);
   const [fileSize, setFileSize] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const navigate = useNavigate();
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -51,6 +53,7 @@ export default function Quote() {
     if (file && file.name.endsWith('.stl')) {
       setUploadedFile(file.name);
       setFileSize(file.size);
+      setModelFile(file);
     }
   }, []);
 
@@ -59,6 +62,7 @@ export default function Quote() {
     if (file) {
       setUploadedFile(file.name);
       setFileSize(file.size);
+      setModelFile(file);
     }
   }, []);
 
@@ -289,11 +293,11 @@ export default function Quote() {
                   </div>
 
                   <button
-                    onClick={() => alert('Quote added to cart! Proceed to checkout via WhatsApp.')}
+                    onClick={() => navigate('/print-order', { state: { modelFile, quote: { fileName: uploadedFile, price: totalPrice, material: matData.name, color, infill, quality, estimatedVolume } } })}
                     className="w-full mt-4 flex items-center justify-center gap-2 bg-kiwi-gold hover:bg-kiwi-goldDark text-kiwi-dark py-3 rounded-lg font-medium transition-colors"
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    Add to Cart
+                    Place this order
                   </button>
 
                   <a

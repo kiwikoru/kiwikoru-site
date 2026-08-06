@@ -1,6 +1,8 @@
 import { ArrowLeft, Check, Clock3, Home, PackageCheck, Palette, Sparkles } from 'lucide-react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import OrderCustomerFields, { emptyCustomerDetails } from '../components/OrderCustomerFields'
+import '../components/OrderCustomerFields.css'
 import './YoushieMe.css'
 import './YoushieOrder.css'
 
@@ -14,21 +16,33 @@ export default function YoushieOrder() {
   const [rural, setRural] = useState(false)
   const [checkingOut, setCheckingOut] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string>()
+  const [customer, setCustomer] = useState(emptyCustomerDetails)
+  const [confirmation, setConfirmation] = useState<'sending' | 'sent' | 'error'>()
   const productPrice = 30
   const shippingPrices: Record<string, number> = { north: 15, south: 15, australia: 30 }
   const shipping = shippingPrices[destination] + (destination !== 'australia' && rural ? 6 : 0)
   const total = productPrice + shipping
 
-  async function startCheckout() {
+  useEffect(() => {
+    const sessionId = searchParams.get('session_id')
+    if (searchParams.get('payment') !== 'success' || !sessionId) return
+    setConfirmation('sending')
+    fetch('/api/stripe-checkout?action=confirm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId }) })
+      .then(response => { if (!response.ok) throw new Error(); setConfirmation('sent') })
+      .catch(() => setConfirmation('error'))
+  }, [searchParams])
+
+  async function startCheckout(event: React.FormEvent) {
+    event.preventDefault()
     if (!generatedPhoto || checkingOut) return
     setCheckingOut(true)
     setCheckoutError(undefined)
 
     try {
-      const response = await fetch('/api/youshie-checkout', {
+      const response = await fetch('/api/stripe-checkout?action=youshie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ destination, rural, generatedPhoto }),
+        body: JSON.stringify({ destination, rural, generatedPhoto, customer }),
       })
       const contentType = response.headers.get('content-type') || ''
       if (!contentType.includes('application/json')) {
@@ -51,7 +65,7 @@ export default function YoushieOrder() {
     </header>
 
     <main className="order-main">
-      {searchParams.get('payment') === 'success' && <div className="checkout-status success"><Check size={20} /><span><strong>Payment received!</strong> Your Youshie order is safely with KiwiKoru 3D.</span></div>}
+      {searchParams.get('payment') === 'success' && <div className="checkout-status success"><Check size={20} /><span><strong>Payment received!</strong> Your Youshie order is safely with KiwiKoru 3D. {confirmation === 'sent' ? 'A confirmation has been emailed to you.' : confirmation === 'sending' ? 'We’re preparing your email confirmation…' : confirmation === 'error' ? 'Keep your Stripe receipt; we’ll contact you shortly.' : ''}</span></div>}
       {searchParams.get('payment') === 'cancelled' && <div className="checkout-status cancelled"><span>No worries — your order wasn’t charged. Your Youshie is still here when you’re ready.</span></div>}
       <section className="order-heading">
         <div className="eyebrow"><Sparkles size={16} /> From magical picture to real figure</div>
@@ -65,7 +79,7 @@ export default function YoushieOrder() {
           <span className="actual-note"><small>APPROXIMATE HEIGHT</small><strong>10 cm</strong><b>tall</b></span>
         </div>
 
-        <div className="order-details">
+        <form className="order-details" onSubmit={startCheckout}>
           <small className="order-kicker">YOUR REAL COLLECTIBLE</small>
           <h2>One tiny version of you</h2>
           <ul className="product-points">
@@ -84,15 +98,16 @@ export default function YoushieOrder() {
             <option value="australia">Australia</option>
           </select>
           {destination !== 'australia' && <label className="rural-option"><input type="checkbox" checked={rural} onChange={event => setRural(event.target.checked)} /><span><strong>Rural delivery</strong><small>NZ Post rural surcharge</small></span><b>+ NZ$6.00</b></label>}
+          <OrderCustomerFields value={customer} onChange={setCustomer} theme="youshie" />
           <div className="shipping-quote"><span>Estimated delivery</span><strong>NZ${shipping.toFixed(2)}</strong></div>
           <div className="order-total"><span>Figure + delivery</span><strong>NZ${total.toFixed(2)}</strong></div>
-          <button className="checkout-placeholder" disabled={!generatedPhoto || checkingOut} onClick={startCheckout}>
+          <button type="submit" className="checkout-placeholder" disabled={!generatedPhoto || checkingOut}>
             <Check size={20} /> {checkingOut ? 'Opening secure checkout…' : `Pay NZ$${total.toFixed(2)} securely`}
           </button>
           {!generatedPhoto && <p className="checkout-error">Create your Youshie first so we can attach the correct figure to your order.</p>}
           {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
           <p className="checkout-note">Secure payment powered by Stripe. Your payment details are never stored by KiwiKoru.</p>
-        </div>
+        </form>
       </section>
     </main>
   </div>

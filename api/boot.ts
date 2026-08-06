@@ -5,7 +5,7 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "./router";
 import { createContext } from "./context";
 import { env } from "./lib/env";
-import { createYoushieCheckout } from "./stripe-checkout";
+import { confirmCheckout, createPrintCheckout, createYoushieCheckout } from "./stripe-checkout";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
@@ -19,6 +19,8 @@ app.use("/api/trpc/*", async (c) => {
   });
 });
 app.post("/api/youshie-checkout", (c) => createYoushieCheckout(c.req.raw));
+app.post("/api/print-checkout", (c) => createPrintCheckout(c.req.raw));
+app.post("/api/checkout-confirmation", (c) => confirmCheckout(c.req.raw));
 app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));
 
 export default app;

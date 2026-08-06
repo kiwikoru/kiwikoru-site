@@ -8,6 +8,7 @@ import Contact from './pages/Contact'
 import Quote from './pages/Quote'
 import YoushieMe from './pages/YoushieMe'
 import YoushieOrder from './pages/YoushieOrder'
+import PrintOrder from './pages/PrintOrder'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="/materials" element={<Materials />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/quote" element={<Quote />} />
+          <Route path="/print-order" element={<PrintOrder />} />
         </Routes>
       </PageLayout>
     </>
