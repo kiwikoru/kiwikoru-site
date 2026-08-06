@@ -24,6 +24,7 @@ FACE
 - Do not draw a black mouth line and do not assign the lips a separate filament colour. If the source expression requires an open mouth, show only a very small recessed cavity whose darkness comes from natural shadow inside the sculpt, not from black paint or black filament.
 - At most, allow a tiny glimpse of one simple joined tooth shape when essential to the person's recognisable smile. Keep it subtle; WHITE then counts as one of the four filament colours.
 - No detailed lips, lipstick, tongue, gum, individually separated teeth, deep black opening, floating tooth strip, or wide cartoon grin. The mouth must remain narrower than the space between the eyes and visually secondary to the Ushi eyes and cheeks.
+- Follow the supplied Ushi face reference: the upper and lower edges of the smile are rounded skin-colour sculpted volumes; only the narrow recessed space between them reads as the mouth opening. Teeth, when present, are a few thick, softly uneven printable blocks partially hidden inside that opening—not a perfect white row.
 
 HAIR AND CLOTHING
 - Hair becomes a few large sculpted masses. Preserve curls, fringe, buns, spikes, baldness, length, and important hair accessories; never show individual strands.

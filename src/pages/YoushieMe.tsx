@@ -62,10 +62,13 @@ export default function YoushieMe() {
       const styleReference = await fetch('/youshie-style-reference.jpg')
         .then(response => response.blob())
         .then(prepareImage)
+      const faceReference = await fetch('/ushi-face-reference.jpg')
+        .then(response => response.blob())
+        .then(prepareImage)
       const response = await fetch('/api/youshie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image, styleReference, mimeType: 'image/jpeg' }),
+        body: JSON.stringify({ image, styleReference, faceReference, mimeType: 'image/jpeg' }),
       })
       const result = await response.json() as { image?: string; mimeType?: string; error?: string }
       if (!response.ok || !result.image) throw new Error(result.error || 'Could not create your Youshie.')
