@@ -9,6 +9,7 @@ import Quote from './pages/Quote'
 import YoushieMe from './pages/YoushieMe'
 import YoushieOrder from './pages/YoushieOrder'
 import PrintOrder from './pages/PrintOrder'
+import PrintCategory from './pages/PrintCategory'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -39,6 +40,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/quote" element={<Quote />} />
           <Route path="/print-order" element={<PrintOrder />} />
+          <Route path="/what-we-print/:category" element={<PrintCategory />} />
         </Routes>
       </PageLayout>
     </>

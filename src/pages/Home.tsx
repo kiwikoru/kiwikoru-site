@@ -1,12 +1,13 @@
 import { Link } from 'react-router';
 import {
   Upload, Clock, MapPin, Zap, ArrowRight, ChevronRight,
-  Gamepad2, HomeIcon, Wrench, Lightbulb, CheckCircle, Info, HelpCircle, PencilRuler, MessageCircle
+  Gamepad2, HomeIcon, Wrench, Lightbulb, BriefcaseBusiness, CheckCircle, Info, HelpCircle, PencilRuler, MessageCircle
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { printCategories } from '../data/whatWePrint';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -250,12 +251,7 @@ function WhatWePrintSection() {
     return () => ctx.revert();
   }, []);
 
-  const categories = [
-    { icon: Gamepad2, title: 'Hobbies & Games', desc: 'Minis, fidget toys, terrain, and custom gaming accessories.', img: '/images/hobbies.jpg' },
-    { icon: HomeIcon, title: 'Home Hacks', desc: 'Custom brackets, storage solutions, and gadgets.', img: '/images/homehacks.jpg' },
-    { icon: Wrench, title: 'Repairs & DIY', desc: 'Replacement parts for appliances and cars.', img: '/images/repairs.jpg' },
-    { icon: Lightbulb, title: 'Prototypes', desc: 'Rapid prototyping for engineers and inventors.', img: '/images/prototypes.jpg' },
-  ];
+  const iconByCategory = { games: Gamepad2, home: HomeIcon, prototype: Lightbulb, business: BriefcaseBusiness };
 
   return (
     <section id="projects-section" ref={sectionRef} className="bg-white py-20 lg:py-28 scroll-mt-20">
@@ -269,14 +265,16 @@ function WhatWePrintSection() {
           </p>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {categories.map((cat) => (
-            <div
+          {printCategories.map((cat) => {
+            const CategoryIcon = iconByCategory[cat.icon];
+            return <Link
               key={cat.title}
-              className="print-card group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all hover:border-kiwi-base/30"
+              to={`/what-we-print/${cat.slug}`}
+              className="print-card group overflow-hidden rounded-2xl border border-gray-200 bg-white hover:border-kiwi-base/30 hover:shadow-xl transition-all"
             >
               <div className="aspect-[4/3] overflow-hidden">
                 <img
-                  src={cat.img}
+                  src={cat.heroImage}
                   alt={cat.title}
                   className="w-full h-full rounded-t-xl object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -284,14 +282,15 @@ function WhatWePrintSection() {
               <div className="p-5">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-kiwi-base/10">
-                    <cat.icon className="w-4 h-4 text-kiwi-base" />
+                    <CategoryIcon className="w-4 h-4 text-kiwi-base" />
                   </div>
                   <h3 className="font-heading font-semibold text-kiwi-dark text-sm">{cat.title}</h3>
                 </div>
-                <p className="text-kiwi-base/60 text-xs leading-relaxed">{cat.desc}</p>
+                <p className="text-kiwi-base/60 text-xs leading-relaxed">{cat.shortDescription}</p>
+                <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-kiwi-base">View case studies <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" /></span>
               </div>
-            </div>
-          ))}
+            </Link>
+          })}
         </div>
       </div>
     </section>
