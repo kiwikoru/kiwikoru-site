@@ -54,7 +54,7 @@ export async function createYoushieCheckout(request: Request) {
     const image = decodeImage(body.generatedPhoto)
     const extension = image.contentType === 'image/jpeg' ? 'jpg' : image.contentType.split('/')[1]
     const imageBlob = await put(`youshie-orders/${crypto.randomUUID()}.${extension}`, image.bytes, {
-      access: 'public',
+      access: 'private',
       contentType: image.contentType,
       addRandomSuffix: false,
     })
@@ -79,7 +79,6 @@ export async function createYoushieCheckout(request: Request) {
             product_data: {
               name: 'Personalised 10 cm Youshie',
               description: 'Custom four-colour collectible figure made from your generated Youshie image.',
-              images: [imageBlob.url],
             },
           },
         },
