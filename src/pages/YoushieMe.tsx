@@ -112,44 +112,57 @@ export default function YoushieMe() {
     context.clip()
     context.fillStyle = '#f8f3ff'
     context.fillRect(0, 0, canvas.width, canvas.height)
+
+    // Roomy Youshies header: the complete transparent logo, including its
+    // tagline, stays inside one white panel with comfortable breathing room.
     context.fillStyle = '#6c35c9'
-    context.fillRect(0, 0, canvas.width, 178)
+    context.fillRect(0, 0, canvas.width, 220)
     context.fillStyle = '#ffffff'
     context.beginPath()
-    context.roundRect(150, 14, 900, 150, 38)
+    context.roundRect(80, 16, 1040, 188, 38)
     context.fill()
-    const logoWidth = 650
-    const logoHeight = logoWidth * logo.height / logo.width
-    context.drawImage(logo, (canvas.width - logoWidth) / 2, (178 - logoHeight) / 2, logoWidth, logoHeight)
+    const logoScale = Math.min(880 / logo.width, 158 / logo.height)
+    const logoWidth = logo.width * logoScale
+    const logoHeight = logo.height * logoScale
+    context.drawImage(logo, (canvas.width - logoWidth) / 2, 31 + (158 - logoHeight) / 2, logoWidth, logoHeight)
+
     const availableWidth = 1120
-    const availableHeight = 1020
+    const availableHeight = 1050
     const scale = Math.min(availableWidth / figure.width, availableHeight / figure.height)
     const width = figure.width * scale
     const height = figure.height * scale
     context.fillStyle = '#ffffff'
-    context.fillRect(40, 198, 1120, 1032)
-    context.drawImage(figure, (canvas.width - width) / 2, 204 + (1020 - height) / 2, width, height)
+    context.fillRect(40, 240, 1120, 1060)
+    context.drawImage(figure, (canvas.width - width) / 2, 245 + (1050 - height) / 2, width, height)
+
+    // Compact horizontal KiwiKoru footer.
     context.fillStyle = '#6c35c9'
-    context.fillRect(0, 1250, canvas.width, 250)
+    context.fillRect(0, 1320, canvas.width, 180)
     context.fillStyle = '#e8bd3d'
-    context.fillRect(0, 1250, canvas.width, 5)
-    const kiwiWidth = 104
+    context.fillRect(0, 1320, canvas.width, 5)
+    const kiwiWidth = 82
     const kiwiHeight = kiwiWidth * kiwiKoruLogo.height / kiwiKoruLogo.width
     context.fillStyle = '#ffffff'
     context.beginPath()
-    context.roundRect((canvas.width - 142) / 2, 1264, 142, 96, 21)
+    context.roundRect(58, 1350, 108, 108, 22)
     context.fill()
-    context.drawImage(kiwiKoruLogo, (canvas.width - kiwiWidth) / 2, 1272, kiwiWidth, kiwiHeight)
-    context.textAlign = 'center'
+    context.drawImage(kiwiKoruLogo, 58 + (108 - kiwiWidth) / 2, 1350 + (108 - kiwiHeight) / 2, kiwiWidth, kiwiHeight)
+
+    context.textAlign = 'left'
     context.fillStyle = '#ffffff'
-    context.font = '800 44px Nunito, Arial, sans-serif'
-    context.fillText('KiwiKoru 3D', 600, 1398)
+    context.font = '800 38px Nunito, Arial, sans-serif'
+    context.fillText('KiwiKoru 3D', 192, 1417)
+
+    context.textAlign = 'right'
     context.fillStyle = '#eee5fb'
-    context.font = '600 25px Nunito, Arial, sans-serif'
-    context.fillText('3D solutions for people and industry', 600, 1438)
+    context.font = '700 27px Nunito, Arial, sans-serif'
+    context.fillText('3D solutions for people and industry', 1140, 1377)
     context.fillStyle = '#fff2b8'
-    context.font = '700 24px Nunito, Arial, sans-serif'
-    context.fillText('kiwikoru.co.nz   ·   027 436 5339', 600, 1468)
+    context.font = '800 25px Nunito, Arial, sans-serif'
+    context.fillText('www.kiwikoru.co.nz', 1140, 1424)
+    context.fillStyle = '#ffffff'
+    context.font = '700 23px Nunito, Arial, sans-serif'
+    context.fillText('027 436 5339', 1140, 1466)
     context.restore()
     return canvas.toDataURL('image/png')
   }
