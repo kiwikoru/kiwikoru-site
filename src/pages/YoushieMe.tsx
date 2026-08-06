@@ -105,13 +105,18 @@ export default function YoushieMe() {
     canvas.height = 1500
     const context = canvas.getContext('2d')
     if (!context) return source
+    context.clearRect(0, 0, canvas.width, canvas.height)
+    context.save()
+    context.beginPath()
+    context.roundRect(0, 0, canvas.width, canvas.height, 44)
+    context.clip()
     context.fillStyle = '#f8f3ff'
     context.fillRect(0, 0, canvas.width, canvas.height)
     context.fillStyle = '#6c35c9'
     context.fillRect(0, 0, canvas.width, 178)
     context.fillStyle = '#ffffff'
     context.beginPath()
-    context.roundRect(215, 14, 770, 150, 36)
+    context.roundRect(150, 14, 900, 150, 38)
     context.fill()
     const logoWidth = 650
     const logoHeight = logoWidth * logo.height / logo.width
@@ -128,23 +133,24 @@ export default function YoushieMe() {
     context.fillRect(0, 1250, canvas.width, 250)
     context.fillStyle = '#e8bd3d'
     context.fillRect(0, 1250, canvas.width, 5)
-    const kiwiWidth = 86
+    const kiwiWidth = 104
     const kiwiHeight = kiwiWidth * kiwiKoruLogo.height / kiwiKoruLogo.width
     context.fillStyle = '#ffffff'
     context.beginPath()
-    context.roundRect((canvas.width - 118) / 2, 1266, 118, 83, 18)
+    context.roundRect((canvas.width - 142) / 2, 1264, 142, 96, 21)
     context.fill()
-    context.drawImage(kiwiKoruLogo, (canvas.width - kiwiWidth) / 2, 1273, kiwiWidth, kiwiHeight)
+    context.drawImage(kiwiKoruLogo, (canvas.width - kiwiWidth) / 2, 1272, kiwiWidth, kiwiHeight)
     context.textAlign = 'center'
     context.fillStyle = '#ffffff'
-    context.font = '800 39px Nunito, Arial, sans-serif'
-    context.fillText('KiwiKoru 3D', 600, 1390)
+    context.font = '800 44px Nunito, Arial, sans-serif'
+    context.fillText('KiwiKoru 3D', 600, 1398)
     context.fillStyle = '#eee5fb'
-    context.font = '600 22px Nunito, Arial, sans-serif'
-    context.fillText('3D solutions for people and industry', 600, 1428)
+    context.font = '600 25px Nunito, Arial, sans-serif'
+    context.fillText('3D solutions for people and industry', 600, 1438)
     context.fillStyle = '#fff2b8'
-    context.font = '700 22px Nunito, Arial, sans-serif'
+    context.font = '700 24px Nunito, Arial, sans-serif'
     context.fillText('kiwikoru.co.nz   ·   027 436 5339', 600, 1468)
+    context.restore()
     return canvas.toDataURL('image/png')
   }
 

@@ -197,7 +197,7 @@
   width: 100%;
   min-height: 230px;
   border: 2px dashed #cdb5ee;
-  border-radius: 22px;
+  border-radius: 30px;
   background: #f9f6ff;
   display: flex;
   flex-direction: column;
@@ -250,6 +250,7 @@
   height: 100%;
   object-fit: contain;
   background: #f4effa;
+  border-radius: 28px;
 }
 .change-photo {
   position: absolute;
@@ -429,7 +430,7 @@
 }
 .magic-overlay > strong { margin-bottom: 15px; font-size: 14px; }
 .magic-overlay .magic-progress { width: min(360px, 75%); margin-inline: auto; }
-.photo-drop.has-result { cursor: default; border-style: solid; border-color: #8a55df; box-shadow: 0 18px 50px #6c35d933; animation: inline-result-reveal .75s cubic-bezier(.2,.85,.25,1.2) both; }
+.photo-drop.has-result { cursor: default; border-style: solid; border-color: #8a55df; border-radius: 30px; box-shadow: 0 18px 50px #6c35d933; animation: inline-result-reveal .75s cubic-bezier(.2,.85,.25,1.2) both; }
 .special-request { position: relative; margin-top: 17px; text-align: left; }
 .request-example { display: flex; align-items: center; gap: 7px; margin: 0 5px 9px; color: #73548f; font-size: 12px; line-height: 1.35; }
 .request-example svg { flex: 0 0 auto; color: #d69b11; }
