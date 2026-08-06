@@ -14,15 +14,15 @@ type AudioWindow = Window & typeof globalThis & { webkitAudioContext?: typeof Au
 function makeCuteGrumble(context: AudioContext, variant: number) {
   const now = context.currentTime
   const profiles = [
-    { pitch: 155, end: 112, duration: 0.34, formant: 720, wobble: 17 },
-    { pitch: 205, end: 255, duration: 0.29, formant: 930, wobble: 22 },
-    { pitch: 178, end: 132, duration: 0.42, formant: 610, wobble: 14 },
+    { pitch: 168, end: 105, duration: 0.66, tone: 920, wobble: 13 },
+    { pitch: 196, end: 265, duration: 0.54, tone: 1250, wobble: 19 },
+    { pitch: 145, end: 118, duration: 0.78, tone: 760, wobble: 10 },
   ]
   const profile = profiles[variant % profiles.length]
   const master = context.createGain()
   master.gain.setValueAtTime(0.0001, now)
-  master.gain.exponentialRampToValueAtTime(0.22, now + 0.025)
-  master.gain.setValueAtTime(0.22, now + profile.duration * 0.52)
+  master.gain.exponentialRampToValueAtTime(0.34, now + 0.035)
+  master.gain.setValueAtTime(0.3, now + profile.duration * 0.62)
   master.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration)
   master.connect(context.destination)
 
@@ -45,10 +45,10 @@ function makeCuteGrumble(context: AudioContext, variant: number) {
   vibrato.connect(vibratoDepth)
   vibratoDepth.connect(voice.frequency)
   vibratoDepth.connect(harmonic.frequency)
-  formant.type = 'bandpass'
-  formant.frequency.value = profile.formant
-  formant.Q.value = 0.75
-  voiceGain.gain.value = 0.85
+  formant.type = 'lowpass'
+  formant.frequency.value = profile.tone
+  formant.Q.value = 0.35
+  voiceGain.gain.value = 0.72
   voice.connect(voiceGain)
   harmonic.connect(voiceGain)
   voiceGain.connect(formant).connect(master)
@@ -62,8 +62,8 @@ function makeCuteGrumble(context: AudioContext, variant: number) {
   const breathGain = context.createGain()
   breath.buffer = noiseBuffer
   breathFilter.type = 'lowpass'
-  breathFilter.frequency.value = 520
-  breathGain.gain.value = 0.075
+  breathFilter.frequency.value = variant === 2 ? 430 : 620
+  breathGain.gain.value = variant === 1 ? 0.08 : 0.13
   breath.connect(breathFilter).connect(breathGain).connect(master)
 
   ;[voice, harmonic, vibrato, breath].forEach(source => source.start(now))
@@ -83,6 +83,23 @@ export default function KiwiKoruPet() {
   const reactionRun = useRef(0)
   const audioContext = useRef<AudioContext | null>(null)
   const soundIndex = useRef(0)
+
+  useEffect(() => {
+    const unlockAudio = () => {
+      try {
+        const AudioContextClass = window.AudioContext || (window as AudioWindow).webkitAudioContext
+        if (!AudioContextClass) return
+        if (!audioContext.current) audioContext.current = new AudioContextClass()
+        if (audioContext.current.state === 'suspended') void audioContext.current.resume().catch(() => undefined)
+      } catch { /* Audio remains an optional enhancement. */ }
+    }
+    window.addEventListener('pointerdown', unlockAudio, { passive: true, once: true })
+    window.addEventListener('keydown', unlockAudio, { once: true })
+    return () => {
+      window.removeEventListener('pointerdown', unlockAudio)
+      window.removeEventListener('keydown', unlockAudio)
+    }
+  }, [])
 
   useEffect(() => {
     let timeout = 0
@@ -171,7 +188,7 @@ export default function KiwiKoruPet() {
   }
 
   const startTouchTantrum = (event: React.PointerEvent) => {
-    if (event.pointerType !== 'touch' && !window.matchMedia('(max-width: 767px)').matches) return
+    event.stopPropagation()
     playReaction()
   }
 
