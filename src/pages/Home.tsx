@@ -373,15 +373,21 @@ function WhoWeAreSection() {
   return (
     <section ref={sectionRef} className="bg-forest-dark py-20 lg:py-28">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl border border-white/25 bg-white/10 shadow-2xl">
-          <img ref={imageRef} src="/images/dit-studio-team.png" alt="The interdisciplinary Dit. design and engineering team" className="aspect-[4/3] h-full w-full scale-[1.08] rounded-2xl object-cover grayscale contrast-[1.05] will-change-transform" />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-dark/45 via-transparent to-transparent" />
+        <div>
+          <div className="relative overflow-hidden rounded-3xl border border-white/25 bg-white/10 shadow-2xl">
+            <img ref={imageRef} src="/images/dit-studio-team.png" alt="The interdisciplinary Dit. design and engineering team" className="aspect-[4/3] h-full w-full scale-[1.08] rounded-2xl object-cover grayscale contrast-[1.05] will-change-transform" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-dark/45 via-transparent to-transparent" />
+          </div>
+          <div className="mt-5 flex items-baseline justify-end gap-3 border-t border-white/15 pt-4 text-white/60" aria-label="Studio Dit.">
+            <span className="text-xs font-medium uppercase tracking-[.24em]">Studio</span>
+            <strong className="text-[34px] font-light leading-none tracking-[-.06em] text-white/80" style={{ fontFamily: 'Quicksand, sans-serif' }}>Dit.</strong>
+          </div>
         </div>
         <div>
           <span className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-4 py-2 text-xs font-bold uppercase tracking-[.18em] text-gold-light">Who we are</span>
           <h2 className="mt-6 text-3xl font-semibold leading-tight text-white sm:text-4xl lg:text-5xl">More than ten years of interdisciplinary design.</h2>
           <p className="mt-6 text-lg leading-relaxed text-white/72">
-            KiwiKoru 3D is backed by <strong className="font-semibold text-gold-light">Dit.</strong>, an established interdisciplinary studio bringing together engineers, industrial designers and specialists in business consulting and industrial layout.
+            KiwiKoru 3D is backed by an established interdisciplinary studio bringing together engineers, industrial designers and specialists in business consulting and industrial layout.
           </p>
           <p className="mt-4 leading-relaxed text-white/75">
             For more than a decade, our team has developed practical solutions for people and industry. We specialise in products and solutions made through 3D printing, while also helping projects migrate to other manufacturing processes when scale, performance or cost calls for a different production method.
