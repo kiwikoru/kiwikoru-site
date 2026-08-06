@@ -13,39 +13,62 @@ type AudioWindow = Window & typeof globalThis & { webkitAudioContext?: typeof Au
 
 function makeCuteGrumble(context: AudioContext, variant: number) {
   const now = context.currentTime
+  const profiles = [
+    { pitch: 155, end: 112, duration: 0.34, formant: 720, wobble: 17 },
+    { pitch: 205, end: 255, duration: 0.29, formant: 930, wobble: 22 },
+    { pitch: 178, end: 132, duration: 0.42, formant: 610, wobble: 14 },
+  ]
+  const profile = profiles[variant % profiles.length]
   const master = context.createGain()
   master.gain.setValueAtTime(0.0001, now)
-  master.gain.exponentialRampToValueAtTime(0.11, now + 0.018)
-  master.gain.exponentialRampToValueAtTime(0.0001, now + 0.36)
+  master.gain.exponentialRampToValueAtTime(0.22, now + 0.025)
+  master.gain.setValueAtTime(0.22, now + profile.duration * 0.52)
+  master.gain.exponentialRampToValueAtTime(0.0001, now + profile.duration)
   master.connect(context.destination)
 
-  const notes = variant === 0 ? [185, 145] : variant === 1 ? [220, 310] : [275, 190, 235]
-  notes.forEach((frequency, index) => {
-    const oscillator = context.createOscillator()
-    const voice = context.createGain()
-    const start = now + index * 0.085
-    oscillator.type = variant === 1 ? 'triangle' : 'sawtooth'
-    oscillator.frequency.setValueAtTime(frequency, start)
-    oscillator.frequency.exponentialRampToValueAtTime(frequency * (variant === 1 ? 1.16 : 0.82), start + 0.11)
-    voice.gain.setValueAtTime(0.0001, start)
-    voice.gain.exponentialRampToValueAtTime(0.42, start + 0.012)
-    voice.gain.exponentialRampToValueAtTime(0.0001, start + 0.13)
-    oscillator.connect(voice).connect(master)
-    oscillator.start(start)
-    oscillator.stop(start + 0.14)
-  })
+  // A rounded, pitch-bending little voice. Sine waves avoid the electronic
+  // buzz of the old sawtooth sound, while a quiet breath layer adds warmth.
+  const voice = context.createOscillator()
+  const harmonic = context.createOscillator()
+  const vibrato = context.createOscillator()
+  const vibratoDepth = context.createGain()
+  const formant = context.createBiquadFilter()
+  const voiceGain = context.createGain()
+  voice.type = 'sine'
+  harmonic.type = 'sine'
+  voice.frequency.setValueAtTime(profile.pitch, now)
+  voice.frequency.exponentialRampToValueAtTime(profile.end, now + profile.duration)
+  harmonic.frequency.setValueAtTime(profile.pitch * 2.02, now)
+  harmonic.frequency.exponentialRampToValueAtTime(profile.end * 2, now + profile.duration)
+  vibrato.frequency.value = profile.wobble
+  vibratoDepth.gain.value = variant === 1 ? 8 : 5
+  vibrato.connect(vibratoDepth)
+  vibratoDepth.connect(voice.frequency)
+  vibratoDepth.connect(harmonic.frequency)
+  formant.type = 'bandpass'
+  formant.frequency.value = profile.formant
+  formant.Q.value = 0.75
+  voiceGain.gain.value = 0.85
+  voice.connect(voiceGain)
+  harmonic.connect(voiceGain)
+  voiceGain.connect(formant).connect(master)
 
-  const wobble = context.createOscillator()
-  const wobbleGain = context.createGain()
-  wobble.type = 'sine'
-  wobble.frequency.setValueAtTime(variant === 2 ? 520 : 390, now)
-  wobble.frequency.exponentialRampToValueAtTime(variant === 2 ? 330 : 470, now + 0.2)
-  wobbleGain.gain.setValueAtTime(0.0001, now)
-  wobbleGain.gain.exponentialRampToValueAtTime(0.12, now + 0.03)
-  wobbleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24)
-  wobble.connect(wobbleGain).connect(master)
-  wobble.start(now)
-  wobble.stop(now + 0.25)
+  const noiseLength = Math.ceil(context.sampleRate * profile.duration)
+  const noiseBuffer = context.createBuffer(1, noiseLength, context.sampleRate)
+  const noiseData = noiseBuffer.getChannelData(0)
+  for (let i = 0; i < noiseLength; i += 1) noiseData[i] = (Math.random() * 2 - 1) * (1 - i / noiseLength)
+  const breath = context.createBufferSource()
+  const breathFilter = context.createBiquadFilter()
+  const breathGain = context.createGain()
+  breath.buffer = noiseBuffer
+  breathFilter.type = 'lowpass'
+  breathFilter.frequency.value = 520
+  breathGain.gain.value = 0.075
+  breath.connect(breathFilter).connect(breathGain).connect(master)
+
+  ;[voice, harmonic, vibrato, breath].forEach(source => source.start(now))
+  ;[voice, harmonic, vibrato].forEach(source => source.stop(now + profile.duration))
+  breath.stop(now + profile.duration)
 }
 
 export default function KiwiKoruPet() {
