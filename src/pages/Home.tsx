@@ -262,7 +262,7 @@ function WhatWePrintSection() {
                 <img
                   src={cat.img}
                   alt={cat.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full rounded-t-xl object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
               <div className="p-5">
@@ -339,11 +339,26 @@ function MaterialsSection() {
 
 /* ─────────── FAQ SECTION ─────────── */
 function WhoWeAreSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current || !imageRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(imageRef.current, { yPercent: -4 }, {
+        yPercent: 4,
+        ease: 'none',
+        scrollTrigger: { trigger: sectionRef.current, start: 'top bottom', end: 'bottom top', scrub: 0.8 },
+      });
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="bg-forest-dark py-20 lg:py-28">
+    <section ref={sectionRef} className="bg-forest-dark py-20 lg:py-28">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
         <div className="relative overflow-hidden rounded-3xl border border-white/25 bg-white/10 shadow-2xl">
-          <img src="/images/dit-studio-team.png" alt="The interdisciplinary Dit. design and engineering team" className="aspect-[4/3] h-full w-full object-cover grayscale contrast-[1.05]" />
+          <img ref={imageRef} src="/images/dit-studio-team.png" alt="The interdisciplinary Dit. design and engineering team" className="aspect-[4/3] h-full w-full scale-[1.08] rounded-2xl object-cover grayscale contrast-[1.05] will-change-transform" />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-dark/45 via-transparent to-transparent" />
         </div>
         <div>

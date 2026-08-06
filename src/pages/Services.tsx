@@ -143,7 +143,7 @@ export default function Services() {
               <img
                 src="/images/printer-workshop-real.jpg"
                 alt="Our 3D Printing Studio"
-                className="w-full h-48 object-cover"
+                className="w-full h-48 rounded-xl object-cover"
               />
             </div>
           </div>
