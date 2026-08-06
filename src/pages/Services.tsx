@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { Layers, Target, Printer, ShieldCheck, Cog, Boxes, Sun, ArrowRight } from 'lucide-react';
+import { Layers, Target, Printer, ShieldCheck, Cog, Boxes, Sun, ArrowRight, Palette } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -7,10 +7,11 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
 
 const specs = [
-  { icon: Boxes, label: 'Build Volume', value: '256 x 256 x 256 mm', desc: 'Maximum single-part dimensions.' },
+  { icon: Boxes, label: 'Build Volume', value: '420 × 420 × 500 mm', desc: 'Maximum single-part dimensions.' },
   { icon: Layers, label: 'Print Standard', value: 'Optimized 0.2mm', desc: 'Tuned balance of strength & detail.' },
   { icon: Target, label: 'Accuracy', value: '\u00B1 0.2 mm', desc: 'Typical dimensional tolerance.' },
   { icon: Cog, label: 'Capacity', value: 'Multi-Printer Farm', desc: 'Reliable throughput for batch orders.' },
+  { icon: Palette, label: 'Advanced Printing', value: 'Multi-material & Multicolour', desc: 'Multiple materials and colours in a single print.' },
 ];
 
 const workflow = [
@@ -64,7 +65,7 @@ export default function Services() {
             </span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {specs.map((spec) => (
               <div key={spec.label} className="bg-white rounded-xl p-5 border border-gray-200 hover:border-kiwi-base/30 hover:shadow-md transition-all">
                 <spec.icon className="w-5 h-5 text-kiwi-base/60 mb-3" />

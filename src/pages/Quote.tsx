@@ -140,7 +140,7 @@ export default function Quote() {
                     Drag and drop an STL file, or click to browse
                   </p>
                   <p className="text-kiwi-base/30 text-xs mt-3">
-                    Maximum build size: 250 x 250 x 250 mm
+                    Maximum build size: 420 × 420 × 500 mm
                   </p>
                 </div>
               )}
