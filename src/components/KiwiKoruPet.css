@@ -76,12 +76,12 @@
   .kiwikoru-pet-float {
     right: 4px;
     bottom: 4px;
-    width: 96px;
-    height: 104px;
+    width: 48px;
+    height: 52px;
     z-index: 38;
   }
   .kiwikoru-pet-bubble {
-    right: 72px;
+    right: 40px;
     top: -60px;
     width: 205px;
     padding: 11px 13px;
