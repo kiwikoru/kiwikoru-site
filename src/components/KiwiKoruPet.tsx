@@ -2,13 +2,24 @@ import { useEffect, useRef, useState } from 'react'
 import './KiwiKoruPet.css'
 
 const IDLE_DURATIONS = [280, 110, 110, 140, 140, 320]
+const TANTRUM = [
+  { row: 5, column: 0, duration: 110 },
+  { row: 5, column: 1, duration: 100 },
+  { row: 5, column: 2, duration: 130 },
+  { row: 7, column: 3, duration: 280 },
+  { row: 5, column: 3, duration: 100 },
+  { row: 5, column: 4, duration: 110 },
+  { row: 0, column: 0, duration: 180 },
+]
 
 export default function KiwiKoruPet() {
   const petRef = useRef<HTMLDivElement>(null)
   const [idleFrame, setIdleFrame] = useState(0)
   const [lookDirection, setLookDirection] = useState<number | null>(null)
   const [tantrumFrame, setTantrumFrame] = useState<number | null>(null)
+  const [showIntro, setShowIntro] = useState(false)
   const tantrumTimer = useRef<number | null>(null)
+  const introTimer = useRef<number | null>(null)
 
   useEffect(() => {
     let timeout = 0
@@ -25,23 +36,31 @@ export default function KiwiKoruPet() {
 
   useEffect(() => () => {
     if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
+    if (introTimer.current !== null) window.clearTimeout(introTimer.current)
   }, [])
 
   const startTantrum = () => {
     if (tantrumTimer.current !== null) return
+    if (introTimer.current !== null) window.clearTimeout(introTimer.current)
+    setShowIntro(false)
     setTantrumFrame(0)
     let frame = 0
     const advance = () => {
-      frame += 1
-      if (frame >= 8) {
+      if (frame >= TANTRUM.length - 1) {
         setTantrumFrame(null)
         tantrumTimer.current = null
+        setShowIntro(true)
+        introTimer.current = window.setTimeout(() => {
+          setShowIntro(false)
+          introTimer.current = null
+        }, 5600)
         return
       }
+      frame += 1
       setTantrumFrame(frame)
-      tantrumTimer.current = window.setTimeout(advance, frame === 7 ? 240 : 140)
+      tantrumTimer.current = window.setTimeout(advance, TANTRUM[frame].duration)
     }
-    tantrumTimer.current = window.setTimeout(advance, 140)
+    tantrumTimer.current = window.setTimeout(advance, TANTRUM[0].duration)
   }
 
   useEffect(() => {
@@ -69,11 +88,13 @@ export default function KiwiKoruPet() {
     }
   }, [])
 
-  const row = tantrumFrame !== null ? 5 : lookDirection === null ? 0 : lookDirection < 8 ? 9 : 10
-  const column = tantrumFrame !== null ? tantrumFrame : lookDirection === null ? idleFrame : lookDirection % 8
+  const tantrumPose = tantrumFrame !== null ? TANTRUM[tantrumFrame] : null
+  const row = tantrumPose ? tantrumPose.row : showIntro ? 0 : lookDirection === null ? 0 : lookDirection < 8 ? 9 : 10
+  const column = tantrumPose ? tantrumPose.column : showIntro ? 0 : lookDirection === null ? idleFrame : lookDirection % 8
 
   return (
-    <aside className="kiwikoru-pet-float" aria-label="Kiwi Grumpy, the KiwiKoru mascot">
+    <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot">
+      {showIntro && <div className="kiwikoru-pet-bubble"><strong>Soy Kiwi Grumpy.</strong><span>Próximamente seré tu asistente virtual.</span></div>}
       <div
         ref={petRef}
         className="kiwikoru-pet-sprite"

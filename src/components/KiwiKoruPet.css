@@ -18,10 +18,57 @@
   image-rendering: auto;
   transform-origin: 50% 100%;
   animation: kiwikoru-arrive .65s cubic-bezier(.2, .85, .3, 1.2) both;
+  will-change: transform;
 }
+
+.kiwikoru-pet-float.is-tantrum .kiwikoru-pet-sprite {
+  animation: kiwikoru-tantrum .1s steps(2, end) infinite;
+}
+
+.kiwikoru-pet-bubble {
+  position: absolute;
+  right: 100px;
+  top: -42px;
+  width: 245px;
+  padding: 13px 16px;
+  border: 2px solid #233b2f;
+  border-radius: 20px 20px 5px 20px;
+  background: #fffdf5;
+  color: #2d4538;
+  box-shadow: 0 10px 28px rgba(20, 34, 26, .2);
+  font: 700 13px/1.3 Nunito, sans-serif;
+  animation: kiwikoru-bubble-in .32s cubic-bezier(.2, .85, .3, 1.15) both;
+  pointer-events: none;
+}
+.kiwikoru-pet-bubble::after {
+  content: '';
+  position: absolute;
+  right: -12px;
+  bottom: 8px;
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid #233b2f;
+  border-bottom: 2px solid #233b2f;
+  background: #fffdf5;
+  transform: rotate(-38deg);
+}
+.kiwikoru-pet-bubble strong,
+.kiwikoru-pet-bubble span { display: block; }
+.kiwikoru-pet-bubble strong { margin-bottom: 2px; color: #6b7728; font-size: 15px; }
 
 @keyframes kiwikoru-arrive {
   from { opacity: 0; transform: translateY(35px) scale(.82); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes kiwikoru-tantrum {
+  0% { transform: translateX(-4px) rotate(-3deg); }
+  50% { transform: translateX(4px) rotate(3deg); }
+  100% { transform: translateX(-3px) rotate(-2deg); }
+}
+
+@keyframes kiwikoru-bubble-in {
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
 
@@ -33,6 +80,14 @@
     height: 104px;
     z-index: 38;
   }
+  .kiwikoru-pet-bubble {
+    right: 72px;
+    top: -60px;
+    width: 205px;
+    padding: 11px 13px;
+    font-size: 12px;
+  }
+  .kiwikoru-pet-bubble strong { font-size: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
