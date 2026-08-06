@@ -50,12 +50,14 @@ export default function KiwiKoruPet() {
   const [lookDirection, setLookDirection] = useState<number | null>(null)
   const [tantrumFrame, setTantrumFrame] = useState<number | null>(null)
   const [showIntro, setShowIntro] = useState(false)
+  const [showArmsJoke, setShowArmsJoke] = useState(false)
   const tantrumTimer = useRef<number | null>(null)
   const introTimer = useRef<number | null>(null)
   const isHovered = useRef(false)
   const reactionRun = useRef(0)
   const audioContext = useRef<AudioContext | null>(null)
   const soundIndex = useRef(0)
+  const soundInteractions = useRef(0)
 
   useEffect(() => {
     const unlockAudio = () => {
@@ -131,6 +133,12 @@ export default function KiwiKoruPet() {
     tantrumTimer.current = null
     introTimer.current = null
     setShowIntro(false)
+    if (withSound) {
+      soundInteractions.current += 1
+      setShowArmsJoke(soundInteractions.current === 3)
+    } else {
+      setShowArmsJoke(false)
+    }
     setTantrumFrame(0)
     if (withSound) playNextSound()
     let frame = 0
@@ -196,7 +204,7 @@ export default function KiwiKoruPet() {
 
   return (
     <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot" onPointerEnter={startTantrum} onPointerLeave={stopInteraction}>
-      {showIntro && <div className="kiwikoru-pet-bubble"><strong>I’m Kiwi Grumpy.</strong><span>Soon I’ll be your virtual assistant.</span><a href="https://wa.me/64274365339?text=Hi%20KiwiKoru!%20I%20have%20a%20project%20in%20mind.%20How%20can%20we%20get%20started%3F" target="_blank" rel="noopener noreferrer" aria-label="Message KiwiKoru 3D on WhatsApp">Message us on WhatsApp</a></div>}
+      {showIntro && <div className="kiwikoru-pet-bubble" role="status"><strong>{showArmsJoke ? 'They’re not wings. They’re arms.' : 'I’m Kiwi Grumpy.'}</strong><span>{showArmsJoke ? 'Kiwis can’t fly — but I evolved. I’m a maker kiwi.' : 'Soon I’ll be your virtual assistant.'}</span><a href="https://wa.me/64274365339?text=Hi%20KiwiKoru!%20I%20have%20a%20project%20in%20mind.%20How%20can%20we%20get%20started%3F" target="_blank" rel="noopener noreferrer" aria-label="Message KiwiKoru 3D on WhatsApp">Message us on WhatsApp</a></div>}
       <div
         ref={petRef}
         className="kiwikoru-pet-sprite"
