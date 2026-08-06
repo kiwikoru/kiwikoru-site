@@ -18,6 +18,7 @@ export default function KiwiKoruPet() {
   const tantrumTimer = useRef<number | null>(null)
   const introTimer = useRef<number | null>(null)
   const isHovered = useRef(false)
+  const reactionRun = useRef(0)
 
   useEffect(() => {
     let timeout = 0
@@ -39,6 +40,7 @@ export default function KiwiKoruPet() {
 
   const stopInteraction = (event: React.PointerEvent) => {
     if (event.pointerType === 'touch' || window.matchMedia('(max-width: 767px)').matches) return
+    reactionRun.current += 1
     isHovered.current = false
     if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
@@ -49,19 +51,25 @@ export default function KiwiKoruPet() {
   }
 
   const playReaction = () => {
+    reactionRun.current += 1
+    const run = reactionRun.current
     isHovered.current = true
-    if (tantrumTimer.current !== null) return
+    if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
     if (introTimer.current !== null) window.clearTimeout(introTimer.current)
+    tantrumTimer.current = null
+    introTimer.current = null
     setShowIntro(false)
     setTantrumFrame(0)
     let frame = 0
     const advance = () => {
+      if (run !== reactionRun.current || !isHovered.current) return
       if (frame >= TANTRUM.length - 1) {
         setTantrumFrame(null)
         tantrumTimer.current = null
         if (!isHovered.current) return
         setShowIntro(true)
         introTimer.current = window.setTimeout(() => {
+          if (run !== reactionRun.current) return
           setShowIntro(false)
           introTimer.current = null
         }, 3200)
