@@ -107,9 +107,13 @@ export default function YoushieMe() {
     if (!context) return source
     context.fillStyle = '#f8f3ff'
     context.fillRect(0, 0, canvas.width, canvas.height)
-    context.fillStyle = '#ffffff'
+    context.fillStyle = '#6c35c9'
     context.fillRect(0, 0, canvas.width, 178)
-    const logoWidth = 470
+    context.fillStyle = '#ffffff'
+    context.beginPath()
+    context.roundRect(215, 14, 770, 150, 36)
+    context.fill()
+    const logoWidth = 650
     const logoHeight = logoWidth * logo.height / logo.width
     context.drawImage(logo, (canvas.width - logoWidth) / 2, (178 - logoHeight) / 2, logoWidth, logoHeight)
     const availableWidth = 1120

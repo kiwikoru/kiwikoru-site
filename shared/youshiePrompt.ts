@@ -36,11 +36,12 @@ ONE SURPRISE, CHOSEN FOR THIS PERSON
 - Preserve the clothing and personality already visible in the photograph. Do not infer gender, occupation, hobby, fantasy role, or personality stereotype.
 - No separate prop, scenery, floating magic, costume change, animal suit, hat, or extra object unless it is clearly present in the source photo.
 
-NON-NEGOTIABLE FOUR-FILAMENT PALETTE
-Silently select the smallest useful palette, with an absolute maximum of FOUR physical filament colours for the entire figure.
-- Before rendering, silently name the palette C1, C2, C3, and C4 and assign EVERY visible physical region to one of those exact four base materials. Recolour, merge, or remove any region that cannot be assigned. Never invent a fifth material during rendering.
+NON-NEGOTIABLE FOUR-BASE-COLOUR PALETTE
+Silently select the smallest useful palette, with a maximum of FOUR primary physical filament colours for the entire figure.
+- Before rendering, silently name the primary palette C1, C2, C3, and C4 and assign every substantial visible physical region to those exact four base materials. Recolour, merge, or remove any substantial region that cannot be assigned.
 - WHITE counts as one. BLACK counts as one. SKIN TONE counts as one. Every visibly different material colour or shade counts.
-- The tiny solid-black oval eyes may be hand-painted and excluded from the filament count. If black appears anywhere else—hair, shoes, clothing, accessories—it MUST be one of the four filament colours.
+- A FIFTH colour is allowed only as a tiny hand-painted BLACK or WHITE finishing detail, such as the two solid-black eyes, a minuscule tooth glimpse, or similarly tiny identity-critical marks. It must never cover a substantial region, garment, hair mass, shoe, accessory, hand, or limb. Never use both extra black and extra white: at most one fifth detail colour.
+- If black appears anywhere substantial—hair, shoes, clothing, or accessories—it MUST be one of the four primary filament colours. The same rule applies to substantial white regions.
 - Use one flat skin-tone material, not separate light and dark skin materials.
 - No extra accent colours, gradients, printed textures, multicolour patterns, or multiple shades of one material.
 - Every colour boundary is a clean separated physical region suitable for multi-colour FDM printing.
@@ -64,5 +65,5 @@ RENDER
 - No packaging, words, logo, arrows, comparison photo, prominent props, busy scenery, or frame.
 - Square 1:1 product image with comfortable empty space.
 
-Before output, silently verify identity, authentic Ushi-short legs, tiny mitten hands, plump solid-black Ushi eyes, compact facial placement, no more than four physical filament colours, sturdy 10 cm printability, and an original personalized appearance. Return only the final product render—no explanation, labels, text, before/after layout, or source photograph.
+Before output, silently verify identity, authentic Ushi-short legs, tiny mitten hands, plump solid-black Ushi eyes, compact facial placement, no more than four primary physical filament colours plus at most one tiny black-or-white finishing-detail colour, sturdy 10 cm printability, and an original personalized appearance. Return only the final product render—no explanation, labels, text, before/after layout, or source photograph.
 `.trim()
