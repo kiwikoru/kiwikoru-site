@@ -2,6 +2,7 @@ import { put } from '@vercel/blob'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
 import type { IncomingMessage, ServerResponse } from 'node:http'
+import { brandedEmail } from './lib/branded-email.js'
 
 export const maxDuration = 60
 
@@ -235,17 +236,9 @@ export async function confirmCheckout(request: Request) {
       const sender = process.env.RESEND_FROM || process.env.EMAIL_FROM || 'onboarding@resend.dev'
       const owner = [...new Set([process.env.RESEND_TO, process.env.EMAIL_TO, 'kiwikoru3d@gmail.com'].filter(Boolean) as string[])]
       const orderNumber = `KK-${new Date(session.created * 1000).toISOString().slice(0, 10).replaceAll('-', '')}-${session.id.slice(-6).toUpperCase()}`
-      const logoUrl = 'https://www.kiwikoru.co.nz/images/kiwikoru-logo-moss.png'
-      const customerHtml = `<div style="margin:0;background:#f5f5f0;padding:24px 10px;font-family:Arial,sans-serif;color:#223126">
-        <div style="max-width:640px;margin:auto;overflow:hidden;border-radius:20px;background:#fff;box-shadow:0 10px 35px rgba(26,40,30,.10)">
-          <div style="background:#253126;padding:24px;text-align:center"><img src="${logoUrl}" width="76" height="76" alt="KiwiKoru 3D" style="display:block;margin:0 auto 8px"><strong style="font-size:22px;color:#e8c9a0">KiwiKoru 3D</strong></div>
-          <div style="padding:32px"><p style="margin:0;color:#876b43;font-size:12px;font-weight:700;letter-spacing:1.5px">ORDER CONFIRMED · ${safe(orderNumber)}</p><h1 style="margin:10px 0 12px;font-size:30px;color:#1b281e">Thank you, ${safe(m.customer_name)}!</h1><p style="font-size:17px;line-height:1.6;color:#506056">Your payment has been received and your order is now safely with KiwiKoru 3D.</p>
-          <div style="margin:24px 0;padding:20px;border-radius:14px;background:#f7f5ef;border:1px solid #e3dfd5">${details}</div>
-          <h2 style="font-size:18px;color:#253126">What happens next?</h2><p style="line-height:1.65;color:#506056">We’ll prepare your order and contact you by email when it is ready ${m.destination === 'pickup' ? 'to collect' : 'to dispatch'}. If anything needs changing, simply reply to this message.</p>
-          <p style="margin:26px 0 0;padding-top:20px;border-top:1px solid #ece9e1;color:#657168;font-size:14px">Questions? Reply to this email or call <strong style="color:#253126">027 436 5339</strong>.<br><a href="https://www.kiwikoru.co.nz" style="color:#3f4a2f;font-weight:700">www.kiwikoru.co.nz</a></p></div>
-        </div></div>`
+      const customerHtml = brandedEmail({ eyebrow: `Order confirmed · ${orderNumber}`, title: `Thank you, ${m.customer_name}!`, intro: 'Your payment has been received and your idea is now safely in the hands of the KiwiKoru team.', content: `<div style="margin:24px 0;padding:20px;border-radius:14px;background:#f7f5ef;border:1px solid #e3dfd5">${details}</div><h2 style="font-size:18px;color:#253126">What happens next?</h2><p style="line-height:1.65;color:#506056">We’ll prepare your order and contact you by email when it is ready ${m.destination === 'pickup' ? 'to collect' : 'to dispatch'}. If anything needs changing, simply reply to this message.</p>` })
       const customerMessage = await resend.emails.send(
-        { from: `KiwiKoru 3D <${sender}>`, to: email, subject: `Your KiwiKoru 3D order ${orderNumber} is confirmed`, html: customerHtml },
+        { from: `KiwiKoru 3D <${sender}>`, to: email, subject: `We’re making it real — order ${orderNumber} confirmed`, html: customerHtml },
         { headers: { 'Idempotency-Key': `order-customer-${session.id}` } },
       )
       if (customerMessage.error || !customerMessage.data?.id) {
@@ -257,8 +250,7 @@ export async function confirmCheckout(request: Request) {
       const attachment = attachments[0]
       const isYoushie = m.order_type === 'youshie' || m.order_type === 'youshie_test'
       const fileName = isYoushie ? 'Youshie customer image' : (m.model_name || '3D model')
-      const ownerHtml = `<div style="font-family:Arial,sans-serif;max-width:720px;margin:auto;color:#223126;background:#f7f5ef;padding:28px;border-radius:18px">
-        <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px"><img src="${logoUrl}" width="58" height="58" alt="KiwiKoru 3D" style="border-radius:13px"><div><p style="margin:0;color:#876b43;font-weight:700;letter-spacing:1.5px">NEW PAID ORDER</p><h1 style="margin:5px 0 0">${safe(orderNumber)}</h1></div></div><p style="margin:0 0 24px;color:#59665d">Payment confirmed by Stripe. Ready to organise production.</p>
+      const ownerContent = `
         ${isYoushie && attachment ? '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:0 0 24px"><div style="text-align:center"><img src="cid:customer-youshie" alt="Generated Youshie" style="display:block;width:260px;max-width:100%;border-radius:16px"><small>Generated Youshie</small></div>' + (m.youshie_original_url ? '<div style="text-align:center"><img src="cid:original-reference" alt="Original reference" style="display:block;width:260px;max-width:100%;border-radius:16px"><small>Original reference photo</small></div>' : '') + '</div>' : ''}
         ${!isYoushie ? `<div style="margin:0 0 24px;padding:22px;border-radius:16px;background:#253126;color:#fff;text-align:center"><div style="font-size:38px">◫</div><strong style="display:block;margin-top:8px;font-size:18px">${safe(fileName)}</strong><span style="display:block;margin-top:6px;color:#e8c9a0;font-size:13px">STL production file ${attachment ? 'attached to this email' : 'stored with the paid order'}</span></div>` : ''}
         <table role="presentation" style="width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden">
@@ -270,7 +262,8 @@ export async function confirmCheckout(request: Request) {
         ${!isYoushie ? `<tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Print settings</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${safe(m.material)} · ${safe(m.colour)} · ${safe(m.infill)}% infill · ${safe(m.layer_height)} mm</td></tr>` : ''}
         <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">${m.destination === 'pickup' ? 'Collection' : 'Delivery'}</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${m.destination === 'pickup' ? 'Pick up in Morningside, Whangārei — exact address supplied when ready' : `${safe(m.delivery_address)}<br>${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}<br>${safe(destinationLabels[m.destination as Destination] || m.destination)}${m.rural === 'true' ? ' — Rural delivery' : ''}`}</td></tr>
         <tr><td style="padding:12px 16px;color:#687269">Total paid</td><td style="padding:12px 16px;font-size:20px;font-weight:800">NZ$${((session.amount_total || 0) / 100).toFixed(2)}</td></tr></table>
-        <p style="margin:22px 0 5px"><strong>Stripe reference:</strong> ${safe(session.id)}</p><p style="margin:0;color:#687269;font-size:13px">Keep this email as the production and dispatch record for this order.</p></div>`
+        <p style="margin:22px 0 5px"><strong>Stripe reference:</strong> ${safe(session.id)}</p><p style="margin:0;color:#687269;font-size:13px">Keep this email as the production and dispatch record for this order.</p>`
+      const ownerHtml = brandedEmail({ internal: true, eyebrow: 'New paid order', title: orderNumber, intro: 'Payment is confirmed by Stripe. This project is ready to organise for production.', content: ownerContent })
       const ownerMessage = await resend.emails.send(
         { from: `KiwiKoru 3D Orders <${sender}>`, to: owner, replyTo: email, subject: `PAID ${orderNumber} — ${safe(m.customer_name)} — ${safe(typeName)}`, html: ownerHtml, attachments: attachments.length ? attachments : undefined },
         { headers: { 'Idempotency-Key': `order-owner-v3-${session.id}` } },
