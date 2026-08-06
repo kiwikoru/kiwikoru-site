@@ -114,17 +114,15 @@ export default function KiwiKoruPet() {
   const column = tantrumPose ? tantrumPose.column : showIntro ? 0 : lookDirection === null ? idleFrame : lookDirection % 8
 
   return (
-    <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot">
-      {showIntro && <div className="kiwikoru-pet-bubble"><strong>I’m Kiwi Grumpy.</strong><span>Soon I’ll be your virtual assistant.</span></div>}
+    <aside className={`kiwikoru-pet-float ${tantrumPose ? 'is-tantrum' : ''}`} aria-label="Kiwi Grumpy, the KiwiKoru mascot" onPointerEnter={startTantrum} onPointerLeave={stopInteraction}>
+      {showIntro && <div className="kiwikoru-pet-bubble"><strong>I’m Kiwi Grumpy.</strong><span>Soon I’ll be your virtual assistant.</span><a href="https://wa.me/64274365339?text=Hi%20KiwiKoru%203D!%20I%27d%20like%20to%20ask%20you%20something." target="_blank" rel="noopener noreferrer" aria-label="Message KiwiKoru 3D on WhatsApp">Message us on WhatsApp</a></div>}
       <div
         ref={petRef}
         className="kiwikoru-pet-sprite"
         role="img"
         aria-label="Kiwi Grumpy watching the pointer"
         title="Kiwi Grumpy · Your KiwiKoru helper is waking up"
-        onPointerEnter={startTantrum}
         onPointerDown={startTouchTantrum}
-        onPointerLeave={stopInteraction}
         style={{
           backgroundPosition: `${(column / 7) * 100}% ${(row / 10) * 100}%`,
         }}
