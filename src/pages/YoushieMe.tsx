@@ -119,21 +119,26 @@ export default function YoushieMe() {
     context.fillRect(0, 0, canvas.width, 220)
     context.fillStyle = '#ffffff'
     context.beginPath()
-    context.roundRect(80, 16, 1040, 188, 38)
+    context.roundRect(70, 14, 1060, 192, 38)
     context.fill()
-    const logoScale = Math.min(880 / logo.width, 158 / logo.height)
+    const logoScale = Math.min(780 / logo.width, 128 / logo.height)
     const logoWidth = logo.width * logoScale
     const logoHeight = logo.height * logoScale
-    context.drawImage(logo, (canvas.width - logoWidth) / 2, 31 + (158 - logoHeight) / 2, logoWidth, logoHeight)
+    context.drawImage(logo, (canvas.width - logoWidth) / 2, 28 + (164 - logoHeight) / 2, logoWidth, logoHeight)
 
     const availableWidth = 1120
     const availableHeight = 1050
     const scale = Math.min(availableWidth / figure.width, availableHeight / figure.height)
     const width = figure.width * scale
     const height = figure.height * scale
+    context.save()
+    context.beginPath()
+    context.roundRect(40, 240, 1120, 1060, 32)
+    context.clip()
     context.fillStyle = '#ffffff'
     context.fillRect(40, 240, 1120, 1060)
     context.drawImage(figure, (canvas.width - width) / 2, 245 + (1050 - height) / 2, width, height)
+    context.restore()
 
     // Compact horizontal KiwiKoru footer.
     context.fillStyle = '#6c35c9'
