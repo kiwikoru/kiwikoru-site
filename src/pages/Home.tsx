@@ -338,6 +338,32 @@ function MaterialsSection() {
 }
 
 /* ─────────── FAQ SECTION ─────────── */
+function WhoWeAreSection() {
+  return (
+    <section className="bg-forest-dark py-20 lg:py-28">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16 lg:px-8">
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl">
+          <img src="/images/printer-workshop-real.jpg" alt="KiwiKoru 3D workshop in Whangārei" className="aspect-[4/3] h-full w-full object-cover grayscale contrast-[1.08]" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-forest-dark/45 via-transparent to-transparent" />
+        </div>
+        <div>
+          <span className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-4 py-2 text-xs font-bold uppercase tracking-[.18em] text-gold-light">Who we are</span>
+          <h2 className="mt-6 text-3xl font-semibold leading-tight text-white sm:text-4xl lg:text-5xl">Practical making, backed by interdisciplinary design.</h2>
+          <p className="mt-6 text-lg leading-relaxed text-white/72">
+            KiwiKoru 3D is connected to <strong className="font-semibold text-gold-light">D.i.t. with a D.</strong>, an interdisciplinary design team that brings together creative thinking, technical knowledge and hands-on production.
+          </p>
+          <p className="mt-4 leading-relaxed text-white/62">
+            From an early idea to a finished object, we look at how a product works, how it is made and how it can be improved. Our Whangārei workshop turns that thinking into prototypes, replacement parts, short production runs and useful objects made for real people and industry.
+          </p>
+          <Link to="/contact" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3.5 text-sm font-bold text-forest-dark shadow-md transition hover:-translate-y-0.5 hover:bg-gold-light">
+            Meet us through your project <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function FAQSection() {
   const faqs = [
     {
@@ -400,6 +426,7 @@ export default function Home() {
       <FindModelsSection />
       <WhatWePrintSection />
       <MaterialsSection />
+      <WhoWeAreSection />
       <FAQSection />
     </main>
   );
