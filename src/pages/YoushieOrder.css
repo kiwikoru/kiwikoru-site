@@ -32,6 +32,9 @@
 .price-box,.shipping-quote,.order-total { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #eadff5; padding: 18px 0; color: #705c81; }
 .price-box strong,.shipping-quote strong,.order-total strong { color: #6332ad; font: 800 19px "Baloo 2"; }
 .shipping-label { display: block; margin: 5px 0 9px; font-size: 12px; font-weight: 900; color: #584169; }
+.pickup-choice { width: 100%; margin: 4px 0 16px; padding: 13px 14px; border: 2px solid #d8c7eb; border-radius: 14px; background: #fff; color: #5b416d; display: flex; align-items: center; gap: 11px; text-align: left; cursor: pointer; transition: border-color .2s ease, background .2s ease, transform .2s ease; }
+.pickup-choice:hover { transform: translateY(-1px); border-color: #8a58ca; }.pickup-choice.is-selected { border-color: #7440c3; background: #f4ecff; box-shadow: 0 8px 18px rgba(103,56,166,.12); }
+.pickup-choice svg { width: 22px; color: #7440c3; }.pickup-choice span { flex: 1; display: flex; flex-direction: column; }.pickup-choice strong { font-size: 13px; }.pickup-choice small { color: #8b779c; font-size: 10px; }.pickup-choice b { color: #6332ad; font-size: 12px; }
 .order-details select { width: 100%; height: 50px; border: 1px solid #dbcbed; border-radius: 13px; padding: 0 14px; background: #fbf9fe; color: #4e3761; font: 700 13px Nunito; }
 .rural-option { display: flex; align-items: center; gap: 10px; margin-top: 11px; padding: 11px 13px; border-radius: 12px; background: #f8f3fd; color: #5b416d; cursor: pointer; }
 .rural-option input { accent-color: #7140c2; width: 17px; height: 17px; }.rural-option span { display: flex; flex: 1; flex-direction: column; }.rural-option small { color: #927fa2; }.rural-option b { color: #6f3eb9; font-size: 12px; }

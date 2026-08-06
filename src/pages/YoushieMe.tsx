@@ -15,6 +15,7 @@ export default function YoushieMe() {
   const [photo, setPhoto] = useState<string>()
   const [photoFile, setPhotoFile] = useState<File>()
   const [generatedPhoto, setGeneratedPhoto] = useState<string>()
+  const [originalOrderPhoto, setOriginalOrderPhoto] = useState<string>()
   const [specialRequest, setSpecialRequest] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string>()
@@ -60,6 +61,7 @@ export default function YoushieMe() {
     setGeneratedPhoto(undefined)
     try {
       const image = await prepareImage(photoFile)
+      const originalPhoto = `data:image/jpeg;base64,${image}`
       const styleReference = await fetch('/youshie-style-reference.jpg')
         .then(response => response.blob())
         .then(prepareImage)
@@ -83,7 +85,11 @@ export default function YoushieMe() {
       playFairyChime()
       await new Promise(resolve => window.setTimeout(resolve, 520))
       setGeneratedPhoto(finishedImage)
-      try { sessionStorage.setItem('youshie-order-image', finishedImage) } catch { /* The navigation state still carries the image if browser storage is full. */ }
+      setOriginalOrderPhoto(originalPhoto)
+      try {
+        sessionStorage.setItem('youshie-order-image', finishedImage)
+        sessionStorage.setItem('youshie-order-original', originalPhoto)
+      } catch { /* Navigation state still carries both images if browser storage is full. */ }
       setRevealCount(null)
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')
@@ -240,9 +246,9 @@ export default function YoushieMe() {
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
           <p className="generation-limit">Unlimited testing is temporarily enabled</p>
           {!generatedPhoto && <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Making magic…</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>}
-          {generatedPhoto && <div className="inline-result-copy"><p>Your framed four-colour collectible concept is ready.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie-kiwikoru.png"><Download size={18} /> Download</a><span className="share-promo"><button onClick={share}><Share2 size={18} /> Share</button><span className="share-bubble"><b>Enter the giveaway!</b> Share for a chance to win your Youshie free or a Youshie stand.</span></span><button className="again" onClick={() => setGeneratedPhoto(undefined)}><Sparkles size={18} /> Try again</button></div><Link className="order-youshie-cta" to="/youshie-order" state={{ generatedPhoto }}><ShoppingBag size={24} /><span><strong>Bring your Youshie home</strong><small>Order your real 10 cm collectible</small></span><b>→</b></Link></div>}
+          {generatedPhoto && <div className="inline-result-copy"><p>Your framed four-colour collectible concept is ready.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie-kiwikoru.png"><Download size={18} /> Download</a><span className="share-promo"><button onClick={share}><Share2 size={18} /> Share</button><span className="share-bubble"><b>Enter the giveaway!</b> Share for a chance to win your Youshie free or a Youshie stand.</span></span><button className="again" onClick={() => setGeneratedPhoto(undefined)}><Sparkles size={18} /> Try again</button></div><Link className="order-youshie-cta" to="/youshie-order" state={{ generatedPhoto, originalPhoto: originalOrderPhoto }}><ShoppingBag size={24} /><span><strong>Bring your Youshie home</strong><small>Order your real 10 cm collectible</small></span><b>→</b></Link></div>}
           {error && <p className="generation-error" role="alert">{error}</p>}
-          <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used only to create your Youshie</p>
+          <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used to create your Youshie. If you order, the original and generated images are stored privately for production.</p>
         </section>
 
         <section className="kiwikoru-contact-cta" aria-label="Contact KiwiKoru 3D">

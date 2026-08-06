@@ -6,7 +6,7 @@ import '../components/OrderCustomerFields.css'
 import './YoushieMe.css'
 import './YoushieOrder.css'
 
-type OrderState = { generatedPhoto?: string }
+type OrderState = { generatedPhoto?: string; originalPhoto?: string }
 
 async function prepareOrderImage(source: string) {
   const image = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -31,6 +31,7 @@ export default function YoushieOrder() {
   const { state } = useLocation()
   const [searchParams] = useSearchParams()
   const generatedPhoto = (state as OrderState | null)?.generatedPhoto || sessionStorage.getItem('youshie-order-image') || undefined
+  const originalPhoto = (state as OrderState | null)?.originalPhoto || sessionStorage.getItem('youshie-order-original') || undefined
   const [destination, setDestination] = useState('north')
   const [rural, setRural] = useState(false)
   const [checkingOut, setCheckingOut] = useState(false)
@@ -38,8 +39,9 @@ export default function YoushieOrder() {
   const [customer, setCustomer] = useState(emptyCustomerDetails)
   const [confirmation, setConfirmation] = useState<'sending' | 'sent' | 'error'>()
   const productPrice = 30
-  const shippingPrices: Record<string, number> = { north: 15, south: 15, australia: 30 }
-  const shipping = shippingPrices[destination] + (destination !== 'australia' && rural ? 6 : 0)
+  const pickup = destination === 'pickup'
+  const shippingPrices: Record<string, number> = { pickup: 0, north: 15, south: 15, australia: 30 }
+  const shipping = shippingPrices[destination] + (!pickup && destination !== 'australia' && rural ? 6 : 0)
   const total = productPrice + shipping
 
   useEffect(() => {
@@ -62,7 +64,7 @@ export default function YoushieOrder() {
       const response = await fetch(`/api/stripe-checkout?action=${testPurchase ? 'youshie-test' : 'youshie'}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ destination, rural, generatedPhoto: checkoutImage, customer }),
+        body: JSON.stringify({ destination, rural, generatedPhoto: checkoutImage, originalPhoto, customer }),
       })
       const contentType = response.headers.get('content-type') || ''
       if (!contentType.includes('application/json')) {
@@ -111,16 +113,20 @@ export default function YoushieOrder() {
           </ul>
 
           <div className="price-box"><span>Youshie figure</span><strong>NZ${productPrice.toFixed(2)}</strong></div>
+          <button type="button" className={`pickup-choice ${pickup ? 'is-selected' : ''}`} onClick={() => { setDestination(pickup ? 'north' : 'pickup'); setRural(false) }}>
+            <Home /><span><strong>Pick up in person</strong><small>Morningside, Whangārei — no delivery charge</small></span><b>{pickup ? 'Selected' : 'Free'}</b>
+          </button>
           <label className="shipping-label" htmlFor="shipping">Where should your Youshie travel?</label>
           <select id="shipping" value={destination} onChange={event => setDestination(event.target.value)}>
+            <option value="pickup">Pick up in person — Morningside, Whangārei (Free)</option>
             <option value="north">New Zealand — North Island</option>
             <option value="south">New Zealand — South Island</option>
             <option value="australia">Australia</option>
           </select>
-          {destination !== 'australia' && <label className="rural-option"><input type="checkbox" checked={rural} onChange={event => setRural(event.target.checked)} /><span><strong>Rural delivery</strong><small>NZ Post rural surcharge</small></span><b>+ NZ$6.00</b></label>}
-          <OrderCustomerFields value={customer} onChange={setCustomer} theme="youshie" />
-          <div className="shipping-quote"><span>Estimated delivery</span><strong>NZ${shipping.toFixed(2)}</strong></div>
-          <div className="order-total"><span>Figure + delivery</span><strong>NZ${total.toFixed(2)}</strong></div>
+          {!pickup && destination !== 'australia' && <label className="rural-option"><input type="checkbox" checked={rural} onChange={event => setRural(event.target.checked)} /><span><strong>Rural delivery</strong><small>NZ Post rural surcharge</small></span><b>+ NZ$6.00</b></label>}
+          <OrderCustomerFields value={customer} onChange={setCustomer} theme="youshie" pickup={pickup} />
+          <div className="shipping-quote"><span>{pickup ? 'Pick up in person' : 'Estimated delivery'}</span><strong>{pickup ? 'Free' : `NZ$${shipping.toFixed(2)}`}</strong></div>
+          <div className="order-total"><span>{pickup ? 'Figure total' : 'Figure + delivery'}</span><strong>NZ${total.toFixed(2)}</strong></div>
           <button type="submit" className="checkout-placeholder" disabled={!generatedPhoto || checkingOut}>
             <Check size={20} /> {checkingOut ? 'Opening secure checkout…' : `Pay NZ$${total.toFixed(2)} securely`}
           </button>
@@ -132,7 +138,7 @@ export default function YoushieOrder() {
           </div>
           {!generatedPhoto && <p className="checkout-error">Create your Youshie first so we can attach the correct figure to your order.</p>}
           {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
-          <p className="checkout-note">Secure payment powered by Stripe. Your payment details are never stored by KiwiKoru.</p>
+          <p className="checkout-note">Secure payment powered by Stripe. Your payment details are never stored by KiwiKoru. For Youshie orders, the original and generated images are kept privately for production.</p>
         </form>
       </section>
     </main>
