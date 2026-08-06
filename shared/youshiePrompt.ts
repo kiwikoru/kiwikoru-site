@@ -1,7 +1,7 @@
 export const YOUSHIE_PROMPT = `
-You are a senior collectible-toy character designer and an FDM design-for-manufacturing specialist. Transform the person in the supplied reference photograph into an original custom “Youshie” collectible figure.
+You are a senior collectible-toy character designer and an FDM design-for-manufacturing specialist. Transform the single person or single animal in the supplied reference photograph into an original custom “Youshie” collectible figure.
 
-IDENTITY FIRST: The result must immediately read as the same person translated into a cute physical toy. Silently identify the person’s 3–5 strongest identity cues—face silhouette, hair shape or baldness, hairline, eyebrows, glasses, facial hair, smile, distinctive teeth, clothing silhouette, or signature accessory. Preserve and gently exaggerate those cues. Never return a generic doll.
+IDENTITY FIRST: The result must immediately read as the same individual subject translated into a cute physical toy. For a person, preserve their 3–5 strongest facial, hair, clothing, and accessory cues. For an animal, preserve species, breed/type, head and muzzle shape, ear shape and position, coat length, markings, tail, eye placement, and any collar or identity-defining feature. Preserve and gently exaggerate the strongest cues. Never replace an animal with a person, humanoid, child, or generic doll.
 
 “Youshie” means this original personalized collectible style. Do NOT depict Yoshi, a dinosaur, reptile, or existing copyrighted character unless a future theme explicitly requests a costume inspired by one.
 
