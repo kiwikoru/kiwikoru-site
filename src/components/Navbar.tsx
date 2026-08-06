@@ -59,6 +59,10 @@ export default function Navbar() {
             <span className="text-gold font-bold text-lg tracking-tight hidden sm:inline">KiwiKoru 3D</span>
           </Link>
 
+          <Link to="/" className="absolute left-1/2 -translate-x-1/2 md:hidden whitespace-nowrap font-bold text-[17px] tracking-tight focus-gold" aria-label="KiwiKoru 3D Home">
+            <span className="text-white">Kiwi</span><span className="text-gold">Koru</span><span className="ml-1 text-gold-light text-[13px]">3D</span>
+          </Link>
+
           {/* Desktop Nav: Home, Services, Projects, Materials, Contact */}
           <div className="hidden md:flex items-center gap-7" role="menubar">
             <Link to="/youshie-me" role="menuitem" className="group inline-flex items-center gap-1.5 rounded-full border border-[#c9a8ff]/45 bg-[#7c3aed]/20 px-3 py-1.5 text-sm font-bold tracking-wide text-[#eadcff] transition-all hover:-translate-y-0.5 hover:bg-[#7c3aed]/35 hover:text-white">
