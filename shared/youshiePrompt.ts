@@ -6,8 +6,8 @@ IDENTITY FIRST: The result must immediately read as the same individual subject 
 “Youshie” means this original personalized collectible style. Do NOT depict Yoshi, a dinosaur, reptile, or existing copyrighted character unless a future theme explicitly requests a costume inspired by one.
 
 DESIGN
-- Physical collectible approximately 10 cm tall; oversized rounded head is 45–50% of total height.
-- Compact torso, extremely short sturdy legs, small integrated feet, friendly silhouette, and smooth rounded manufacturable volumes.
+- Physical collectible approximately 10 cm tall; the oversized rounded head is 50–55% of total height and must clearly dominate the silhouette.
+- Compact torso, extremely short sturdy legs, slightly enlarged integrated feet, friendly silhouette, and smooth rounded manufacturable volumes. The feet should add stability and charm without reading as separate realistic shoes.
 - Use a distinctive Youshie house silhouette: softly pear-shaped rounded head, cheeks that gently taper toward a tiny chin, compact bean-like torso, arms resting close to the body, and very short legs. Avoid a square or cylindrical head.
 - Clearly non-realistic proportions. It must look like a real premium 3D-printed collectible photographed in a studio—not a 2D illustration, animation frame, or movie character.
 - Do not imitate Funko Pop, LEGO, Pixar, Disney, anime, or any existing toy franchise. This must feel like an original personalized Youshie sculpt.
@@ -15,6 +15,8 @@ DESIGN
 - The head should feel broad and softly rounded, not balloon-like. Keep the body squat and sturdy, with shoulders flowing naturally into short arms and feet that feel planted rather than oversized shoes.
 - CRITICAL USHI PROPORTIONS: from crotch to floor, both legs together occupy only about 12–15% of total figure height. There must be almost no visible shin. The feet emerge directly beneath the squat torso, separated by only a small notch. Never give the figure normal child proportions, long legs, long trousers, or tall shoes.
 - The arms are short and softly curved. Hands sit around hip level and resemble tiny rounded mittens with, at most, one shallow thumb bump. No palms, knuckles, fingernails, or separated fingers.
+- PERSON PROPORTION CHECK: the finished person must read instantly as a big-headed custom collectible, never as a normally proportioned child. If forced to choose, enlarge the head and shorten the torso and legs rather than preserving realistic anatomy.
+- ANIMAL PROPORTION CHECK: preserve the animal's real species and identity, but translate it into the same large-headed, compact Youshie silhouette. The head may be 45–55% of the visible figure height depending on species.
 
 FACE
 - Preserve apparent age range, face shape, skin tone, hairstyle, hairline or bald areas, eyebrows, glasses, facial hair, smile, and defining traits, simplified into toy geometry.
@@ -31,6 +33,12 @@ HAIR AND CLOTHING
 - Use the clothing visible in the reference unless a theme says otherwise. Preserve its main type, silhouette, and essential colour blocking while removing tiny logos, text, seams, and patterns.
 - Integrate accessories into the body wherever possible.
 
+ANIMAL POSE AND ANATOMY
+- A single dog, cat, or other four-legged pet must default to a cute seated pose on its rear legs/bottom, with the front paws grounded or resting close together in front. Do not render a default standing-on-four-legs pose.
+- Keep the seated body compact and stable. Simplify the rear legs into sturdy haunches and integrate the tail against the body or floor so it cannot look fragile or floating.
+- Preserve species-specific anatomy: muzzle or beak, ears, paws, coat masses, markings, and tail. Never convert an animal into a humanoid body or human face.
+- Only depart from the seated pose when the customer's optional request clearly asks for a different pose; even then, keep it stable, cute, and realistically printable.
+
 ONE SURPRISE, CHOSEN FOR THIS PERSON
 - Keep the transformation surprising through the caricature itself, not through a random costume or unrelated accessory.
 - Preserve the clothing and personality already visible in the photograph. Do not infer gender, occupation, hobby, fantasy role, or personality stereotype.
@@ -41,6 +49,7 @@ Silently select the smallest useful palette, with a maximum of FOUR primary phys
 - Before rendering, silently name the primary palette C1, C2, C3, and C4 and assign every substantial visible physical region to those exact four base materials. Recolour, merge, or remove any substantial region that cannot be assigned.
 - WHITE counts as one. BLACK counts as one. SKIN TONE counts as one. Every visibly different material colour or shade counts.
 - A FIFTH colour is allowed only as a tiny hand-painted BLACK or WHITE finishing detail, such as the two solid-black eyes, a minuscule tooth glimpse, or similarly tiny identity-critical marks. It must never cover a substantial region, garment, hair mass, shoe, accessory, hand, or limb. Never use both extra black and extra white: at most one fifth detail colour.
+- For an animal, tiny claws, a tiny tooth glimpse, or the solid-black eyes may use that single fifth hand-painted BLACK or WHITE detail colour. Paw pads, large muzzle patches, collars, and coat markings are not micro-details and must fit inside the four main colours.
 - If black appears anywhere substantial—hair, shoes, clothing, or accessories—it MUST be one of the four primary filament colours. The same rule applies to substantial white regions.
 - Use one flat skin-tone material, not separate light and dark skin materials.
 - No extra accent colours, gradients, printed textures, multicolour patterns, or multiple shades of one material.
@@ -53,11 +62,11 @@ FDM MANUFACTURABILITY
 - One sturdy printable object. No floating elements, loose strands, separate props, fragile fingers, thin horns, thin glasses, thin ankles, or unsupported pieces.
 - Hands must be rounded Ushi mittens fused or held close to the body, with no individual fingers. A single shallow thumb suggestion is allowed. Thicken glasses/accessories and connect them securely.
 - Avoid severe overhangs and deep cavities. Details must survive at 10 cm scale.
-- Stable front-facing pose with both feet planted. No base unless absolutely required.
+- For a person, use a stable front-facing pose with both enlarged feet planted. For a four-legged pet, use the required stable seated pose with its front paws grounded. No base unless absolutely required.
 
 RENDER
 - One figure only, full body head-to-feet, centered, straight-on front view, simple nearly symmetrical pose.
-- Place the figure standing directly on a clean, neutral light-wood or warm off-white desktop. Use a softly blurred, uncluttered creative-studio or home-office background with shallow depth of field, gentle daylight, and a subtle grounding shadow.
+- Place the person standing, or the animal sitting, directly on the same clean neutral light-wood or warm off-white desktop. Use the same softly blurred, uncluttered creative-studio or home-office background with shallow depth of field, gentle daylight, and a subtle grounding shadow. Do not redesign, replace, decorate, or materially alter this established desk environment.
 - The desktop and blurred environment are photographic context and do not count toward the figure's four filament colours. Keep them visually quiet and clearly separate from the physical figure.
 - Matte PLA-like molded surface with very subtle realistic FDM layer texture.
 - Let the object feel genuinely 3D printed: retain softly visible horizontal layer lines, gently simplified joins, and a trace of handmade imperfection. Do not make it look injection-moulded, glossy, airbrushed, or digitally perfect.
