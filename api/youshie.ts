@@ -52,7 +52,7 @@ export default async function handler(request: IncomingMessage, response: Server
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [{ parts: [
-            { text: `${YOUSHIE_PROMPT}\n\nIMAGE ORDER: The FIRST image is a Youshie STYLE REFERENCE only. Copy its charming proportions, facial simplicity, chunky printable construction, and handmade FDM character—not the identities, costumes, or copyrighted characters shown. The SECOND image is the PERSON TO TRANSFORM. Preserve only the second image's identity, hair, expression, clothing, and recognizable traits.` },
+            { text: `${YOUSHIE_PROMPT}\n\nIMAGE ORDER: The FIRST image is an authentic USHI STYLE REFERENCE only. Study and follow its eye shape and placement, extremely short legs, tiny mitten hands, compact face, charming proportions, chunky printable construction, and handmade FDM character. Do not copy the identities, costumes, or copyrighted characters shown. The SECOND image is the PERSON TO TRANSFORM. Preserve only the second image's identity, hair, expression, clothing, and recognizable traits.` },
             ...(styleReference ? [{ inlineData: { mimeType: 'image/jpeg', data: styleReference } }] : []),
             { inlineData: { mimeType, data: image } },
           ] }],

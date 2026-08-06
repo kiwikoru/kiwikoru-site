@@ -7,16 +7,19 @@ IDENTITY FIRST: The result must immediately read as the same person translated i
 
 DESIGN
 - Physical collectible approximately 10 cm tall; oversized rounded head is 45–50% of total height.
-- Compact torso, short sturdy limbs, slightly oversized stable feet, friendly silhouette, smooth rounded manufacturable volumes.
+- Compact torso, extremely short sturdy legs, small integrated feet, friendly silhouette, and smooth rounded manufacturable volumes.
 - Use a distinctive Youshie house silhouette: softly pear-shaped rounded head, cheeks that gently taper toward a tiny chin, compact bean-like torso, arms resting close to the body, and very short legs. Avoid a square or cylindrical head.
 - Clearly non-realistic proportions. It must look like a real premium 3D-printed collectible photographed in a studio—not a 2D illustration, animation frame, or movie character.
 - Do not imitate Funko Pop, LEGO, Pixar, Disney, anime, or any existing toy franchise. This must feel like an original personalized Youshie sculpt.
 - Match the supplied Youshie style reference's emotional essence: irresistibly sweet, slightly quirky, handmade, and shelf-friendly. Avoid slick corporate mascot styling or a flawless animated-film render.
 - The head should feel broad and softly rounded, not balloon-like. Keep the body squat and sturdy, with shoulders flowing naturally into short arms and feet that feel planted rather than oversized shoes.
+- CRITICAL USHI PROPORTIONS: from crotch to floor, both legs together occupy only about 12–15% of total figure height. There must be almost no visible shin. The feet emerge directly beneath the squat torso, separated by only a small notch. Never give the figure normal child proportions, long legs, long trousers, or tall shoes.
+- The arms are short and softly curved. Hands sit around hip level and resemble tiny rounded mittens with, at most, one shallow thumb bump. No palms, knuckles, fingernails, or separated fingers.
 
 FACE
 - Preserve apparent age range, face shape, skin tone, hairstyle, hairline or bald areas, eyebrows, glasses, facial hair, smile, and defining traits, simplified into toy geometry.
-- Eyes are exactly two simple solid-BLACK softly vertical ovals: pleasantly plump and only slightly taller than wide, approximately a 1.25:1 height-to-width ratio. Never use narrow capsules or long stretched ovals. No sclera, iris, pupil, catchlight, or white highlight.
+- USHI EYES ARE THE STYLE ANCHOR. Use exactly two simple solid-BLACK softly vertical ovals, pleasantly plump and only slightly taller than wide, approximately a 1.18–1.25:1 height-to-width ratio. They should feel like two smooth flattened black beans, not circles and never narrow capsules. Place them fairly close together in the upper-middle of the face, level with each other, leaving generous cheek space below. No sclera, iris, pupil, eyelashes, catchlight, reflection, or white highlight.
+- Keep the whole face compact: the eyes, tiny nose and tiny mouth occupy only the central area. Preserve broad empty cheeks and a simple forehead. Do not spread features across the full head.
 - Very small simplified nose. The mouth is small, understated, and toy-like: use one short friendly curved opening or compact smile, never a wide cartoon grin extending across the face.
 - Prefer a tiny dark curved mouth with gently lifted corners. Keep it narrower than the space between the two eyes and avoid a floating white tooth strip.
 - A tiny open smile, one or two uneven simplified teeth, or a small tooth gap is welcome only when it strengthens the person's recognizable charm. It must remain compact, friendly, and physically printable.
@@ -46,7 +49,7 @@ Silently select the smallest useful palette, with an absolute maximum of FOUR ph
 
 FDM MANUFACTURABILITY
 - One sturdy printable object. No floating elements, loose strands, separate props, fragile fingers, thin horns, thin glasses, thin ankles, or unsupported pieces.
-- Mitten-like or minimally separated hands; no individual fingers. Thicken glasses/accessories and connect them securely.
+- Hands must be rounded Ushi mittens fused or held close to the body, with no individual fingers. A single shallow thumb suggestion is allowed. Thicken glasses/accessories and connect them securely.
 - Avoid severe overhangs and deep cavities. Details must survive at 10 cm scale.
 - Stable front-facing pose with both feet planted. No base unless absolutely required.
 
@@ -60,5 +63,5 @@ RENDER
 - No packaging, words, logo, arrows, comparison photo, prominent props, busy scenery, or frame.
 - Square 1:1 product image with comfortable empty space.
 
-Before output, silently verify identity, solid-black oval eyes, no more than four physical filament colours, sturdy 10 cm printability, and an original Youshie appearance. Return only the final product render—no explanation, labels, text, before/after layout, or source photograph.
+Before output, silently verify identity, authentic Ushi-short legs, tiny mitten hands, plump solid-black Ushi eyes, compact facial placement, no more than four physical filament colours, sturdy 10 cm printability, and an original personalized appearance. Return only the final product render—no explanation, labels, text, before/after layout, or source photograph.
 `.trim()
