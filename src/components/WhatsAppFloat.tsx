@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 
-const PHONE_NUMBER = '64274365339'
+export const WHATSAPP_URL = 'https://wa.me/64274365339'
 
-function WhatsAppLogo({ className }: { className?: string }) {
+export function WhatsAppLogo({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -34,7 +34,7 @@ export default function WhatsAppFloat() {
 
       {/* WhatsApp Button */}
       <a
-        href={`https://wa.me/${PHONE_NUMBER}`}
+        href={WHATSAPP_URL}
         target="_blank"
         rel="noopener noreferrer"
         onMouseEnter={() => setShowTooltip(true)}

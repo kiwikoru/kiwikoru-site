@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import Navbar from './Navbar'
 import Footer from './Footer'
-import WhatsAppFloat from './WhatsAppFloat'
 import KiwiKoruPet from './KiwiKoruPet'
 
 interface PageLayoutProps {
@@ -14,7 +13,6 @@ export default function PageLayout({ children }: PageLayoutProps) {
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
-      <WhatsAppFloat />
       <KiwiKoruPet />
     </div>
   )

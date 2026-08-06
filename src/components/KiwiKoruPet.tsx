@@ -7,6 +7,8 @@ export default function KiwiKoruPet() {
   const petRef = useRef<HTMLDivElement>(null)
   const [idleFrame, setIdleFrame] = useState(0)
   const [lookDirection, setLookDirection] = useState<number | null>(null)
+  const [tantrumFrame, setTantrumFrame] = useState<number | null>(null)
+  const tantrumTimer = useRef<number | null>(null)
 
   useEffect(() => {
     let timeout = 0
@@ -20,6 +22,27 @@ export default function KiwiKoruPet() {
     timeout = window.setTimeout(advance, IDLE_DURATIONS[0])
     return () => window.clearTimeout(timeout)
   }, [])
+
+  useEffect(() => () => {
+    if (tantrumTimer.current !== null) window.clearTimeout(tantrumTimer.current)
+  }, [])
+
+  const startTantrum = () => {
+    if (tantrumTimer.current !== null) return
+    setTantrumFrame(0)
+    let frame = 0
+    const advance = () => {
+      frame += 1
+      if (frame >= 8) {
+        setTantrumFrame(null)
+        tantrumTimer.current = null
+        return
+      }
+      setTantrumFrame(frame)
+      tantrumTimer.current = window.setTimeout(advance, frame === 7 ? 240 : 140)
+    }
+    tantrumTimer.current = window.setTimeout(advance, 140)
+  }
 
   useEffect(() => {
     let animationFrame = 0
@@ -46,8 +69,8 @@ export default function KiwiKoruPet() {
     }
   }, [])
 
-  const row = lookDirection === null ? 0 : lookDirection < 8 ? 9 : 10
-  const column = lookDirection === null ? idleFrame : lookDirection % 8
+  const row = tantrumFrame !== null ? 5 : lookDirection === null ? 0 : lookDirection < 8 ? 9 : 10
+  const column = tantrumFrame !== null ? tantrumFrame : lookDirection === null ? idleFrame : lookDirection % 8
 
   return (
     <aside className="kiwikoru-pet-float" aria-label="Kiwi Grumpy, the KiwiKoru mascot">
@@ -57,6 +80,7 @@ export default function KiwiKoruPet() {
         role="img"
         aria-label="Kiwi Grumpy watching the pointer"
         title="Kiwi Grumpy · Your KiwiKoru helper is waking up"
+        onPointerEnter={startTantrum}
         style={{
           backgroundPosition: `${(column / 7) * 100}% ${(row / 10) * 100}%`,
         }}

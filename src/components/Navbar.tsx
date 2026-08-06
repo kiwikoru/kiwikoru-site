@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
+import { WhatsAppLogo, WHATSAPP_URL } from './WhatsAppFloat'
 
 const pageLinks = [
   { label: 'Home', path: '/' },
@@ -82,10 +83,15 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop CTA */}
-          <Link to="/quote" className="hidden md:inline-flex items-center px-5 py-2.5 bg-gold/90 text-forest font-semibold text-sm rounded-pill transition-all duration-300 hover:bg-gold hover:-translate-y-0.5 focus-gold backdrop-blur-sm">
-            Get Instant Estimate
-          </Link>
+          {/* Desktop actions */}
+          <div className="hidden md:flex items-center gap-3">
+            <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Chat with KiwiKoru on WhatsApp" className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-md transition-colors hover:bg-[#20bd5a] focus-gold">
+              <WhatsAppLogo className="w-5 h-5" />
+            </a>
+            <Link to="/quote" className="inline-flex items-center px-5 py-2.5 bg-gold/90 text-forest font-semibold text-sm rounded-pill transition-all duration-300 hover:bg-gold hover:-translate-y-0.5 focus-gold backdrop-blur-sm">
+              Get Instant Estimate
+            </Link>
+          </div>
 
           {/* Mobile Hamburger */}
           <button className="md:hidden text-gold p-2 focus-gold" onClick={() => setMobileOpen(true)} aria-label="Open navigation menu" aria-expanded={mobileOpen}>
@@ -118,6 +124,9 @@ export default function Navbar() {
           <Link to="/quote" className="mt-10 px-8 py-3 bg-gold text-forest font-semibold rounded-pill transition-all duration-200 hover:bg-gold-light focus-gold" onClick={() => setMobileOpen(false)}>
             Get Instant Estimate
           </Link>
+          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-3 px-7 py-3 bg-[#25D366] text-white font-semibold rounded-pill focus-gold" onClick={() => setMobileOpen(false)}>
+            <WhatsAppLogo className="w-5 h-5" /> Chat on WhatsApp
+          </a>
         </div>
       )}
     </>

@@ -3,9 +3,9 @@
   right: 14px;
   bottom: 8px;
   z-index: 42;
-  width: 150px;
-  height: 162px;
-  pointer-events: none;
+  width: 132px;
+  height: 143px;
+  pointer-events: auto;
   filter: drop-shadow(0 13px 14px rgba(20, 34, 26, .25));
 }
 
@@ -29,8 +29,8 @@
   .kiwikoru-pet-float {
     right: 4px;
     bottom: 4px;
-    width: 112px;
-    height: 121px;
+    width: 96px;
+    height: 104px;
     z-index: 38;
   }
 }
