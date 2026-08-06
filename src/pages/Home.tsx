@@ -371,7 +371,20 @@ function WhoWeAreSection() {
             For more than a decade, our team has developed practical solutions for people and industry. We specialise in products and solutions made through 3D printing, while also helping projects migrate to other manufacturing processes when scale, performance or cost calls for a different production method.
           </p>
           <p className="mt-4 leading-relaxed text-white/75">
-            From a first concept to production planning, we can support product development, prototyping, process improvement, factory and workspace layouts, and broader industrial advisory projects.
+            We look at every challenge as a complete system—not simply as a part to print. From the first conversation through design, testing and production planning, we connect the right disciplines to create a practical, responsible and scalable answer.
+          </p>
+          <div className="mt-7 grid gap-3 sm:grid-cols-2">
+            <div className="rounded-2xl border border-white/15 bg-white/[.07] p-5">
+              <div className="flex items-center gap-3 text-gold-light"><Lightbulb className="h-5 w-5" /><strong>Solutions for people</strong></div>
+              <p className="mt-3 text-sm leading-relaxed text-white/70">Personal projects, replacement parts, repairs, adaptations, one-off objects, personalised products and ideas that need a clear path from sketch to reality.</p>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-white/[.07] p-5">
+              <div className="flex items-center gap-3 text-gold-light"><Wrench className="h-5 w-5" /><strong>Solutions for industry</strong></div>
+              <p className="mt-3 text-sm leading-relaxed text-white/70">Product development, prototypes, jigs and tooling, short production runs, process improvement, factory and workspace layout, and manufacturing advice.</p>
+            </div>
+          </div>
+          <p className="mt-5 text-sm leading-relaxed text-white/60">
+            Our goal is not to force every project into 3D printing. We use it where it adds genuine value and recommend alternative production methods when another process offers a better result.
           </p>
           <Link to="/contact" className="mt-8 inline-flex items-center gap-2 rounded-xl bg-gold px-6 py-3.5 text-sm font-bold text-forest-dark shadow-md transition hover:-translate-y-0.5 hover:bg-gold-light">
             Meet us through your project <ChevronRight className="h-4 w-4" />
