@@ -79,6 +79,7 @@ export default function YoushieMe() {
       playFairyChime()
       await new Promise(resolve => window.setTimeout(resolve, 520))
       setGeneratedPhoto(finishedImage)
+      try { sessionStorage.setItem('youshie-order-image', finishedImage) } catch { /* The navigation state still carries the image if browser storage is full. */ }
       setRevealCount(null)
     } catch (generationError) {
       setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')

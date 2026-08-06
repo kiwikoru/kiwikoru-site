@@ -8,7 +8,7 @@ type OrderState = { generatedPhoto?: string }
 
 export default function YoushieOrder() {
   const { state } = useLocation()
-  const generatedPhoto = (state as OrderState | null)?.generatedPhoto
+  const generatedPhoto = (state as OrderState | null)?.generatedPhoto || sessionStorage.getItem('youshie-order-image') || undefined
   const [destination, setDestination] = useState('north')
   const [rural, setRural] = useState(false)
   const productPrice = 30
