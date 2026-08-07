@@ -79,7 +79,7 @@ export default function Quote() {
     await addPrintCartItem({
       id: crypto.randomUUID(), fileName: uploadedFile, file: modelFile, thumbnail, price: totalPrice,
       material: matData.name, color, infill, quality, estimatedVolume, dimensions: modelDimensions,
-      scale: modelScale, createdAt: Date.now(),
+      scale: modelScale, quantity: 1, createdAt: Date.now(),
     });
     setInCart(true);
   };

@@ -11,6 +11,7 @@ export type PrintCartItem = {
   estimatedVolume: number
   dimensions?: { x: number; y: number; z: number }
   scale: number
+  quantity: number
   createdAt: number
 }
 
@@ -42,7 +43,7 @@ const announceUpdate = () => window.dispatchEvent(new CustomEvent(CART_UPDATED_E
 
 export async function listPrintCart(): Promise<PrintCartItem[]> {
   const items = await withStore<PrintCartItem[]>('readonly', store => store.getAll())
-  return items.sort((a, b) => b.createdAt - a.createdAt)
+  return items.map(item => ({ ...item, quantity: Math.max(1, Math.min(99, Number(item.quantity) || 1)) })).sort((a, b) => b.createdAt - a.createdAt)
 }
 
 export async function addPrintCartItem(item: PrintCartItem) {
@@ -55,4 +56,16 @@ export async function removePrintCartItem(id: string) {
   announceUpdate()
 }
 
-export async function getPrintCartCount() { return (await listPrintCart()).length }
+export async function updatePrintCartQuantity(id: string, quantity: number) {
+  const item = await withStore<PrintCartItem | undefined>('readonly', store => store.get(id))
+  if (!item) return
+  await withStore<IDBValidKey>('readwrite', store => store.put({ ...item, quantity: Math.max(1, Math.min(99, Math.round(quantity))) }))
+  announceUpdate()
+}
+
+export async function clearPrintCart() {
+  await withStore<undefined>('readwrite', store => store.clear())
+  announceUpdate()
+}
+
+export async function getPrintCartCount() { return (await listPrintCart()).reduce((total, item) => total + item.quantity, 0) }

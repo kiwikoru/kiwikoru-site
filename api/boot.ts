@@ -19,7 +19,6 @@ app.use("/api/trpc/*", async (c) => {
   });
 });
 app.post("/api/youshie-checkout", (c) => createYoushieCheckout(c.req.raw));
-app.post("/api/youshie-test-checkout", (c) => createYoushieCheckout(c.req.raw, true));
 app.post("/api/print-checkout", (c) => createPrintCheckout(c.req.raw));
 app.post("/api/checkout-confirmation", (c) => confirmCheckout(c.req.raw));
 app.all("/api/*", (c) => c.json({ error: "Not Found" }, 404));

@@ -53,7 +53,7 @@ export default function YoushieOrder() {
       .catch(() => setConfirmation('error'))
   }, [searchParams])
 
-  async function startCheckout(event: React.SyntheticEvent, testPurchase = false) {
+  async function startCheckout(event: React.SyntheticEvent) {
     event.preventDefault()
     if (!generatedPhoto || checkingOut) return
     setCheckingOut(true)
@@ -61,7 +61,7 @@ export default function YoushieOrder() {
 
     try {
       const checkoutImage = await prepareOrderImage(generatedPhoto)
-      const response = await fetch(`/api/stripe-checkout?action=${testPurchase ? 'youshie-test' : 'youshie'}`, {
+      const response = await fetch('/api/stripe-checkout?action=youshie', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ destination, rural, generatedPhoto: checkoutImage, originalPhoto, customer }),
@@ -130,12 +130,6 @@ export default function YoushieOrder() {
           <button type="submit" className="checkout-placeholder" disabled={!generatedPhoto || checkingOut}>
             <Check size={20} /> {checkingOut ? 'Opening secure checkout…' : `Pay NZ$${total.toFixed(2)} securely`}
           </button>
-          <div className="test-checkout-box">
-            <div><strong>Test the complete payment flow</strong><small>This is a real NZ$0.50 Stripe payment. It does not include a figure or delivery.</small></div>
-            <button type="button" onClick={event => startCheckout(event, true)} disabled={!generatedPhoto || checkingOut}>
-              {checkingOut ? 'Opening Stripe…' : 'Make a NZ$0.50 test payment'}
-            </button>
-          </div>
           {!generatedPhoto && <p className="checkout-error">Create your Youshie first so we can attach the correct figure to your order.</p>}
           {checkoutError && <p className="checkout-error" role="alert">{checkoutError}</p>}
           <p className="checkout-note">Secure payment powered by Stripe. Your payment details are never stored by KiwiKoru. For Youshie orders, the original and generated images are kept privately for production.</p>
