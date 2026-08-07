@@ -10,12 +10,14 @@ const magicMessages = [
   'Sculpting your tiny Youshie…',
   'Adding one last touch of magic…',
 ]
+const YOUSHIE_USE_KEY = 'kiwikoru-youshie-single-use-v1'
 
 export default function YoushieMe() {
   const [photo, setPhoto] = useState<string>()
   const [photoFile, setPhotoFile] = useState<File>()
-  const [generatedPhoto, setGeneratedPhoto] = useState<string>()
-  const [originalOrderPhoto, setOriginalOrderPhoto] = useState<string>()
+  const [generatedPhoto, setGeneratedPhoto] = useState<string | undefined>(() => { try { return sessionStorage.getItem('youshie-order-image') || undefined } catch { return undefined } })
+  const [originalOrderPhoto, setOriginalOrderPhoto] = useState<string | undefined>(() => { try { return sessionStorage.getItem('youshie-order-original') || undefined } catch { return undefined } })
+  const [hasUsedMagic, setHasUsedMagic] = useState(() => { try { return localStorage.getItem(YOUSHIE_USE_KEY) === 'used' } catch { return false } })
   const [specialRequest, setSpecialRequest] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string>()
@@ -25,6 +27,11 @@ export default function YoushieMe() {
   const audioRef = useRef<AudioContext | null>(null)
 
   useEffect(() => () => { if (photo) URL.revokeObjectURL(photo) }, [photo])
+  useEffect(() => {
+    const syncUse = (event: StorageEvent) => { if (event.key === YOUSHIE_USE_KEY && event.newValue === 'used') setHasUsedMagic(true) }
+    window.addEventListener('storage', syncUse)
+    return () => window.removeEventListener('storage', syncUse)
+  }, [])
   useEffect(() => {
     if (!creating) { setMagicStep(0); return }
     const timer = window.setInterval(() => setMagicStep(step => Math.min(step + 1, magicMessages.length - 1)), 6500)
@@ -53,7 +60,13 @@ export default function YoushieMe() {
   }
 
   async function createYoushie() {
+    let storedUse = ''
+    try { storedUse = localStorage.getItem(YOUSHIE_USE_KEY) || '' } catch { /* Continue when storage is unavailable. */ }
+    if (hasUsedMagic || storedUse === 'used') { setHasUsedMagic(true); setError('Your one magical Youshie has already been created on this device.'); return }
+    if (storedUse.startsWith('creating:') && Date.now() - Number(storedUse.split(':')[1]) < 120_000) { setError('Your Youshie magic is already happening in another tab. Keep that tab open for the reveal!'); return }
     if (!photoFile) { inputRef.current?.click(); return }
+    const attemptToken = `creating:${Date.now()}:${crypto.randomUUID()}`
+    try { localStorage.setItem(YOUSHIE_USE_KEY, attemptToken) } catch { /* The experience still works if storage is unavailable. */ }
     if (!audioRef.current) audioRef.current = new AudioContext()
     await audioRef.current.resume().catch(() => undefined)
     setCreating(true)
@@ -86,12 +99,15 @@ export default function YoushieMe() {
       await new Promise(resolve => window.setTimeout(resolve, 520))
       setGeneratedPhoto(finishedImage)
       setOriginalOrderPhoto(originalPhoto)
+      try { localStorage.setItem(YOUSHIE_USE_KEY, 'used') } catch { /* Storage may be unavailable in private browsing. */ }
+      setHasUsedMagic(true)
       try {
         sessionStorage.setItem('youshie-order-image', finishedImage)
         sessionStorage.setItem('youshie-order-original', originalPhoto)
       } catch { /* Navigation state still carries both images if browser storage is full. */ }
       setRevealCount(null)
     } catch (generationError) {
+      try { if (localStorage.getItem(YOUSHIE_USE_KEY) === attemptToken) localStorage.removeItem(YOUSHIE_USE_KEY) } catch { /* A failed generation never consumes the attempt. */ }
       setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')
     } finally {
       setCreating(false)
@@ -220,16 +236,16 @@ export default function YoushieMe() {
           <div className="steps"><span><b>1</b> Add a photo</span><span><b>2</b> Watch the magic</span><span><b>3</b> Meet your Youshie</span></div>
         </section>
 
-        <section className={`creator-card ${generatedPhoto ? 'has-generated' : ''}`} aria-label="Youshie creator">
-          <div className="card-heading"><div><small>{generatedPhoto ? 'TA-DA!' : 'YOUR TURN'}</small><h2>{generatedPhoto ? 'Your Youshie!' : 'Youshie Me!'}</h2></div><span className="wiggle">✦</span></div>
-          {!generatedPhoto && <div className="once-message"><Sparkles size={22} /><div><strong>Testing mode is open.</strong><p>Create as many Youshies as you need while we perfect the magic. The final competition experience will return to one surprise creation per person.</p></div></div>}
-          <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} hidden />
-          <button className={`photo-drop ${photo || generatedPhoto ? 'has-photo' : ''} ${generatedPhoto ? 'has-result' : ''}`} onClick={() => !generatedPhoto && inputRef.current?.click()} disabled={creating}>
+        <section className={`creator-card ${generatedPhoto ? 'has-generated' : ''} ${hasUsedMagic && !generatedPhoto ? 'is-used' : ''}`} aria-label="Youshie creator">
+          <div className="card-heading"><div><small>{generatedPhoto ? 'TA-DA!' : hasUsedMagic ? 'YOUR MAGIC MOMENT' : 'YOUR TURN'}</small><h2>{generatedPhoto ? 'Your Youshie!' : hasUsedMagic ? 'Your wish has been used' : 'Youshie Me!'}</h2></div><span className="wiggle">✦</span></div>
+          {!generatedPhoto && <div className={`once-message ${hasUsedMagic ? 'is-used' : ''}`}><Sparkles size={25} /><div><strong>{hasUsedMagic ? 'Your one little wish has already come true.' : 'One wish. One Youshie. One magical reveal.'}</strong><p>{hasUsedMagic ? 'We hope your tiny alter ego made you smile. You can still contact KiwiKoru if you have another idea or a special project.' : 'This experience can be enjoyed only once, so choose a photo you love and make your little wish count. No pressure — just a touch of magic!'}</p></div></div>}
+          <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} disabled={hasUsedMagic} hidden />
+          {hasUsedMagic && !generatedPhoto ? <div className="used-magic-lock"><span>✦</span><strong>Your Youshie magic has been created</strong><small>One unique surprise per device</small></div> : <button className={`photo-drop ${photo || generatedPhoto ? 'has-photo' : ''} ${generatedPhoto ? 'has-result' : ''}`} onClick={() => !generatedPhoto && inputRef.current?.click()} disabled={creating}>
             {generatedPhoto ? <img className="inline-result" src={generatedPhoto} alt="Your generated Youshie collectible" /> : photo ? <img src={photo} alt="Your uploaded portrait" /> : <><span className="upload-icon"><ImagePlus size={30} /></span><strong>Choose your favourite photo</strong><small>Clear, front-facing photos work best</small><span className="browse-pill">Browse photo</span></>}
             {photo && !creating && !generatedPhoto && <span className="change-photo">Change photo</span>}
             {creating && <div className={`magic-stage magic-overlay ${revealCount !== null ? 'is-revealing' : ''}`} aria-live="polite">{revealCount !== null ? <div key={revealCount} className={`magic-count ${revealCount === 'BOOM' ? 'boom' : ''}`}><span>✦</span>{revealCount}<span>✦</span></div> : <><div className="magic-figure"><span>✦</span><span>✦</span><span>✦</span><div className="magic-head" /><div className="magic-body" /></div><strong>{magicMessages[magicStep]}</strong><div className="magic-progress"><i style={{ width: `${25 * (magicStep + 1)}%` }} /></div><small>Please keep this page open. Your reveal can take about a minute.</small></>}</div>}
-          </button>
-          {!generatedPhoto && <div className="special-request">
+          </button>}
+          {!generatedPhoto && !hasUsedMagic && <div className="special-request">
             <div className="request-example"><Sparkles size={15} /><span><b>Funny example:</b> “Dress me like Luke Skywalker… but let me keep my Crocs.”</span></div>
             <label htmlFor="youshie-request">Add one little twist <small>(optional)</small></label>
             <input
@@ -244,9 +260,9 @@ export default function YoushieMe() {
             <span className="request-counter">{specialRequest.length}/180</span>
           </div>}
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
-          <p className="generation-limit">Unlimited testing is temporarily enabled</p>
-          {!generatedPhoto && <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Making magic…</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>}
-          {generatedPhoto && <div className="inline-result-copy"><p>Your framed four-colour collectible concept is ready.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie-kiwikoru.png"><Download size={18} /> Download</a><span className="share-promo"><button onClick={share}><Share2 size={18} /> Share</button><span className="share-bubble"><b>Enter the giveaway!</b> Share for a chance to win your Youshie free or a Youshie stand.</span></span><button className="again" onClick={() => setGeneratedPhoto(undefined)}><Sparkles size={18} /> Try again</button></div><Link className="order-youshie-cta" to="/youshie-order" state={{ generatedPhoto, originalPhoto: originalOrderPhoto }}><ShoppingBag size={24} /><span><strong>Bring your Youshie home</strong><small>Order your real 10 cm collectible</small></span><b>→</b></Link></div>}
+          <p className="generation-limit">One magical creation per device</p>
+          {!generatedPhoto && !hasUsedMagic && <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Making magic…</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>}
+          {generatedPhoto && <div className="inline-result-copy"><p>Your framed four-colour collectible concept is ready — this is your one-of-a-kind Youshie.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie-kiwikoru.png"><Download size={18} /> Download</a><span className="share-promo"><button onClick={share}><Share2 size={18} /> Share</button><span className="share-bubble"><b>Enter the giveaway!</b> Share for a chance to win your Youshie free or a Youshie stand.</span></span></div><Link className="order-youshie-cta" to="/youshie-order" state={{ generatedPhoto, originalPhoto: originalOrderPhoto }}><ShoppingBag size={24} /><span><strong>Bring your Youshie home</strong><small>Order your real 10 cm collectible</small></span><b>→</b></Link></div>}
           {error && <p className="generation-error" role="alert">{error}</p>}
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used to create your Youshie. If you order, the original and generated images are stored privately for production.</p>
         </section>

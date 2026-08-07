@@ -181,14 +181,20 @@
   align-items: flex-start;
   margin: 0 0 22px;
   padding: 15px 17px;
-  border: 1px solid #e3d2fb;
+  border: 2px solid #e7c9ff;
   border-radius: 17px;
   color: #553272;
-  background: linear-gradient(135deg, #f6eeff, #fff8dc);
+  background: linear-gradient(125deg, #f3e6ff 0%, #fff0c7 42%, #ddfbf0 72%, #e8efff 100%);
+  box-shadow: 0 10px 28px rgba(114, 62, 176, .13);
 }
 .once-message > svg { flex: 0 0 auto; color: #e2a915; margin-top: 2px; }
-.once-message strong { font-family: "Baloo 2"; font-size: 17px; }
-.once-message p { margin: 2px 0 0; color: #806993; font-size: 12px; line-height: 1.5; }
+.once-message strong { font-family: "Baloo 2"; font-size: 19px; color: #5b287e; }
+.once-message p { margin: 3px 0 0; color: #674f77; font-size: 13px; line-height: 1.55; }
+.once-message.is-used { background: linear-gradient(135deg, #f1e9fb, #f7f3ff); border-color: #d8c6ec; box-shadow: none; }
+.used-magic-lock { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; border: 2px dashed #d7c4e9; border-radius: 28px; background: #faf7fd; color: #76538e; text-align: center; }
+.used-magic-lock > span { font-size: 38px; color: #e1ad25; }
+.used-magic-lock strong { font-family: "Baloo 2"; font-size: 22px; color: #56326e; }
+.used-magic-lock small { font-weight: 800; color: #987faa; }
 .wiggle {
   font-size: 35px;
   color: #f2bb28;
