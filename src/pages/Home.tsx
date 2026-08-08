@@ -385,7 +385,7 @@ function WhoWeAreSection() {
         <div>
           <span className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-4 py-2 text-xs font-bold uppercase tracking-[.18em] text-gold-light">Who we are</span>
           <h2 className="mt-6 text-3xl font-semibold leading-tight text-white sm:text-4xl lg:text-5xl">More than ten years of interdisciplinary design.</h2>
-          <p className="mt-6 text-lg leading-relaxed text-white/72">
+          <p className="mt-6 text-lg font-medium leading-relaxed text-[#e7d0aa]">
             KiwiKoru 3D is backed by an established interdisciplinary studio bringing together engineers, industrial designers and specialists in business consulting and industrial layout.
           </p>
           <p className="mt-4 leading-relaxed text-white/75">

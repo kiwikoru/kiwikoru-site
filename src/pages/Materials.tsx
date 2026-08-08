@@ -5,6 +5,9 @@ const materials = [
   {
     tag: 'MOST POPULAR',
     tagColor: 'bg-kiwi-base/10 text-kiwi-base',
+    code: 'PLA',
+    spoolColor: '#758247',
+    spoolSoft: '#eef1e2',
     name: 'PLA - Standard',
     desc: 'Our most popular material. Excellent for high-detail models, prototypes, and decorative pieces.',
     bestFor: 'Prototypes, Architectural models, Intricate decor.',
@@ -19,6 +22,9 @@ const materials = [
   {
     tag: 'IMPACT RESISTANT',
     tagColor: 'bg-green-100 text-green-700',
+    code: 'PETG',
+    spoolColor: '#298b78',
+    spoolSoft: '#e2f3ee',
     name: 'PETG - Durable',
     desc: 'A durable, impact-resistant material that bridges the gap between PLA and ABS. Great all-rounder.',
     bestFor: 'Mechanical parts, Brackets, Clips, Outdoor enclosures.',
@@ -33,6 +39,9 @@ const materials = [
   {
     tag: 'WEATHER RESISTANT',
     tagColor: 'bg-blue-100 text-blue-700',
+    code: 'ASA',
+    spoolColor: '#3678a8',
+    spoolSoft: '#e4f0f8',
     name: 'ASA - Outdoor',
     desc: 'UV-stable material perfect for outdoor applications. Maintains colour and strength in sunlight.',
     bestFor: 'Outdoor fixtures, Automotive parts, Marine applications.',
@@ -47,6 +56,9 @@ const materials = [
   {
     tag: 'FLEXIBLE',
     tagColor: 'bg-purple-100 text-purple-700',
+    code: 'TPU',
+    spoolColor: '#7652a6',
+    spoolSoft: '#eee7f7',
     name: 'TPU - Flexible',
     desc: 'Rubber-like flexible filament for parts that need to bend, compress, or absorb impact.',
     bestFor: 'Phone cases, Gaskets, Wearables, Shock dampeners.',
@@ -81,11 +93,20 @@ export default function Materials() {
         {/* Material Cards */}
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           {materials.map((mat) => (
-            <div key={mat.name} className="bg-white rounded-2xl p-6 border border-gray-200 hover:border-kiwi-base/30 hover:shadow-lg transition-all">
+            <div key={mat.name} className="relative bg-white rounded-2xl p-6 border border-gray-200 hover:border-kiwi-base/30 hover:shadow-lg transition-all">
+              <div className="absolute right-5 top-5" aria-hidden="true">
+                <svg viewBox="0 0 72 72" className="h-16 w-16 drop-shadow-sm">
+                  <circle cx="36" cy="36" r="31" fill={mat.spoolSoft} />
+                  <circle cx="36" cy="36" r="25" fill="none" stroke={mat.spoolColor} strokeWidth="6" />
+                  <circle cx="36" cy="36" r="13" fill="white" stroke={mat.spoolColor} strokeWidth="3" />
+                  <path d="M16 27h40M16 45h40" stroke={mat.spoolColor} strokeWidth="2.5" strokeLinecap="round" opacity=".55" />
+                  <text x="36" y="39" textAnchor="middle" fill={mat.spoolColor} fontSize={mat.code.length > 3 ? 8.5 : 10.5} fontWeight="800" fontFamily="Nunito, Arial, sans-serif">{mat.code}</text>
+                </svg>
+              </div>
               <span className={`inline-block px-3 py-1 rounded-full ${mat.tagColor} text-xs font-medium tracking-wide mb-4`}>
                 {mat.tag}
               </span>
-              <h3 className="text-xl font-heading font-semibold text-kiwi-dark mb-3">{mat.name}</h3>
+              <h3 className="text-xl font-heading font-semibold text-kiwi-dark mb-3 pr-16">{mat.name}</h3>
               <p className="text-kiwi-base/60 text-sm mb-6">{mat.desc}</p>
 
               <div className="space-y-4 mb-6">

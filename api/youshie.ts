@@ -108,9 +108,17 @@ export default async function handler(request: IncomingMessage, response: Server
       : ''
 
     let result: GeminiResult = {}
-    let generatedSuccessfully = false
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      const geminiResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-image:generateContent', {
+    let generated: { data?: string; mimeType?: string } | undefined
+    const generationModels = [
+      'gemini-3.1-flash-lite-image',
+      'gemini-3.1-flash-lite-image',
+      'gemini-3.1-flash-image',
+      'gemini-2.5-flash-image',
+      'gemini-3-pro-image',
+    ]
+    for (let attempt = 0; attempt < generationModels.length; attempt += 1) {
+      const model = generationModels[attempt]
+      const geminiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
@@ -120,33 +128,57 @@ export default async function handler(request: IncomingMessage, response: Server
             ...(faceReference ? [{ inlineData: { mimeType: 'image/jpeg', data: faceReference } }] : []),
             { inlineData: { mimeType, data: image } },
           ] }],
-          generationConfig: {
+          generationConfig: model === 'gemini-2.5-flash-image' ? {
+            responseModalities: ['IMAGE'],
+            imageConfig: { aspectRatio: '1:1' },
+          } : model === 'gemini-3-pro-image' ? {
             responseModalities: ['IMAGE'],
             imageConfig: { aspectRatio: '1:1', imageSize: '1K' },
-            thinkingConfig: { thinkingLevel: 'HIGH', includeThoughts: false },
+          } : {
+            responseModalities: ['IMAGE'],
+            imageConfig: { aspectRatio: '1:1', imageSize: '1K' },
+            // Image generation needs only enough reasoning to follow the references.
+            // HIGH can consume the response budget before an image is emitted.
+            thinkingConfig: { thinkingLevel: 'MINIMAL', includeThoughts: false },
           },
         }),
       })
 
       result = await geminiResponse.json() as GeminiResult
-      if (geminiResponse.ok) { generatedSuccessfully = true; break }
-      const retryable = geminiResponse.status === 429 || geminiResponse.status === 503 || /high demand|temporar/i.test(result.error?.message || '')
-      if (!retryable || attempt === 2) throw new Error(result.error?.message || 'Gemini could not generate the image.')
-      await new Promise(resolve => setTimeout(resolve, 1500 * (attempt + 1)))
-    }
-    if (!generatedSuccessfully) throw new Error('Gemini could not generate the image.')
+      if (geminiResponse.ok) {
+        generated = result.candidates?.flatMap(candidate => candidate.content?.parts || [])
+          .find(part => !part.thought && part.inlineData?.data)?.inlineData
+        if (generated?.data) {
+          console.info('Youshie image generated', { model, attempt: attempt + 1 })
+          break
+        }
 
-    const generated = result.candidates?.flatMap(candidate => candidate.content?.parts || [])
-      .find(part => !part.thought && part.inlineData?.data)?.inlineData
-    if (!generated?.data) {
-      const candidate = result.candidates?.[0]
-      const explanation = candidate?.content?.parts?.find(part => part.text && !part.thought)?.text
-      throw new Error(candidate?.finishMessage || explanation || `Gemini returned no image${candidate?.finishReason ? ` (${candidate.finishReason})` : ''}. Try a clearer front-facing photo.`)
+        const candidate = result.candidates?.[0]
+        console.warn('Youshie image response contained no image', {
+          model,
+          attempt: attempt + 1,
+          finishReason: candidate?.finishReason,
+          finishMessage: candidate?.finishMessage,
+        })
+        if (attempt === generationModels.length - 1) {
+          const explanation = candidate?.content?.parts?.find(part => part.text && !part.thought)?.text
+          throw new Error(candidate?.finishMessage || explanation || `Gemini returned no image${candidate?.finishReason ? ` (${candidate.finishReason})` : ''}. Please try again.`)
+        }
+        continue
+      }
+      const retryable = geminiResponse.status === 429 || geminiResponse.status === 503 || /high demand|temporar/i.test(result.error?.message || '')
+      console.warn('Youshie image attempt failed', { model, attempt: attempt + 1, status: geminiResponse.status, retryable, upstreamStatus: result.error?.message })
+      if (!retryable || attempt === generationModels.length - 1) throw new Error(result.error?.message || 'Gemini could not generate the image.')
+      const backoff = Math.min(12_000, 2_000 * 2 ** attempt) + Math.floor(Math.random() * 750)
+      await new Promise(resolve => setTimeout(resolve, backoff))
     }
+    if (!generated?.data) throw new Error('Gemini could not generate the image.')
 
     return send(response, 200, { image: generated.data, mimeType: generated.mimeType || 'image/png' })
   } catch (error) {
     console.error('Youshie generation failed', error)
-    return send(response, 500, { error: error instanceof Error ? error.message : 'Could not create this Youshie.' })
+    const message = error instanceof Error ? error.message : 'Could not create this Youshie.'
+    const status = /high demand|temporar|unavailable/i.test(message) ? 503 : 500
+    return send(response, status, { error: message })
   }
 }

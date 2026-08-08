@@ -191,6 +191,10 @@
 .once-message strong { font-family: "Baloo 2"; font-size: 19px; color: #5b287e; }
 .once-message p { margin: 3px 0 0; color: #674f77; font-size: 13px; line-height: 1.55; }
 .once-message.is-used { background: linear-gradient(135deg, #f1e9fb, #f7f3ff); border-color: #d8c6ec; box-shadow: none; }
+.creator-card.is-testing .once-message:not(.testing-message) { display: none; }
+.testing-message { border-color: #75cda9; background: linear-gradient(125deg, #e3fff3, #f4e8ff 55%, #fff5c9); }
+.testing-message > svg { color: #31a878; }
+.testing-message strong { color: #34745e; }
 .used-magic-lock { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; border: 2px dashed #d7c4e9; border-radius: 28px; background: #faf7fd; color: #76538e; text-align: center; }
 .used-magic-lock > span { font-size: 38px; color: #e1ad25; }
 .used-magic-lock strong { font-family: "Baloo 2"; font-size: 22px; color: #56326e; }
@@ -339,6 +343,8 @@
 .create-button:disabled {
   opacity: 0.75;
 }
+.create-button.test-another { margin-top: 14px; background: linear-gradient(105deg, #efe5fb, #dcf8ef); color: #63379d; box-shadow: 0 10px 24px rgba(99, 55, 157, .16); }
+.create-button.test-another:hover { box-shadow: 0 13px 28px rgba(99, 55, 157, .22); }
 .spinner {
   width: 18px;
   height: 18px;
@@ -459,6 +465,26 @@
 .photo-drop .inline-result { object-fit: contain; background: #f4efe8; }
 .inline-result-copy { text-align: center; padding-top: 18px; }
 .inline-result-copy p { margin: 0; color: #766489; font-size: 13px; }
+.contest-reminder {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-top: 15px;
+  padding: 12px 14px;
+  border: 1px solid #e4b52f;
+  border-radius: 15px;
+  background: linear-gradient(115deg, #fff8c9, #f4e5ff 58%, #e5f6ff);
+  color: #5b3479;
+  box-shadow: 0 9px 24px rgba(111, 55, 181, .14);
+  text-align: left;
+  animation: contest-reminder-in .6s .45s cubic-bezier(.2, .85, .25, 1.15) both;
+}
+.contest-reminder > svg { flex: 0 0 auto; color: #d69b11; filter: drop-shadow(0 2px 4px rgba(214, 155, 17, .25)); }
+.contest-reminder strong,
+.contest-reminder span { display: block; }
+.contest-reminder strong { color: #6b35aa; font: 800 16px/1.2 "Baloo 2"; }
+.contest-reminder span { margin-top: 2px; font-size: 12px; line-height: 1.35; }
+.contest-reminder b { color: #7139bb; }
 .inline-result-copy .result-actions { justify-content: center; margin-top: 14px; }
 .share-promo { position: relative; display: inline-flex; }
 .share-bubble {
@@ -500,6 +526,7 @@
 .order-youshie-cta small { color: rgba(255,255,255,.88); font-size: 11px; }
 .order-youshie-cta b { font-size: 25px; }
 @keyframes inline-result-reveal { from { opacity: .2; transform: scale(.9); filter: blur(9px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes contest-reminder-in { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
 .reveal-magic {
   position: fixed;
   inset: 0;

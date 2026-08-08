@@ -11,13 +11,59 @@ const magicMessages = [
   'Adding one last touch of magic…',
 ]
 const YOUSHIE_USE_KEY = 'kiwikoru-youshie-single-use-v1'
+const MAX_YOUSHIE_CREATIONS = 3
+// Temporary QA switch. Set to false to restore the one-generation experience.
+const ALLOW_REPEAT_GENERATIONS = true
+const YOUSHIES_FACEBOOK_GROUP = 'https://www.facebook.com/share/g/1Fuf4KqqeU/'
+const YOUSHIE_DB_NAME = 'kiwikoru-youshie-gallery'
+const YOUSHIE_STORE_NAME = 'creations'
+const YOUSHIE_LATEST_KEY = 'latest'
+
+type SavedYoushie = { generatedPhoto: string; originalPhoto?: string }
+
+function openYoushieDatabase() {
+  return new Promise<IDBDatabase>((resolve, reject) => {
+    const request = indexedDB.open(YOUSHIE_DB_NAME, 1)
+    request.onupgradeneeded = () => {
+      if (!request.result.objectStoreNames.contains(YOUSHIE_STORE_NAME)) request.result.createObjectStore(YOUSHIE_STORE_NAME)
+    }
+    request.onsuccess = () => resolve(request.result)
+    request.onerror = () => reject(request.error)
+  })
+}
+
+async function loadSavedYoushie() {
+  const database = await openYoushieDatabase()
+  return new Promise<SavedYoushie | undefined>((resolve, reject) => {
+    const request = database.transaction(YOUSHIE_STORE_NAME, 'readonly').objectStore(YOUSHIE_STORE_NAME).get(YOUSHIE_LATEST_KEY)
+    request.onsuccess = () => { database.close(); resolve(request.result as SavedYoushie | undefined) }
+    request.onerror = () => { database.close(); reject(request.error) }
+  })
+}
+
+async function saveYoushie(generatedPhoto: string, originalPhoto?: string) {
+  const database = await openYoushieDatabase()
+  return new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(YOUSHIE_STORE_NAME, 'readwrite')
+    transaction.objectStore(YOUSHIE_STORE_NAME).put({ generatedPhoto, originalPhoto } satisfies SavedYoushie, YOUSHIE_LATEST_KEY)
+    transaction.oncomplete = () => { database.close(); resolve() }
+    transaction.onerror = () => { database.close(); reject(transaction.error) }
+  })
+}
+
+function creationCount(value: string | null) {
+  if (!value) return 0
+  if (value === 'used') return 1
+  const count = Number(value)
+  return Number.isFinite(count) ? Math.max(0, Math.min(MAX_YOUSHIE_CREATIONS, count)) : 0
+}
 
 export default function YoushieMe() {
   const [photo, setPhoto] = useState<string>()
   const [photoFile, setPhotoFile] = useState<File>()
   const [generatedPhoto, setGeneratedPhoto] = useState<string | undefined>(() => { try { return sessionStorage.getItem('youshie-order-image') || undefined } catch { return undefined } })
   const [originalOrderPhoto, setOriginalOrderPhoto] = useState<string | undefined>(() => { try { return sessionStorage.getItem('youshie-order-original') || undefined } catch { return undefined } })
-  const [hasUsedMagic, setHasUsedMagic] = useState(() => { try { return localStorage.getItem(YOUSHIE_USE_KEY) === 'used' } catch { return false } })
+  const [hasUsedMagic, setHasUsedMagic] = useState(() => { if (ALLOW_REPEAT_GENERATIONS) return false; try { return creationCount(localStorage.getItem(YOUSHIE_USE_KEY)) >= MAX_YOUSHIE_CREATIONS } catch { return false } })
   const [specialRequest, setSpecialRequest] = useState('')
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string>()
@@ -28,7 +74,21 @@ export default function YoushieMe() {
 
   useEffect(() => () => { if (photo) URL.revokeObjectURL(photo) }, [photo])
   useEffect(() => {
-    const syncUse = (event: StorageEvent) => { if (event.key === YOUSHIE_USE_KEY && event.newValue === 'used') setHasUsedMagic(true) }
+    let active = true
+    void loadSavedYoushie().then(saved => {
+      if (!active || !saved?.generatedPhoto) return
+      setGeneratedPhoto(current => current || saved.generatedPhoto)
+      setOriginalOrderPhoto(current => current || saved.originalPhoto)
+      try {
+        sessionStorage.setItem('youshie-order-image', saved.generatedPhoto)
+        if (saved.originalPhoto) sessionStorage.setItem('youshie-order-original', saved.originalPhoto)
+      } catch { /* IndexedDB remains the durable source if session storage is full. */ }
+    }).catch(() => undefined)
+    return () => { active = false }
+  }, [])
+  useEffect(() => {
+    if (ALLOW_REPEAT_GENERATIONS) return
+    const syncUse = (event: StorageEvent) => { if (event.key === YOUSHIE_USE_KEY) setHasUsedMagic(creationCount(event.newValue) >= MAX_YOUSHIE_CREATIONS) }
     window.addEventListener('storage', syncUse)
     return () => window.removeEventListener('storage', syncUse)
   }, [])
@@ -61,12 +121,13 @@ export default function YoushieMe() {
 
   async function createYoushie() {
     let storedUse = ''
-    try { storedUse = localStorage.getItem(YOUSHIE_USE_KEY) || '' } catch { /* Continue when storage is unavailable. */ }
-    if (hasUsedMagic || storedUse === 'used') { setHasUsedMagic(true); setError('Your one magical Youshie has already been created on this device.'); return }
-    if (storedUse.startsWith('creating:') && Date.now() - Number(storedUse.split(':')[1]) < 120_000) { setError('Your Youshie magic is already happening in another tab. Keep that tab open for the reveal!'); return }
+    if (!ALLOW_REPEAT_GENERATIONS) try { storedUse = localStorage.getItem(YOUSHIE_USE_KEY) || '' } catch { /* Continue when storage is unavailable. */ }
+    const previousCreations = creationCount(storedUse)
+    if (!ALLOW_REPEAT_GENERATIONS && (hasUsedMagic || previousCreations >= MAX_YOUSHIE_CREATIONS)) { setHasUsedMagic(true); setError('Your magical Youshie experience has already been completed on this device.'); return }
+    if (!ALLOW_REPEAT_GENERATIONS && storedUse.startsWith('creating:') && Date.now() - Number(storedUse.split(':')[1]) < 120_000) { setError('Your Youshie magic is already happening in another tab. Keep that tab open for the reveal!'); return }
     if (!photoFile) { inputRef.current?.click(); return }
-    const attemptToken = `creating:${Date.now()}:${crypto.randomUUID()}`
-    try { localStorage.setItem(YOUSHIE_USE_KEY, attemptToken) } catch { /* The experience still works if storage is unavailable. */ }
+    const attemptToken = `creating:${Date.now()}:${crypto.randomUUID()}:${previousCreations}`
+    if (!ALLOW_REPEAT_GENERATIONS) try { localStorage.setItem(YOUSHIE_USE_KEY, attemptToken) } catch { /* The experience still works if storage is unavailable. */ }
     if (!audioRef.current) audioRef.current = new AudioContext()
     await audioRef.current.resume().catch(() => undefined)
     setCreating(true)
@@ -99,19 +160,38 @@ export default function YoushieMe() {
       await new Promise(resolve => window.setTimeout(resolve, 520))
       setGeneratedPhoto(finishedImage)
       setOriginalOrderPhoto(originalPhoto)
-      try { localStorage.setItem(YOUSHIE_USE_KEY, 'used') } catch { /* Storage may be unavailable in private browsing. */ }
-      setHasUsedMagic(true)
+      await saveYoushie(finishedImage, originalPhoto).catch(() => undefined)
+      if (!ALLOW_REPEAT_GENERATIONS) {
+        const completedCreations = Math.min(MAX_YOUSHIE_CREATIONS, previousCreations + 1)
+        try { localStorage.setItem(YOUSHIE_USE_KEY, String(completedCreations)) } catch { /* Storage may be unavailable in private browsing. */ }
+        setHasUsedMagic(completedCreations >= MAX_YOUSHIE_CREATIONS)
+      }
       try {
         sessionStorage.setItem('youshie-order-image', finishedImage)
         sessionStorage.setItem('youshie-order-original', originalPhoto)
       } catch { /* Navigation state still carries both images if browser storage is full. */ }
       setRevealCount(null)
     } catch (generationError) {
-      try { if (localStorage.getItem(YOUSHIE_USE_KEY) === attemptToken) localStorage.removeItem(YOUSHIE_USE_KEY) } catch { /* A failed generation never consumes the attempt. */ }
+      if (!ALLOW_REPEAT_GENERATIONS) try { if (localStorage.getItem(YOUSHIE_USE_KEY) === attemptToken) { if (previousCreations) localStorage.setItem(YOUSHIE_USE_KEY, String(previousCreations)); else localStorage.removeItem(YOUSHIE_USE_KEY) } } catch { /* A failed generation never consumes the attempt. */ }
       setError(generationError instanceof Error ? generationError.message : 'Could not create your Youshie. Please try again.')
     } finally {
       setCreating(false)
     }
+  }
+
+  function resetForAnotherTest() {
+    if (photo) URL.revokeObjectURL(photo)
+    setPhoto(undefined)
+    setPhotoFile(undefined)
+    setGeneratedPhoto(undefined)
+    setOriginalOrderPhoto(undefined)
+    setSpecialRequest('')
+    setError(undefined)
+    if (inputRef.current) inputRef.current.value = ''
+    try {
+      sessionStorage.removeItem('youshie-order-image')
+      sessionStorage.removeItem('youshie-order-original')
+    } catch { /* Testing can continue when session storage is unavailable. */ }
   }
 
   async function addKiwiKoruFrame(source: string) {
@@ -212,12 +292,6 @@ export default function YoushieMe() {
     })
   }
 
-  async function share() {
-    const data = { title: 'My Youshie', text: 'I made my own Youshie with KiwiKoru 3D!', url: window.location.href }
-    if (navigator.share) await navigator.share(data).catch(() => undefined)
-    else await navigator.clipboard.writeText(window.location.href)
-  }
-
   return (
     <div className="youshie-page">
       <div className="youshie-orb orb-one" /><div className="youshie-orb orb-two" />
@@ -232,11 +306,11 @@ export default function YoushieMe() {
         <section className="youshie-intro">
           <div className="eyebrow"><Sparkles size={16} /> Made for you. Made like you.</div>
           <h1>Meet your little<br /><em>3D alter ego.</em></h1>
-          <p>Upload a photo and watch yourself become a playful, one-of-a-kind Youshie designed with four printable colours.</p>
+          <p>Choose one special photo and watch yourself become a playful, one-of-a-kind Youshie designed with four printable colours.</p>
           <div className="steps"><span><b>1</b> Add a photo</span><span><b>2</b> Watch the magic</span><span><b>3</b> Meet your Youshie</span></div>
         </section>
 
-        <section className={`creator-card ${generatedPhoto ? 'has-generated' : ''} ${hasUsedMagic && !generatedPhoto ? 'is-used' : ''}`} aria-label="Youshie creator">
+        <section className={`creator-card ${generatedPhoto ? 'has-generated' : ''} ${hasUsedMagic && !generatedPhoto ? 'is-used' : ''} ${ALLOW_REPEAT_GENERATIONS ? 'is-testing' : ''}`} aria-label="Youshie creator">
           <div className="card-heading"><div><small>{generatedPhoto ? 'TA-DA!' : hasUsedMagic ? 'YOUR MAGIC MOMENT' : 'YOUR TURN'}</small><h2>{generatedPhoto ? 'Your Youshie!' : hasUsedMagic ? 'Your wish has been used' : 'Youshie Me!'}</h2></div><span className="wiggle">✦</span></div>
           {!generatedPhoto && <div className={`once-message ${hasUsedMagic ? 'is-used' : ''}`}><Sparkles size={25} /><div><strong>{hasUsedMagic ? 'Your one little wish has already come true.' : 'One wish. One Youshie. One magical reveal.'}</strong><p>{hasUsedMagic ? 'We hope your tiny alter ego made you smile. You can still contact KiwiKoru if you have another idea or a special project.' : 'This experience can be enjoyed only once, so choose a photo you love and make your little wish count. No pressure — just a touch of magic!'}</p></div></div>}
           <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={choosePhoto} disabled={hasUsedMagic} hidden />
@@ -262,7 +336,8 @@ export default function YoushieMe() {
           <div className="four-colour-badge"><span>4</span><div><strong>Four-colour ready</strong><small>Designed with real 3D printing in mind</small></div></div>
           <p className="generation-limit">One magical creation per device</p>
           {!generatedPhoto && !hasUsedMagic && <button className="create-button" onClick={createYoushie} disabled={creating}>{creating ? <><span className="spinner" /> Making magic…</> : <><Sparkles size={20} /> {photo ? 'Youshify me!' : 'Add a photo to begin'}</>}</button>}
-          {generatedPhoto && <div className="inline-result-copy"><p>Your framed four-colour collectible concept is ready — this is your one-of-a-kind Youshie.</p><div className="result-actions"><a href={generatedPhoto} download="my-youshie-kiwikoru.png"><Download size={18} /> Download</a><span className="share-promo"><button onClick={share}><Share2 size={18} /> Share</button><span className="share-bubble"><b>Enter the giveaway!</b> Share for a chance to win your Youshie free or a Youshie stand.</span></span></div><Link className="order-youshie-cta" to="/youshie-order" state={{ generatedPhoto, originalPhoto: originalOrderPhoto }}><ShoppingBag size={24} /><span><strong>Bring your Youshie home</strong><small>Order your real 10 cm collectible</small></span><b>→</b></Link></div>}
+          {generatedPhoto && <div className="inline-result-copy"><p>Your framed four-colour collectible concept is ready — this is your one-of-a-kind Youshie.</p><div className="contest-reminder"><Sparkles size={22} /><div><strong>Remember to share your photo!</strong><span>Post it in our official Youshies Facebook group and enter the competition by tapping <b>Participate in the competition</b>.</span></div></div><div className="result-actions"><a href={generatedPhoto} download="my-youshie-kiwikoru.png"><Download size={18} /> Download</a><span className="share-promo"><a href={YOUSHIES_FACEBOOK_GROUP} target="_blank" rel="noopener noreferrer"><Share2 size={18} /> Participate in the competition</a><span className="share-bubble"><b>Enter the giveaway!</b> Facebook will open the official group so you can publish your Youshie and participate.</span></span></div><Link className="order-youshie-cta" to="/youshie-order" state={{ generatedPhoto, originalPhoto: originalOrderPhoto }}><ShoppingBag size={24} /><span><strong>Bring your Youshie home</strong><small>Order your real 10 cm collectible</small></span><b>→</b></Link></div>}
+          {generatedPhoto && (ALLOW_REPEAT_GENERATIONS || !hasUsedMagic) && <button className="create-button test-another" onClick={resetForAnotherTest}><Sparkles size={18} /> Try another photo</button>}
           {error && <p className="generation-error" role="alert">{error}</p>}
           <p className="gemini-note"><span className="gemini-star">✦</span> Powered by Gemini AI · Your photo is used to create your Youshie. If you order, the original and generated images are stored privately for production.</p>
         </section>
