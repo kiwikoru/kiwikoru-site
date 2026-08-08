@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/youshie-me",
+      "destination": "/youshie-me.html"
+    },
+    {
+      "source": "/((?!api/|images/|assets/).*)",
       "destination": "/index.html"
     }
   ]
