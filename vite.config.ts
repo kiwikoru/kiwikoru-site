@@ -3,16 +3,23 @@ import path from "path"
 const __dirname = import.meta.dirname
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
-import { inspectAttr } from 'kimi-plugin-inspect-react'
+import { inspectAttr } from "kimi-plugin-inspect-react"
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
-    devServer({ entry: "api/boot.ts", exclude: [/^\/(?!api\/).*$/] }),
-    inspectAttr(), react()],
+    devServer({
+      entry: "api/boot.ts",
+      exclude: [/^\/(?!api\/).*$/],
+    }),
+    inspectAttr(),
+    react(),
+  ],
+
   server: {
     port: 3000,
   },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -21,9 +28,18 @@ export default defineConfig({
       "db": path.resolve(__dirname, "./db"),
     },
   },
+
   envDir: path.resolve(__dirname),
+
   build: {
     outDir: path.resolve(__dirname, "dist/public"),
     emptyOutDir: true,
+
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        youshieMe: path.resolve(__dirname, "youshie-me.html"),
+      },
+    },
   },
-});
+})
