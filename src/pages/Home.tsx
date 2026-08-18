@@ -85,7 +85,7 @@ function HeroSection() {
           <div className="hero-card flex justify-center lg:justify-end">
             <div className="relative w-full max-w-sm pt-36">
               {/* The opaque quote card cleanly crops the mascot in front. */}
-              <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 z-0 h-[178px] w-[280px] -translate-x-1/2 overflow-hidden">
+              <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 z-0 h-36 w-[214px] -translate-x-1/2 -rotate-3 overflow-hidden">
                 <img
                   src="/images/kiwikoru-mascot-peek.png"
                   alt=""
