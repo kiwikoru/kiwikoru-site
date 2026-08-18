@@ -6,6 +6,7 @@ import { CART_UPDATED_EVENT, getPrintCartCount } from '../lib/printCart'
 
 const pageLinks = [
   { label: 'Home', path: '/' },
+  { label: 'Working Smarter Consulting', path: '/working-smarter-consulting' },
   { label: 'Services', path: '/services' },
   { label: 'Materials', path: '/materials' },
   { label: 'Contact', path: '/contact' },
@@ -76,6 +77,9 @@ export default function Navbar() {
 
           {/* Desktop Nav: Home, Services, Projects, Materials, Contact */}
           <div className="hidden md:flex items-center gap-7" role="menubar">
+            <Link to="/working-smarter-consulting" role="menuitem" className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${location.pathname === '/working-smarter-consulting' ? 'border-gold bg-gold/15 text-gold' : 'border-white/20 text-white/80 hover:border-gold/60 hover:text-gold'}`}>
+              Working Smarter Consulting
+            </Link>
             <Link to="/" role="menuitem" className={`relative text-sm font-medium tracking-[0.06em] transition-colors duration-300 focus-gold py-1 ${location.pathname === '/' ? 'text-gold' : 'text-white/80 hover:text-gold'}`}>
               Home
               {location.pathname === '/' && <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold rounded-full" />}
