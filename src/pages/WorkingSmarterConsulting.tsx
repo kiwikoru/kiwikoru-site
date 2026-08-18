@@ -1,24 +1,24 @@
 import { Link } from 'react-router-dom'
 import {
-  ArrowDown, ArrowRight, BookOpen, Boxes, Brain, Check, CircleGauge,
+  ArrowDown, ArrowLeft, ArrowRight, BookOpen, Brain, Check, CircleGauge,
   Factory, GraduationCap, Network, Search, Settings2, Sparkles, Users,
 } from 'lucide-react'
 import './WorkingSmarterConsulting.css'
 
 const pillars = [
-  { label: 'Process', title: 'Make work simpler and more consistent.', icon: Network, items: ['Process mapping', 'Standardisation', 'Roles & responsibilities', 'SOP development', 'Workflow improvement'] },
-  { label: 'Knowledge', title: 'Turn experience into organisational knowledge.', icon: BookOpen, items: ['Critical knowledge capture', 'Expert interviews', 'Documentation systems', 'Manuals, guides & checklists', 'Knowledge repositories'] },
-  { label: 'Capability', title: 'Build teams that can perform without constant supervision.', icon: GraduationCap, items: ['Training systems', 'Onboarding', 'Workshops', 'Knowledge transfer', 'Internal capability development'] },
+  { label: 'Process', title: 'Make work simpler and more consistent.', icon: Network, items: ['Map the real work', 'Clarify roles', 'Create practical standards'] },
+  { label: 'Knowledge', title: 'Turn experience into organisational knowledge.', icon: BookOpen, items: ['Capture critical know-how', 'Build useful documentation', 'Make knowledge accessible'] },
+  { label: 'Capability', title: 'Build teams that perform with confidence.', icon: GraduationCap, items: ['Strengthen onboarding', 'Transfer knowledge', 'Build internal capability'] },
 ]
 
-const outcomes = ['Less dependence on key people', 'Faster onboarding', 'Fewer errors and less rework', 'More consistent delivery', 'Better operational visibility', 'Reduced administrative friction', 'Knowledge retained inside the business', 'Less management firefighting', 'Systems capable of supporting growth']
+const outcomes = ['Less dependence on key people', 'Faster onboarding', 'Fewer errors and less rework', 'More consistent delivery', 'Knowledge retained in the business', 'Systems ready to support growth']
 
 const services = [
-  { number: '01', title: 'Operational Health Check', description: 'A practical diagnostic of how the organisation currently works, where operational risk exists and where improvement will create the greatest impact.', includes: 'Interviews · Process analysis · Risk identification · Documentation review', delivers: 'Executive report · Opportunity map · Prioritised recommendations' },
-  { number: '02', title: 'Process Improvement', description: 'Design clearer, more consistent ways of working that reduce friction, errors and unnecessary effort.', includes: 'Process mapping · BPMN where useful · SOPs · Roles and responsibilities · Workflow redesign', delivers: 'Documented processes · Operating procedures · Practical management tools' },
-  { number: '03', title: 'Knowledge Management', description: 'Capture critical know-how before it becomes a business risk.', includes: 'Expert interviews · Critical knowledge capture · Repository design · Documentation standards', delivers: 'Manuals · Guides · Checklists · Knowledge bases' },
-  { number: '04', title: 'Capability Development', description: 'Build internal capability so improvements continue after the consulting engagement ends.', includes: 'Workshops · Training · Onboarding · Knowledge transfer', delivers: 'Training material · Induction programmes · Learning pathways' },
-  { number: '05', title: 'Business Operations Advisory', description: 'Ongoing practical support for businesses that need operational improvement capability without hiring a full-time internal specialist.', includes: 'Periodic reviews · Improvement follow-up · Documentation support · Workshop facilitation', delivers: 'A practical, ongoing advisory relationship' },
+  { number: '01', title: 'Operational Health Check', description: 'See how work happens, where risk sits and what to improve first.', icon: Search },
+  { number: '02', title: 'Process Improvement', description: 'Create clearer workflows that reduce friction, errors and wasted effort.', icon: Network },
+  { number: '03', title: 'Knowledge Management', description: 'Capture critical know-how before it becomes a business risk.', icon: Brain },
+  { number: '04', title: 'Capability Development', description: 'Give teams the tools, training and confidence to sustain improvements.', icon: GraduationCap },
+  { number: '05', title: 'Operations Advisory', description: 'Ongoing, practical improvement support without a full-time specialist.', icon: Users },
 ]
 
 const steps = [
@@ -38,6 +38,8 @@ const engagements = [
 export default function WorkingSmarterConsulting() {
   return (
     <div className="working-smarter-page">
+      <Link to="/" className="wsc-back" aria-label="Back to KiwiKoru"><ArrowLeft size={19} /></Link>
+      <img src="/images/working-smarter-logo.png" alt="Working Smarter Consulting — Strategy that moves you forward" className="wsc-brand" />
       <section className="h-screen w-full overflow-hidden relative flex items-end" aria-labelledby="wsc-hero-title">
         <video className="absolute inset-0 h-full w-full object-cover" autoPlay muted loop playsInline aria-hidden="true">
           <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260703_053131_1ec3dd1c-d627-44fb-ab20-6e1fce41b0d5.mp4" type="video/mp4" />
@@ -63,7 +65,7 @@ export default function WorkingSmarterConsulting() {
           <div>
             <p className="wsc-kicker">The problem</p>
             <h2 className="wsc-heading">Growing businesses often outgrow the way they work.</h2>
-            <p className="wsc-copy mt-6">As organisations grow, processes that once worked informally begin to create friction. Knowledge becomes concentrated in a few people. Training becomes inconsistent. Procedures live in people's heads. Owners and managers become trapped in day-to-day operations.</p>
+            <p className="wsc-copy mt-6">Growth exposes informal processes. Knowledge sits with a few people, training varies and managers get pulled into daily firefighting.</p>
           </div>
           <div className="space-y-4">
             {['Everything depends on a few people.', "We're growing faster than our systems.", 'We know things need to improve, but nobody has time to fix them.'].map((quote, index) => (
@@ -108,13 +110,7 @@ export default function WorkingSmarterConsulting() {
         <div className="wsc-shell">
           <p className="wsc-kicker">Services</p><h2 className="wsc-heading max-w-3xl">Practical support, from first diagnosis to lasting capability.</h2>
           <div className="mt-14 border-t border-[#18231d]/15">
-            {services.map(service => (
-              <article key={service.number} className="wsc-service">
-                <span className="text-sm text-[#617066]">{service.number}</span>
-                <div><h3 className="text-2xl font-medium">{service.title}</h3><p className="mt-3 max-w-2xl text-[#4e5d54]">{service.description}</p></div>
-                <div className="text-sm leading-relaxed text-[#617066]"><b className="block text-[#18231d]">Includes</b>{service.includes}<b className="mt-3 block text-[#18231d]">Deliverables</b>{service.delivers}</div>
-              </article>
-            ))}
+            {services.map(({ number, title, description, icon: Icon }) => <article key={number} className="wsc-service"><span className="wsc-service-icon"><Icon size={21} /></span><div><span className="text-xs text-[#7c8980]">{number}</span><h3 className="mt-2 text-2xl font-semibold">{title}</h3><p className="mt-3 max-w-xl text-[#5b695f]">{description}</p></div><ArrowRight className="self-center text-[#88968d]" /></article>)}
           </div>
           <Link to="/contact" className="mt-8 inline-flex items-center gap-2 text-sm font-semibold underline decoration-[#9daa9f] underline-offset-8">Start with a Health Check <ArrowRight size={16} /></Link>
         </div>

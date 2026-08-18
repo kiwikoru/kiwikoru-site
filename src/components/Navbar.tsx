@@ -77,7 +77,7 @@ export default function Navbar() {
 
           {/* Desktop Nav: Home, Services, Projects, Materials, Contact */}
           <div className="hidden md:flex items-center gap-7" role="menubar">
-            <Link to="/working-smarter-consulting" role="menuitem" className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${location.pathname === '/working-smarter-consulting' ? 'border-gold bg-gold/15 text-gold' : 'border-white/20 text-white/80 hover:border-gold/60 hover:text-gold'}`}>
+            <Link to="/working-smarter-consulting" role="menuitem" className={`rounded-full border-2 px-4 py-2 text-xs font-black tracking-[.02em] shadow-sm transition-all hover:-translate-y-0.5 ${location.pathname === '/working-smarter-consulting' ? 'border-gold bg-gold/20 text-gold' : 'border-gold/55 bg-gold/10 text-gold-light hover:border-gold hover:bg-gold/20'}`}>
               Working Smarter Consulting
             </Link>
             <Link to="/" role="menuitem" className={`relative text-sm font-medium tracking-[0.06em] transition-colors duration-300 focus-gold py-1 ${location.pathname === '/' ? 'text-gold' : 'text-white/80 hover:text-gold'}`}>
