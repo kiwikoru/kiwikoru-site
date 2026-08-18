@@ -84,12 +84,12 @@ function HeroSection() {
           {/* Right - Quote Card */}
           <div className="hero-card flex justify-center lg:justify-end">
             <div className="relative w-full max-w-sm pt-36">
-              {/* One 3D render overlaps the card edge so body, beak and flippers stay cohesive. */}
-              <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 z-20 h-[190px] w-[280px] -translate-x-1/2 overflow-hidden">
+              {/* The opaque quote card cleanly crops the mascot in front. */}
+              <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 z-0 h-[178px] w-[280px] -translate-x-1/2 overflow-hidden">
                 <img
                   src="/images/kiwikoru-mascot-peek.png"
                   alt=""
-                  className="h-auto w-full select-none object-top drop-shadow-[0_14px_18px_rgba(0,0,0,.4)] [clip-path:polygon(36%_0,64%_0,78%_8%,88%_25%,93%_55%,100%_76%,100%_91%,91%_100%,76%_100%,66%_91%,57%_88%,53%_100%,47%_100%,43%_88%,34%_91%,24%_100%,9%_100%,0_91%,0_76%,7%_55%,12%_25%,22%_8%)]"
+                  className="h-auto w-full select-none object-top drop-shadow-[0_14px_18px_rgba(0,0,0,.4)]"
                 />
               </div>
               <Link
