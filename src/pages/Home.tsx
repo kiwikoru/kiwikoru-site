@@ -84,12 +84,12 @@ function HeroSection() {
           {/* Right - Quote Card */}
           <div className="hero-card flex justify-center lg:justify-end">
             <div className="relative w-full max-w-sm pt-36">
-              {/* Mascot body sits behind the quote card. */}
-              <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 z-0 h-44 w-[310px] -translate-x-1/2 overflow-hidden rounded-t-[45%]">
+              {/* One 3D render overlaps the card edge so body, beak and flippers stay cohesive. */}
+              <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-0 z-20 h-[190px] w-[280px] -translate-x-1/2 overflow-hidden">
                 <img
                   src="/images/kiwikoru-mascot-peek.png"
                   alt=""
-                  className="h-auto w-full select-none object-top drop-shadow-[0_14px_18px_rgba(0,0,0,.4)]"
+                  className="h-auto w-full select-none object-top drop-shadow-[0_14px_18px_rgba(0,0,0,.4)] [clip-path:polygon(36%_0,64%_0,78%_8%,88%_25%,93%_55%,100%_76%,100%_91%,91%_100%,76%_100%,66%_91%,57%_88%,53%_100%,47%_100%,43%_88%,34%_91%,24%_100%,9%_100%,0_91%,0_76%,7%_55%,12%_25%,22%_8%)]"
                 />
               </div>
               <Link
@@ -109,17 +109,6 @@ function HeroSection() {
                   <ArrowRight className="w-5 h-5" />
                 </div>
               </Link>
-
-              {/* Hands and beak sit in front so the mascot visibly grips the card. */}
-              <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[124px] z-20">
-                <div className="absolute left-5 top-0 flex h-12 w-[70px] items-end justify-center gap-1 rounded-[48%_48%_42%_42%] bg-[linear-gradient(145deg,#a2a141,#596326)] shadow-[inset_5px_5px_8px_rgba(255,244,131,.18),4px_7px_9px_rgba(0,0,0,.38)]">
-                  <span className="mb-1 h-7 w-3 rounded-full bg-black/10" /><span className="mb-0.5 h-8 w-3 rounded-full bg-black/10" /><span className="mb-1 h-7 w-3 rounded-full bg-black/10" />
-                </div>
-                <div className="absolute right-5 top-0 flex h-12 w-[70px] items-end justify-center gap-1 rounded-[48%_48%_42%_42%] bg-[linear-gradient(215deg,#a2a141,#596326)] shadow-[inset_-5px_5px_8px_rgba(255,244,131,.18),-4px_7px_9px_rgba(0,0,0,.38)]">
-                  <span className="mb-1 h-7 w-3 rounded-full bg-black/10" /><span className="mb-0.5 h-8 w-3 rounded-full bg-black/10" /><span className="mb-1 h-7 w-3 rounded-full bg-black/10" />
-                </div>
-                <div className="absolute left-1/2 top-0 h-[76px] w-7 -translate-x-1/2 bg-[linear-gradient(100deg,#d8d3bd_0%,#fffdf2_45%,#d8d4c3_100%)] shadow-[3px_7px_8px_rgba(0,0,0,.3)] [clip-path:polygon(7%_0,93%_0,55%_100%,45%_100%)]" />
-              </div>
             </div>
           </div>
         </div>
