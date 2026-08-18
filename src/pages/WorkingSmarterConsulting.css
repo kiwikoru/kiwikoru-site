@@ -21,7 +21,7 @@
 .working-smarter-page .wsc-button:hover { transform: translateY(-2px); }
 .working-smarter-page .wsc-back { position: fixed; z-index: 60; top: 1.25rem; left: 1.25rem; display: grid; width: 2.75rem; height: 2.75rem; place-items: center; border: 1px solid rgba(255,255,255,.45); border-radius: 999px; background: rgba(12,25,18,.3); color: white; backdrop-filter: blur(10px); transition: transform .2s ease, background .2s ease; }
 .working-smarter-page .wsc-back:hover { transform: translateX(-2px); background: rgba(12,25,18,.55); }
-.working-smarter-page .wsc-brand { position: absolute; z-index: 30; top: 2rem; right: clamp(4rem, 10vw, 9rem); width: min(22rem, 30vw); height: auto; filter: hue-rotate(-48deg) saturate(1.2) drop-shadow(0 4px 16px rgba(0,0,0,.22)); }
+.working-smarter-page .wsc-brand { position: absolute; z-index: 30; top: 2rem; right: clamp(10rem, 38vw, 24rem); width: min(22rem, 30vw); height: auto; filter: drop-shadow(0 4px 16px rgba(0,0,0,.22)); }
 .working-smarter-page .wsc-hero-shade { background: linear-gradient(90deg, rgba(7,16,11,.76) 0%, rgba(7,16,11,.28) 52%, rgba(7,16,11,.08) 100%), linear-gradient(0deg, rgba(7,16,11,.48), transparent 58%); }
 .working-smarter-page .wsc-quote { border: 1px solid rgba(24,35,29,.12); border-radius: 1.5rem; background: rgba(255,255,255,.7); padding: 1.5rem 1.7rem; font-size: clamp(1.15rem, 2vw, 1.55rem); line-height: 1.35; box-shadow: 0 18px 50px rgba(24,35,29,.06); }
 .working-smarter-page .wsc-pillar { min-height: 31rem; border: 1px solid rgba(255,255,255,.1); border-radius: 2rem; padding: 2rem; }
@@ -45,7 +45,6 @@
 .working-smarter-page .liquid-glass::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1.4px; background: linear-gradient(180deg,rgba(255,255,255,.45) 0%,rgba(255,255,255,.15) 20%,rgba(255,255,255,0) 40%,rgba(255,255,255,0) 60%,rgba(255,255,255,.15) 80%,rgba(255,255,255,.45) 100%); -webkit-mask: linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
 
 @media (min-width: 768px) {
-  .working-smarter-page .wsc-hero-video { height: 106%; transform: translateY(6%); }
   .working-smarter-page .wsc-hero-content { transform: translateX(-1.5rem); }
   .working-smarter-page .wsc-outcome:nth-child(odd) { border-right: 1px solid rgba(24,35,29,.12); }
 }
