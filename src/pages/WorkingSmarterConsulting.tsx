@@ -39,14 +39,14 @@ export default function WorkingSmarterConsulting() {
   return (
     <div className="working-smarter-page">
       <Link to="/" className="wsc-back" aria-label="Back to KiwiKoru"><ArrowLeft size={19} /></Link>
-      <img src="/images/working-smarter-logo.png" alt="Working Smarter Consulting — Strategy that moves you forward" className="wsc-brand" />
+      <img src="/images/working-smarter-logo-light.png" alt="Working Smarter Consulting — Strategy that moves you forward" className="wsc-brand" />
       <section className="h-screen w-full overflow-hidden relative flex items-end" aria-labelledby="wsc-hero-title">
         <video className="absolute inset-0 h-full w-full object-cover" autoPlay muted loop playsInline aria-hidden="true">
           <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260703_053131_1ec3dd1c-d627-44fb-ab20-6e1fce41b0d5.mp4" type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/10" />
         <div className="absolute inset-0 wsc-hero-shade" />
-        <div className="relative z-10 mx-auto w-full max-w-[1280px] px-6 pb-14 pt-28 sm:px-10 md:pb-20 lg:px-14">
+        <div className="wsc-hero-content relative z-10 mx-auto w-full max-w-[1280px] px-6 pb-14 pt-28 sm:px-10 md:pb-20 lg:px-14">
           <p className="wsc-eyebrow text-white/80">Working Smarter Consulting</p>
           <h1 id="wsc-hero-title" className="mt-5 max-w-5xl text-3xl font-medium leading-[1.05] tracking-[-0.02em] text-white sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl">
             Less chaos.<br /><span className="text-white/60">Smarter systems.</span><br />Better business.
