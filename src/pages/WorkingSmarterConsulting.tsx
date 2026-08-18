@@ -39,7 +39,10 @@ export default function WorkingSmarterConsulting() {
   return (
     <div className="working-smarter-page">
       <Link to="/" className="wsc-back" aria-label="Back to KiwiKoru"><ArrowLeft size={19} /></Link>
-      <img src="/images/working-smarter-logo-orange.png" alt="Working Smarter Consulting — Strategy that moves you forward" className="wsc-brand" />
+      <div className="wsc-brand" role="img" aria-label="Working Smarter Consulting — Strategy that moves you forward">
+        <img src="/images/working-smarter-logo-orange-base.png" alt="" className="wsc-brand-base" />
+        <img src="/images/working-smarter-compass-needle.png" alt="" className="wsc-brand-needle" aria-hidden="true" />
+      </div>
       <section className="h-screen w-full overflow-hidden relative flex items-end" aria-labelledby="wsc-hero-title">
         <video className="absolute inset-0 h-full w-full object-cover" autoPlay muted loop playsInline aria-hidden="true">
           <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260703_053131_1ec3dd1c-d627-44fb-ab20-6e1fce41b0d5.mp4" type="video/mp4" />
