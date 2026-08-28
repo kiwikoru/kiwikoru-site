@@ -10,6 +10,7 @@ import PrintOrder from './pages/PrintOrder'
 import PrintCategory from './pages/PrintCategory'
 import Cart from './pages/Cart'
 import WorkingSmarterConsulting from './pages/WorkingSmarterConsulting'
+import WorkingSmarterLab from './pages/WorkingSmarterLab'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/print-order" element={<PrintOrder />} />
           <Route path="/what-we-print/:category" element={<PrintCategory />} />
           <Route path="/working-smarter-consulting" element={<WorkingSmarterConsulting />} />
+          <Route path="/working-smarter-lab" element={<WorkingSmarterLab />} />
         </Routes>
       </PageLayout>
     </>

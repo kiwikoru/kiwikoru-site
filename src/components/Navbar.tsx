@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Menu, ShoppingCart, X } from 'lucide-react'
+import { FlaskConical, Menu, ShoppingCart, X } from 'lucide-react'
 import { WhatsAppLogo, WHATSAPP_URL } from './WhatsAppFloat'
 import { CART_UPDATED_EVENT, getPrintCartCount } from '../lib/printCart'
 
 const pageLinks = [
   { label: 'Home', path: '/' },
   { label: 'Working Smarter Consulting', path: '/working-smarter-consulting' },
+  { label: 'B.Smarter Design Lab', path: '/working-smarter-lab' },
   { label: 'Services', path: '/services' },
   { label: 'Materials', path: '/materials' },
   { label: 'Contact', path: '/contact' },
@@ -103,6 +104,9 @@ export default function Navbar() {
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-3">
+            <Link to="/working-smarter-lab" aria-label="Open the temporary B.Smarter design lab" title="B.Smarter design lab" className={`relative flex h-8 w-8 items-center justify-center rounded-full border transition-all hover:-translate-y-0.5 focus-gold ${location.pathname === '/working-smarter-lab' ? 'border-gold bg-gold/20 text-gold' : 'border-white/15 bg-white/5 text-white/45 hover:border-gold/60 hover:text-gold'}`}>
+              <FlaskConical className="h-3.5 w-3.5" />
+            </Link>
             <Link to="/cart" aria-label={`Open shopping cart with ${cartCount} items`} title="Shopping cart" className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gold/35 bg-white/10 text-white shadow-md transition-all hover:-translate-y-0.5 hover:border-gold hover:bg-white/15 hover:text-gold focus-gold">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-[10px] font-black text-forest-dark">{cartCount}</span>}
