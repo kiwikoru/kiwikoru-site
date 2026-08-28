@@ -1,4 +1,4 @@
-import { ArrowUpRight, FlaskConical, LockKeyhole } from 'lucide-react'
+import { ArrowUpRight, ExternalLink, FlaskConical } from 'lucide-react'
 
 const concepts = [
   {
@@ -6,7 +6,7 @@ const concepts = [
     title: 'Editorial clarity',
     influence: 'Kononenko direction',
     description: 'Quiet authority, generous space and a restrained consulting tone.',
-    url: 'https://bsmarter-kononenko-concept.rodrigocastagnodecol.chatgpt.site',
+    url: 'https://bsmarter-01-editorial.vercel.app',
     surface: 'bg-[#f0ede6]',
     ink: 'text-[#171714]',
     accent: 'bg-[#c7d3be]',
@@ -16,7 +16,7 @@ const concepts = [
     title: 'Signal system',
     influence: 'Aspen direction',
     description: 'A sharp editorial grid with focused pixel interaction around AI.',
-    url: 'https://bsmarter-aspen-concept.rodrigocastagnodecol.chatgpt.site',
+    url: 'https://bsmarter-02-aspen.vercel.app',
     surface: 'bg-[#f6f6f3]',
     ink: 'text-[#191a18]',
     accent: 'bg-[#98f3ca]',
@@ -26,7 +26,7 @@ const concepts = [
     title: 'Polished systems',
     influence: 'ORGNZM direction',
     description: 'Warm, tactile and conceptual: the stone is polished into a useful system.',
-    url: 'https://bsmarter-orgnzm-concept.rodrigocastagnodecol.chatgpt.site',
+    url: 'https://bsmarter-03-stone.vercel.app',
     surface: 'bg-[#d8ccb9]',
     ink: 'text-[#302a24]',
     accent: 'bg-[#a8b695]',
@@ -36,7 +36,7 @@ const concepts = [
     title: 'Dream smart',
     influence: 'Interactive product direction',
     description: 'A vivid, agile experience with practical tools, assistant demos and colour.',
-    url: 'https://bsmarter-dream-concept.rodrigocastagnodecol.chatgpt.site',
+    url: 'https://bsmarter-04-dream.vercel.app',
     surface: 'bg-[#0b0c13]',
     ink: 'text-white',
     accent: 'bg-[#bcff74]',
@@ -46,7 +46,7 @@ const concepts = [
     title: 'Architecture of work',
     influence: 'Aircenter direction',
     description: 'Monumental typography and a layered sculpture built around B.Smarter’s identity.',
-    url: 'https://bsmarter-air-concept.rodrigocastagnodecol.chatgpt.site',
+    url: 'https://bsmarter-05-architecture.vercel.app',
     surface: 'bg-[#f7f7f4]',
     ink: 'text-[#090a09]',
     accent: 'bg-[#a8c58b]',
@@ -78,7 +78,7 @@ export default function WorkingSmarterLab() {
       <section className="mx-auto max-w-[1400px] px-5 py-12 sm:px-8 lg:px-12 lg:py-20">
         <div className="mb-8 flex items-center justify-between gap-5 border-b border-[#17231c]/25 pb-5">
           <p className="text-xs font-bold uppercase tracking-[.14em]">Select a direction</p>
-          <p className="flex items-center gap-2 text-xs text-[#66705f]"><LockKeyhole className="h-3.5 w-3.5" /> Private concept links</p>
+          <p className="flex items-center gap-2 text-xs text-[#66705f]"><ExternalLink className="h-3.5 w-3.5" /> Public Vercel previews</p>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-2">
@@ -115,7 +115,7 @@ export default function WorkingSmarterLab() {
       <section className="mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-12">
         <div className="rounded-3xl border border-[#d7c6a4] bg-[#eee4d2] px-6 py-8 sm:px-9">
           <p className="text-xs leading-relaxed text-[#5e513f]">
-            This page is a temporary design-review space. It does not change KiwiKoru’s products, services, ordering experience or customer journeys.
+            This is a temporary design-review space. Each concept opens directly as a public Vercel page, without a ChatGPT sign-in. KiwiKoru’s products, services, ordering experience and customer journeys remain unchanged.
           </p>
         </div>
       </section>
