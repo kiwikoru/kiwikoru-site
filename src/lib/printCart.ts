@@ -9,6 +9,7 @@ export type PrintCartItem = {
   infill: number
   quality: number
   estimatedVolume: number
+  estimatedWeight?: number
   dimensions?: { x: number; y: number; z: number }
   scale: number
   quantity: number
