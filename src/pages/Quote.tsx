@@ -4,7 +4,7 @@ import { ShoppingCart, MessageCircle, ChevronDown, Info, Trash2, ArrowRight } fr
 import STLViewer from '../components/STLViewer';
 import { addPrintCartItem } from '../lib/printCart';
 
-const MATERIALS = {  pla: { name: 'PLA - Standard', density: 1.24, pricePerKg: 45 },  petg: { name: 'PETG - Durable', density: 1.27, pricePerKg: 55 },  asa: { name: 'ASA - Weather Resistant', density: 1.07, pricePerKg: 60 },  tpu: { name: 'TPU - Flexible', density: 1.21, pricePerKg: 70 },
+const MATERIALS = {  pla: { name: 'PLA - Standard', density: 1.24, pricePerKg: 45, printMultiplier: 1.0 },  petg: { name: 'PETG - Durable', density: 1.27, pricePerKg: 55, printMultiplier: 1.2 },  asa: { name: 'ASA - Weather Resistant', density: 1.07, pricePerKg: 60, printMultiplier: 1.35 },  tpu: { name: 'TPU - Flexible', density: 1.21, pricePerKg: 70, printMultiplier: 1.5 },
 };
 
 const SETUP_FEE = 12;
@@ -59,10 +59,12 @@ export default function Quote() {
 
   // Estimate volume from file size (rough approximation)
   const estimatedVolume = measuredVolume ?? (fileSize > 0 ? (fileSize / 1024) * 0.5 : 0); const estimatedWeight = estimatedVolume * matData.density; const materialCost = (estimatedWeight / 1000) * matData.pricePerKg;
-  const operatingSubtotal = Math.max(
+  const variablePrintCost = (estimatedVolume * PLA_RATE_PER_CM3 * matData.printMultiplier + materialCost) * infillData.multiplier * qualityData.multiplier;
+  const operatingSubtotal = SETUP_FEE + MINIMUM_PRINT_SUBTOTAL + variablePrintCost; /*
     MINIMUM_PRINT_SUBTOTAL,
     SETUP_FEE + (estimatedVolume * PLA_RATE_PER_CM3 + materialCost) * infillData.multiplier * qualityData.multiplier,
   );
+  */
   const grossBeforeProcessing = operatingSubtotal * (1 + GST_RATE);
   const totalPrice = (grossBeforeProcessing + STRIPE_FIXED_FEE) / (1 - STRIPE_RATE);
   const basePrice = totalPrice / (1 + GST_RATE);
