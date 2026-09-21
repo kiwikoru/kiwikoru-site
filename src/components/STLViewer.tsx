@@ -66,6 +66,14 @@ const AXES = {
   z: { label: 'Z', className: 'text-sky-400', ring: 'focus:border-sky-400' },
 } as const
 
+// Small models must not appear as 0.0 cm³: retain enough precision to show scaling.
+function formatVolume(volume: number) {
+  if (volume >= 100) return volume.toFixed(1)
+  if (volume >= 1) return volume.toFixed(2)
+  if (volume >= 0.01) return volume.toFixed(3)
+  return volume.toFixed(4)
+}
+
 export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleChange, onPreviewColorChange, onThumbnailChange }: STLViewerProps) {
   const [meshData, setMeshData] = useState<MeshData | null>(null)
   const [fileName, setFileName] = useState('')
@@ -280,7 +288,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
             <div className="absolute top-12 left-3 bg-[#253126]/70 backdrop-blur-sm rounded-lg px-3 py-1 text-[11px] text-white/60 pointer-events-none">
               <span className="font-semibold text-red-400">X</span> {scaledDimensions?.x} ×{' '}
               <span className="font-semibold text-emerald-400">Y</span> {scaledDimensions?.y} ×{' '}
-              <span className="font-semibold text-sky-400">Z</span> {scaledDimensions?.z} mm · {scaledVolume.toFixed(1)} cm³
+              <span className="font-semibold text-sky-400">Z</span> {scaledDimensions?.z} mm · {formatVolume(scaledVolume)} cm³
             </div>
 
             {/* Color picker overlay */}
@@ -398,7 +406,8 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
           </div>
           <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-forest/[0.04] px-3 py-2 text-[11px]">
             <label className="flex items-center gap-2 text-charcoal-light"><span>Uniform scale</span><span className="relative"><input type="text" inputMode="decimal" value={percentInput} onChange={event => updateScaleFromPercent(event.target.value)} onBlur={() => setPercentInput(String(Math.round(uniformScale * 100)))} className="w-20 rounded-md border border-forest/15 bg-white py-1.5 pl-2 pr-6 text-right font-bold text-forest outline-none focus:border-gold" aria-label="Uniform scale percentage"/><b className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-forest/60">%</b></span></label>
-            <span className="font-semibold text-forest">{uniformScale < 1 ? `${Math.round((1 - uniformScale) * 100)}% smaller` : uniformScale > 1 ? `${Math.round((uniformScale - 1) * 100)}% larger` : 'Original size'} · {scaledVolume.toFixed(1)} cm³</span>
+            <span className="font-semibold text-forest">{uniformScale < 1 ? `${Math.round((1 - uniformScale) * 100)}% smaller` : uniformScale > 1 ? `${Math.round((uniformScale - 1) * 100)}% larger` : 'Original size'} · {formatVolume(scaledVolume)} cm³</span>
+            <small className="text-forest/60">Volume: {formatVolume(meshData.volume)} cm³ × {uniformScale.toFixed(2)}³ = {formatVolume(scaledVolume)} cm³</small>
           </div>
         </div>
       )}
