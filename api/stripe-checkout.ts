@@ -2,7 +2,7 @@ import { put } from '@vercel/blob'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
 import type { IncomingMessage, ServerResponse } from 'node:http'
-import { brandedEmail } from './lib/branded-email.js'
+import { brandedEmail, emailDetails, emailSafe } from './lib/branded-email.js'
 
 export const maxDuration = 60
 
@@ -296,6 +296,71 @@ export async function confirmCheckout(request: Request) {
   }
 }
 
+
+async function sendContactEmails(request: Request) {
+  const body = await request.json() as { name?: unknown; email?: unknown; subject?: unknown; message?: unknown }
+  const name = String(body.name || '').trim()
+  const email = String(body.email || '').trim()
+  const subject = String(body.subject || '').trim()
+  const message = String(body.message || '').trim()
+  if (!name || !subject || !message || !/^\S+@\S+\.\S+$/.test(email)) return Response.json({ error: 'Please complete your name, email, subject and message.' }, { status: 400 })
+
+  const apiKey = process.env.RESEND_API_KEY
+  const sender = process.env.RESEND_FROM || process.env.EMAIL_FROM
+  if (!apiKey || !sender) return Response.json({ error: 'Email service is not configured.' }, { status: 503 })
+
+  const resend = new Resend(apiKey)
+  const owner = [...new Set([process.env.RESEND_TO, process.env.EMAIL_TO, 'kiwikoru3d@gmail.com'].filter(Boolean) as string[])]
+  const requestId = crypto.randomUUID()
+  const ownerHtml = brandedEmail({
+    internal: true,
+    eyebrow: 'New website message',
+    title: subject,
+    intro: 'A customer has contacted KiwiKoru through the website.',
+    content: emailDetails([['Name', emailSafe(name)], ['Email', '<a href="mailto:' + emailSafe(email) + '" style="color:#3f572d;font-weight:700">' + emailSafe(email) + '</a>'], ['Received', emailSafe(new Date().toLocaleString('en-NZ'))]]) + '<h2 style="margin:26px 0 10px;color:#253126;font-size:18px">Message</h2><div style="padding:17px;border-radius:12px;background:#f2f4ea;color:#334237;font-size:14px;line-height:1.65">' + emailSafe(message).replace(/\n/g, '<br>') + '</div>',
+  })
+  const customerHtml = brandedEmail({
+    eyebrow: 'Message received',
+    title: 'Thanks, ' + emailSafe(name) + '.',
+    intro: 'Your message has arrived safely with the KiwiKoru team. We will reply as soon as we can.',
+    content: emailDetails([['Subject', '<strong>' + emailSafe(subject) + '</strong>']]) + '<p style="margin:22px 0 0;color:#526158;font-size:14px;line-height:1.7">You can reply directly to this email if there is anything else we should know.</p>',
+  })
+  const [ownerResult, customerResult] = await Promise.all([
+    resend.emails.send({ from: 'KiwiKoru 3D <' + sender + '>', to: owner, replyTo: email, subject: 'Website message — ' + subject, html: ownerHtml }, { headers: { 'Idempotency-Key': 'contact-owner-' + requestId } }),
+    resend.emails.send({ from: 'KiwiKoru 3D <' + sender + '>', to: email, subject: 'We received your KiwiKoru message', html: customerHtml }, { headers: { 'Idempotency-Key': 'contact-customer-' + requestId } }),
+  ])
+  if (ownerResult.error || customerResult.error || !ownerResult.data?.id || !customerResult.data?.id) {
+    console.error('[contact] email rejected', { owner: ownerResult.error, customer: customerResult.error })
+    return Response.json({ error: 'Email service could not accept the message.' }, { status: 502 })
+  }
+  return Response.json({ success: true })
+}
+
+async function handleStripeWebhook(request: Request) {
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  const signature = request.headers.get('stripe-signature')
+  if (!secretKey || !webhookSecret || !signature) return Response.json({ error: 'Webhook configuration is missing.' }, { status: 400 })
+
+  try {
+    const stripe = new Stripe(secretKey)
+    const event = stripe.webhooks.constructEvent(Buffer.from(await request.arrayBuffer()), signature, webhookSecret)
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object as Stripe.Checkout.Session
+      if (session.payment_status === 'paid') {
+        const confirmation = await confirmCheckout(new Request('https://www.kiwikoru.co.nz/api/checkout-confirmation', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sessionId: session.id }),
+        }))
+        if (!confirmation.ok) throw new Error('Order confirmation email failed.')
+      }
+    }
+    return Response.json({ received: true })
+  } catch (error) {
+    console.error('[stripe-webhook] failed', error)
+    return Response.json({ error: 'Webhook processing failed.' }, { status: 400 })
+  }
+}
+
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
   if (request.method !== 'POST') {
     response.statusCode = 405
@@ -313,11 +378,11 @@ export default async function handler(request: IncomingMessage, response: Server
     const requestUrl = `${protocol}://${host}${request.url || '/api/stripe-checkout'}`
     const webRequest = new Request(requestUrl, {
       method: 'POST',
-      headers: { 'Content-Type': request.headers['content-type'] || 'application/json' },
+      headers: { 'Content-Type': request.headers['content-type'] || 'application/json', ...(typeof request.headers['stripe-signature'] === 'string' ? { 'stripe-signature': request.headers['stripe-signature'] } : {}) },
       body,
     })
     const action = new URL(requestUrl).searchParams.get('action')
-    const checkoutResponse = action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : action === 'youshie' ? await createYoushieCheckout(webRequest) : Response.json({ error: 'Unknown checkout action.' }, { status: 404 })
+    const checkoutResponse = action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : action === 'contact' ? await sendContactEmails(webRequest) : action === 'webhook' ? await handleStripeWebhook(webRequest) : action === 'youshie' ? await createYoushieCheckout(webRequest) : Response.json({ error: 'Unknown checkout action.' }, { status: 404 })
     response.statusCode = checkoutResponse.status
     response.setHeader('Content-Type', checkoutResponse.headers.get('content-type') || 'application/json')
     response.end(await checkoutResponse.text())
