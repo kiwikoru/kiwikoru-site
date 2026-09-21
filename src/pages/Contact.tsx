@@ -4,15 +4,28 @@ import { Mail, Clock, MapPin, MessageCircle, Send, Phone } from 'lucide-react';
 export default function Contact() {
   const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string>();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In real implementation, this would send to a backend
-    const mailtoLink = `mailto:kiwikoru3d@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
-      `Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`
-    )}`;
-    window.location.href = mailtoLink;
-    setSubmitted(true);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (submitting) return;
+    setSubmitting(true);
+    setError(undefined);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error || 'Unable to send your message.');
+      setSubmitted(true);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to send your message.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -146,7 +159,7 @@ export default function Contact() {
                     <Send className="w-6 h-6 text-green-600" />
                   </div>
                   <h4 className="font-heading font-semibold text-kiwi-dark mb-2">Message Sent!</h4>
-                  <p className="text-kiwi-base/60 text-sm">We'll get back to you as soon as possible.</p>
+                  <p className="text-kiwi-base/60 text-sm">We'll get back to you as soon as possible. A confirmation has also been sent to your email.</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -206,11 +219,13 @@ export default function Contact() {
                   </div>
                   <button
                     type="submit"
-                    className="w-full flex items-center justify-center gap-2 bg-kiwi-gold hover:bg-kiwi-goldDark text-kiwi-dark py-3 rounded-lg font-medium transition-colors"
+                    disabled={submitting}
+                    className="w-full flex items-center justify-center gap-2 bg-kiwi-gold hover:bg-kiwi-goldDark text-kiwi-dark py-3 rounded-lg font-medium transition-colors disabled:opacity-60"
                   >
                     <Send className="w-4 h-4" />
-                    Send Message
+                    {submitting ? 'Sending…' : 'Send Message'}
                   </button>
+                  {error && <p role="alert" className="text-center text-sm font-medium text-red-700">{error}</p>}
                 </form>
               )}
             </div>
