@@ -13,7 +13,7 @@ export default function Contact() {
     setSubmitting(true);
     setError(undefined);
     try {
-      const response = await fetch('/api/contact', {
+      const response = await fetch('/api/stripe-checkout?action=contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
