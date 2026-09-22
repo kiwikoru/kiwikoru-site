@@ -1,4 +1,4 @@
-import { Check, ChevronLeft, FileBox, Heart, Mail, MapPin, PartyPopper, ShieldCheck, Sparkles, Truck } from 'lucide-react'
+import { Check, ChevronLeft, FileBox, Mail, MapPin, MessageCircle, ShieldCheck, Truck } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
@@ -52,16 +52,41 @@ export default function PrintOrder() {
     } catch (caught) { setError(caught instanceof Error ? caught.message : 'Unable to start secure checkout.'); setWorking(false) }
   }
 
+  const paymentComplete = searchParams.get('payment') === 'success'
+  const confirmationCopy = confirmation === 'sent'
+    ? 'Your KiwiKoru confirmation is on its way by email. We’ll message you again when it is ready to collect or dispatch.'
+    : confirmation === 'sending'
+      ? 'We’re preparing your KiwiKoru confirmation email now…'
+      : confirmation === 'error'
+        ? 'Your payment is safe. We are preparing the production record and will contact you shortly.'
+        : 'We are preparing your KiwiKoru confirmation email.'
+
+  if (paymentComplete) return <main className="min-h-screen bg-off-white pt-28 pb-20">
+    <style>{\`@keyframes kiwikoru-payment-dance { 0%, 100% { transform: translateY(0) rotate(-4deg); } 25% { transform: translateY(-13px) rotate(4deg); } 50% { transform: translateY(-4px) rotate(-5deg) scale(1.04); } 75% { transform: translateY(-11px) rotate(4deg); } } @media (prefers-reduced-motion: reduce) { .kiwikoru-payment-dance { animation: none !important; } }\`}</style>
+    <section className="mx-auto max-w-3xl px-4 sm:px-6">
+      <div className="rounded-[2rem] border-2 border-gold/60 bg-forest-dark px-6 py-10 text-center text-white shadow-2xl sm:px-12 sm:py-12">
+        <div className="mx-auto mb-4 h-32 w-32 overflow-hidden" aria-label="KiwiKoru doing a happy dance" role="img">
+          <div className="kiwikoru-payment-dance h-full w-full" style={{ backgroundImage: "url('/pets/kiwikoru/spritesheet.webp')", backgroundRepeat: 'no-repeat', backgroundSize: '800% 1100%', backgroundPosition: '14.2857% 30%', animation: 'kiwikoru-payment-dance 1.45s ease-in-out infinite' }} />
+        </div>
+        <p className="text-xs font-extrabold uppercase tracking-[.22em] text-gold-light">Payment complete</p>
+        <h1 className="mt-3 text-4xl font-semibold leading-tight md:text-5xl">Thank you for bringing your idea to life with us.</h1>
+        <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-white/85">KiwiKoru is doing a happy little dance while your 3D print joins our production queue.</p>
+        <div className="mx-auto mt-6 max-w-xl rounded-2xl bg-white/10 px-5 py-4 text-sm text-white/90 ring-1 ring-white/20"><Check className="mr-2 inline text-gold-light" size={20}/>{confirmationCopy}</div>
+      </div>
+      <section className="mx-auto mt-8 max-w-2xl rounded-3xl border border-forest/15 bg-white p-6 text-center shadow-sm sm:p-8">
+        <h2 className="text-2xl font-semibold text-forest-dark">Anything else we should know about your project?</h2>
+        <p className="mx-auto mt-3 max-w-xl leading-relaxed text-forest/70">A note about the part, its use, finish or fit can help us make the best printing decision. Contact us any time.</p>
+        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link to="/contact" className="inline-flex items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 font-bold text-white transition hover:bg-forest-dark"><Mail size={18}/> Contact form</Link>
+          <a href="mailto:kiwikoru3d@gmail.com" className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-forest/25 px-5 py-3 font-bold text-forest-dark transition hover:border-forest"><Mail size={18}/> Email us</a>
+          <a href="https://wa.me/64274365339?text=Hi%20KiwiKoru!%20I%20just%20placed%20an%20order%20and%20would%20like%20to%20add%20a%20note." target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#25D366] px-5 py-3 font-bold text-[#123b24] transition hover:brightness-95"><MessageCircle size={18}/> WhatsApp</a>
+        </div>
+      </section>
+    </section>
+  </main>
+
   return <main className="min-h-screen bg-off-white pt-28 pb-20">
     <div className="max-w-5xl mx-auto px-4 sm:px-6">
-      {searchParams.get('payment') === 'success' && <section className="relative mb-10 overflow-hidden rounded-[2rem] border-2 border-gold/60 bg-forest-dark px-6 py-10 text-center text-white shadow-2xl">
-        <div className="pointer-events-none absolute inset-0 opacity-20"><span className="absolute left-[10%] top-5 text-gold-light animate-bounce"><Sparkles size={32}/></span><span className="absolute right-[12%] top-12 text-gold animate-pulse"><PartyPopper size={34}/></span><span className="absolute bottom-5 left-[22%] text-gold-light animate-pulse"><Heart size={24}/></span><span className="absolute bottom-7 right-[24%] text-gold animate-bounce"><Sparkles size={26}/></span></div>
-        <img className="relative mx-auto mb-4 h-20 w-20 rounded-full bg-off-white p-2 shadow-lg" src="/images/kiwikoru-logo-moss.png" alt="Happy KiwiKoru" />
-        <p className="relative text-xs font-extrabold uppercase tracking-[.22em] text-gold-light">Payment complete</p>
-        <h1 className="relative mt-3 text-4xl font-semibold md:text-5xl">Thank you — KiwiKoru is doing a happy little dance!</h1>
-        <p className="relative mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-white/85">Your payment was received and your 3D print is now officially in our production queue.</p>
-        <div className="relative mx-auto mt-6 max-w-xl rounded-2xl bg-white/10 px-5 py-4 text-sm text-white/90 ring-1 ring-white/20"><Check className="mr-2 inline text-gold-light" size={20}/>{confirmation === 'sent' ? 'Your KiwiKoru confirmation is on its way by email. We’ll message you again when it is ready to collect or dispatch.' : confirmation === 'sending' ? 'We’re preparing your KiwiKoru confirmation email now…' : confirmation === 'error' ? 'Your payment is safe. We are preparing the production record and will contact you shortly.' : 'We are preparing your KiwiKoru confirmation email.'}</div>
-      </section>}
       {searchParams.get('payment') === 'cancelled' && <div className="mb-8 rounded-2xl bg-white p-5 text-center text-forest-dark">Your order wasn’t charged. You can return to the quote and try again whenever you’re ready.</div>}
       <Link to="/cart" className="inline-flex items-center gap-2 text-sm font-semibold text-forest hover:text-gold"><ChevronLeft size={17}/> Back to your cart</Link>
       <header className="mt-7 mb-9 max-w-2xl"><span className="text-xs font-bold tracking-[.18em] text-gold uppercase">Secure KiwiKoru checkout</span><h1 className="mt-3 text-4xl md:text-5xl font-semibold text-forest-dark">Complete your 3D print order</h1><p className="mt-4 text-forest/70">Confirm the design details, delivery address and final total. For design changes or a more complex project, use our contact form before paying.</p><Link to="/contact" className="inline-flex mt-3 font-semibold text-forest underline">Discuss the design first</Link></header>
