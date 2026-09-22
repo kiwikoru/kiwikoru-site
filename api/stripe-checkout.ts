@@ -426,15 +426,18 @@ export default async function handler(request: IncomingMessage, response: Server
     const host = request.headers.host || 'www.kiwikoru.co.nz'
     const requestUrl = `${protocol}://${host}${request.url || '/api/stripe-checkout'}`
     const webRequest = new Request(requestUrl, {
-      method: 'POST',
+      method: request.method || 'POST',
       headers: { 'Content-Type': request.headers['content-type'] || 'application/json', ...(typeof request.headers['stripe-signature'] === 'string' ? { 'stripe-signature': request.headers['stripe-signature'] } : {}) },
       ...(request.method === 'GET' ? {} : { body }),
     })
     const action = new URL(requestUrl).searchParams.get('action')
     const checkoutResponse = action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : action === 'contact' ? await sendContactEmails(webRequest) : action === 'webhook' ? await handleStripeWebhook(webRequest) : action === 'download' ? await downloadPrintFile(webRequest) : action === 'youshie' ? await createYoushieCheckout(webRequest) : Response.json({ error: 'Unknown checkout action.' }, { status: 404 })
+
+    // Pass through binary bodies and headers unchanged. Converting an STL to text
+    // corrupts its bytes and makes browsers save it as the API route name.
     response.statusCode = checkoutResponse.status
-    response.setHeader('Content-Type', checkoutResponse.headers.get('content-type') || 'application/json')
-    response.end(await checkoutResponse.text())
+    checkoutResponse.headers.forEach((value, key) => response.setHeader(key, value))
+    response.end(Buffer.from(await checkoutResponse.arrayBuffer()))
   } catch (error) {
     console.error('Youshie checkout handler failed', error)
     response.statusCode = 500
