@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { FlaskConical, Menu, ShoppingCart, X } from 'lucide-react'
+import { Menu, ShoppingCart, X } from 'lucide-react'
 import { WhatsAppLogo, WHATSAPP_URL } from './WhatsAppFloat'
 import { CART_UPDATED_EVENT, getPrintCartCount } from '../lib/printCart'
 
 const pageLinks = [
   { label: 'Home', path: '/' },
-  { label: 'Working Smarter Consulting', path: '/working-smarter-consulting' },
-  { label: 'B.Smarter Design Lab', path: '/working-smarter-lab' },
   { label: 'Services', path: '/services' },
   { label: 'Materials', path: '/materials' },
   { label: 'Contact', path: '/contact' },
@@ -78,9 +76,6 @@ export default function Navbar() {
 
           {/* Desktop Nav: Home, Services, Projects, Materials, Contact */}
           <div className="hidden md:flex items-center gap-7" role="menubar">
-            <Link to="/working-smarter-consulting" role="menuitem" className={`rounded-full border-2 px-4 py-2 text-xs font-black tracking-[.02em] shadow-sm transition-all hover:-translate-y-0.5 ${location.pathname === '/working-smarter-consulting' ? 'border-gold bg-gold/20 text-gold' : 'border-gold/55 bg-gold/10 text-gold-light hover:border-gold hover:bg-gold/20'}`}>
-              Working Smarter Consulting
-            </Link>
             <Link to="/" role="menuitem" className={`relative text-sm font-medium tracking-[0.06em] transition-colors duration-300 focus-gold py-1 ${location.pathname === '/' ? 'text-gold' : 'text-white/80 hover:text-gold'}`}>
               Home
               {location.pathname === '/' && <span className="absolute -bottom-0.5 left-0 right-0 h-0.5 bg-gold rounded-full" />}
@@ -104,9 +99,6 @@ export default function Navbar() {
 
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-3">
-            <Link to="/working-smarter-lab" aria-label="Open the temporary B.Smarter design lab" title="B.Smarter design lab" className={`relative flex h-8 w-8 items-center justify-center rounded-full border transition-all hover:-translate-y-0.5 focus-gold ${location.pathname === '/working-smarter-lab' ? 'border-gold bg-gold/20 text-gold' : 'border-white/15 bg-white/5 text-white/45 hover:border-gold/60 hover:text-gold'}`}>
-              <FlaskConical className="h-3.5 w-3.5" />
-            </Link>
             <Link to="/cart" aria-label={`Open shopping cart with ${cartCount} items`} title="Shopping cart" className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gold/35 bg-white/10 text-white shadow-md transition-all hover:-translate-y-0.5 hover:border-gold hover:bg-white/15 hover:text-gold focus-gold">
               <ShoppingCart className="h-5 w-5" />
               {cartCount > 0 && <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-gold px-1 text-[10px] font-black text-forest-dark">{cartCount}</span>}
