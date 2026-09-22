@@ -98,6 +98,7 @@ export async function createYoushieCheckout(request: Request) {
     ]
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      invoice_creation: { enabled: true },
       customer_creation: 'always',
       customer_email: customer.email,
       billing_address_collection: 'required',
@@ -163,7 +164,7 @@ export async function createPrintCheckout(request: Request) {
     const stripe = new Stripe(secretKey)
     const metadata = { order_type: '3d_print_cart', ...addressMetadata(customer), destination, rural: String(rural), print_manifest_url: manifestBlob.url, print_download_token: crypto.randomUUID(), item_count: String(items.length), unit_count: String(items.reduce((sum, item) => sum + item.quantity, 0)) }
     const session = await stripe.checkout.sessions.create({
-      mode: 'payment', customer_creation: 'always', customer_email: customer.email, billing_address_collection: 'required',
+      mode: 'payment', invoice_creation: { enabled: true }, customer_creation: 'always', customer_email: customer.email, billing_address_collection: 'required',
       line_items: [
         ...items.map(item => ({ quantity: item.quantity, price_data: { currency: 'nzd', unit_amount: item.amount, product_data: { name: `Custom 3D print — ${item.modelName}`.slice(0, 120), description: `${item.material} · ${item.colour} · ${item.infill}% infill · ${item.layerHeight} mm layers`.slice(0, 500) } } })),
         ...(pickup ? [] : [{ quantity: 1, price_data: { currency: 'nzd', unit_amount: shippingAmount, product_data: { name: `Delivery — ${destinationLabels[destination]}${rural ? ' (rural)' : ''}` } } }] as Stripe.Checkout.SessionCreateParams.LineItem[]),
@@ -243,7 +244,7 @@ export async function confirmCheckout(request: Request) {
     const { sessionId } = await request.json() as { sessionId?: string }
     if (!sessionId?.startsWith('cs_')) return Response.json({ error: 'Invalid payment session.' }, { status: 400 })
     const stripe = new Stripe(secretKey)
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    const session = await stripe.checkout.sessions.retrieve(sessionId, { expand: ['invoice'] })
     if (session.payment_status !== 'paid') return Response.json({ error: 'Payment has not been completed.' }, { status: 409 })
     const m = session.metadata || {}
     const email = m.customer_email || session.customer_details?.email
@@ -252,10 +253,12 @@ export async function confirmCheckout(request: Request) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       const typeName = m.order_type === 'youshie' ? 'personalised Youshie' : m.order_type === '3d_print_cart' ? `${safe(m.unit_count)} custom 3D printed units` : 'custom 3D print'
       const fulfilment = m.destination === 'pickup' ? 'Free pick up in Morningside, Whangārei. We’ll email when it is ready.' : `${safe(m.delivery_address)}, ${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}`
-      const details = `<p><strong>Order:</strong> ${safe(typeName)}</p><p><strong>Total paid:</strong> NZ$${((session.amount_total || 0) / 100).toFixed(2)}</p><p><strong>${m.destination === 'pickup' ? 'Collection' : 'Delivery'}:</strong> ${fulfilment}</p><p><strong>Phone:</strong> ${safe(m.customer_phone)}</p>`
+      const details = `<p><strong>Order:</strong> ${safe(typeName)}</p><p><strong>Order number:</strong> ${safe(orderNumber)}</p><p><strong>Invoice / payment reference:</strong> ${safe(receiptReference)}</p><p><strong>Total paid:</strong> NZ${((session.amount_total || 0) / 100).toFixed(2)}</p><p><strong>${m.destination === 'pickup' ? 'Collection' : 'Delivery'}:</strong> ${fulfilment}</p><p><strong>Phone:</strong> ${safe(m.customer_phone)}</p>`
       const sender = fromAddress(process.env.RESEND_FROM || process.env.EMAIL_FROM || 'onboarding@resend.dev')
       const owner = [...new Set([process.env.RESEND_TO, process.env.EMAIL_TO, 'kiwikoru3d@gmail.com'].filter(Boolean) as string[])]
       const orderNumber = `KK-${new Date(session.created * 1000).toISOString().slice(0, 10).replaceAll('-', '')}-${session.id.slice(-6).toUpperCase()}`
+      const invoiceNumber = typeof session.invoice === 'object' && session.invoice ? session.invoice.number : undefined
+      const receiptReference = invoiceNumber || String(session.payment_intent || session.id)
       const customerHtml = brandedEmail({ eyebrow: `Order confirmed · ${orderNumber}`, title: `Thank you, ${m.customer_name}!`, intro: 'Your payment has been received and your idea is now safely in the hands of the KiwiKoru team.', content: `<div style="margin:24px 0;padding:20px;border-radius:14px;background:#f7f5ef;border:1px solid #e3dfd5">${details}</div><h2 style="font-size:18px;color:#253126">What happens next?</h2><p style="line-height:1.65;color:#506056">We’ll prepare your order and contact you by email when it is ready ${m.destination === 'pickup' ? 'to collect' : 'to dispatch'}. If anything needs changing, simply reply to this message.</p>` })
       const customerMessage = await resend.emails.send(
         { from: sender, to: email, subject: `We’re making it real — order ${orderNumber} confirmed`, html: customerHtml },
@@ -286,7 +289,7 @@ export async function confirmCheckout(request: Request) {
         ${cartItemRows || (!isYoushie ? `<tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Print settings</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${safe(m.material)} · ${safe(m.colour)} · ${safe(m.infill)}% infill · ${safe(m.layer_height)} mm</td></tr>` : '')}
         <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">${m.destination === 'pickup' ? 'Collection' : 'Delivery'}</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${m.destination === 'pickup' ? 'Pick up in Morningside, Whangārei — exact address supplied when ready' : `${safe(m.delivery_address)}<br>${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}<br>${safe(destinationLabels[m.destination as Destination] || m.destination)}${m.rural === 'true' ? ' — Rural delivery' : ''}`}</td></tr>
         <tr><td style="padding:12px 16px;color:#687269">Total paid</td><td style="padding:12px 16px;font-size:20px;font-weight:800">NZ$${((session.amount_total || 0) / 100).toFixed(2)}</td></tr></table>
-        <p style="margin:22px 0 5px"><strong>Stripe reference:</strong> ${safe(session.id)}</p><p style="margin:0;color:#687269;font-size:13px">Keep this email as the production and dispatch record for this order.</p>`
+        <p style="margin:22px 0 5px"><strong>KiwiKoru order number:</strong> ${safe(orderNumber)}</p><p style="margin:5px 0"><strong>Invoice / payment reference:</strong> ${safe(receiptReference)}</p><p style="margin:0;color:#687269;font-size:13px">Keep this email as the production and dispatch record for this order.</p>`
       const ownerHtml = brandedEmail({ internal: true, eyebrow: 'New paid order', title: orderNumber, intro: 'Payment is confirmed by Stripe. This project is ready to organise for production.', content: ownerContent })
       const ownerMessage = await resend.emails.send(
         { from: sender, to: owner, replyTo: email, subject: `PAID ${orderNumber} — ${safe(m.customer_name)} — ${safe(typeName)}`, html: ownerHtml, attachments: attachments.length ? attachments : undefined },
