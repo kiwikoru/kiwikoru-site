@@ -62,7 +62,7 @@ export default function PrintOrder() {
         : 'We are preparing your KiwiKoru confirmation email.'
 
   if (paymentComplete) return <main className="min-h-screen bg-off-white pt-28 pb-20">
-    <style>{\`@keyframes kiwikoru-payment-dance { 0%, 100% { transform: translateY(0) rotate(-4deg); } 25% { transform: translateY(-13px) rotate(4deg); } 50% { transform: translateY(-4px) rotate(-5deg) scale(1.04); } 75% { transform: translateY(-11px) rotate(4deg); } } @media (prefers-reduced-motion: reduce) { .kiwikoru-payment-dance { animation: none !important; } }\`}</style>
+    <style>{`@keyframes kiwikoru-payment-dance { 0%, 100% { transform: translateY(0) rotate(-4deg); } 25% { transform: translateY(-13px) rotate(4deg); } 50% { transform: translateY(-4px) rotate(-5deg) scale(1.04); } 75% { transform: translateY(-11px) rotate(4deg); } } @media (prefers-reduced-motion: reduce) { .kiwikoru-payment-dance { animation: none !important; } }`}</style>
     <section className="mx-auto max-w-3xl px-4 sm:px-6">
       <div className="rounded-[2rem] border-2 border-gold/60 bg-forest-dark px-6 py-10 text-center text-white shadow-2xl sm:px-12 sm:py-12">
         <div className="mx-auto mb-4 h-32 w-32 overflow-hidden" aria-label="KiwiKoru doing a happy dance" role="img">
