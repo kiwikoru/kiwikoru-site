@@ -253,12 +253,12 @@ export async function confirmCheckout(request: Request) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       const typeName = m.order_type === 'youshie' ? 'personalised Youshie' : m.order_type === '3d_print_cart' ? `${safe(m.unit_count)} custom 3D printed units` : 'custom 3D print'
       const fulfilment = m.destination === 'pickup' ? 'Free pick up in Morningside, Whangārei. We’ll email when it is ready.' : `${safe(m.delivery_address)}, ${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}`
-      const details = `<p><strong>Order:</strong> ${safe(typeName)}</p><p><strong>Order number:</strong> ${safe(orderNumber)}</p><p><strong>Invoice / payment reference:</strong> ${safe(receiptReference)}</p><p><strong>Total paid:</strong> NZ${((session.amount_total || 0) / 100).toFixed(2)}</p><p><strong>${m.destination === 'pickup' ? 'Collection' : 'Delivery'}:</strong> ${fulfilment}</p><p><strong>Phone:</strong> ${safe(m.customer_phone)}</p>`
-      const sender = fromAddress(process.env.RESEND_FROM || process.env.EMAIL_FROM || 'onboarding@resend.dev')
-      const owner = [...new Set([process.env.RESEND_TO, process.env.EMAIL_TO, 'kiwikoru3d@gmail.com'].filter(Boolean) as string[])]
       const orderNumber = `KK-${new Date(session.created * 1000).toISOString().slice(0, 10).replaceAll('-', '')}-${session.id.slice(-6).toUpperCase()}`
       const invoiceNumber = typeof session.invoice === 'object' && session.invoice ? session.invoice.number : undefined
       const receiptReference = invoiceNumber || String(session.payment_intent || session.id)
+      const details = `<p><strong>Order:</strong> ${safe(typeName)}</p><p><strong>Order number:</strong> ${safe(orderNumber)}</p><p><strong>Invoice / payment reference:</strong> ${safe(receiptReference)}</p><p><strong>Total paid:</strong> NZ${((session.amount_total || 0) / 100).toFixed(2)}</p><p><strong>${m.destination === 'pickup' ? 'Collection' : 'Delivery'}:</strong> ${fulfilment}</p><p><strong>Phone:</strong> ${safe(m.customer_phone)}</p>`
+      const sender = fromAddress(process.env.RESEND_FROM || process.env.EMAIL_FROM || 'onboarding@resend.dev')
+      const owner = [...new Set([process.env.RESEND_TO, process.env.EMAIL_TO, 'kiwikoru3d@gmail.com'].filter(Boolean) as string[])]
       const customerHtml = brandedEmail({ eyebrow: `Order confirmed · ${orderNumber}`, title: `Thank you, ${m.customer_name}!`, intro: 'Your payment has been received and your idea is now safely in the hands of the KiwiKoru team.', content: `<div style="margin:24px 0;padding:20px;border-radius:14px;background:#f7f5ef;border:1px solid #e3dfd5">${details}</div><h2 style="font-size:18px;color:#253126">What happens next?</h2><p style="line-height:1.65;color:#506056">We’ll prepare your order and contact you by email when it is ready ${m.destination === 'pickup' ? 'to collect' : 'to dispatch'}. If anything needs changing, simply reply to this message.</p>` })
       const customerMessage = await resend.emails.send(
         { from: sender, to: email, subject: `We’re making it real — order ${orderNumber} confirmed`, html: customerHtml },
