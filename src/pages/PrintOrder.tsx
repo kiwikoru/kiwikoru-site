@@ -62,11 +62,11 @@ export default function PrintOrder() {
         : 'We are preparing your KiwiKoru confirmation email.'
 
   if (paymentComplete) return <main className="min-h-screen bg-off-white pt-28 pb-20">
-    <style>{`@keyframes kiwikoru-payment-dance { 0%, 100% { transform: translateY(0) rotate(-4deg); } 25% { transform: translateY(-13px) rotate(4deg); } 50% { transform: translateY(-4px) rotate(-5deg) scale(1.04); } 75% { transform: translateY(-11px) rotate(4deg); } } @media (prefers-reduced-motion: reduce) { .kiwikoru-payment-dance { animation: none !important; } }`}</style>
+    <style>{`@keyframes kiwikoru-payment-dance { 0%, 100% { transform: translate3d(-4px, 0, 0) rotateZ(-7deg) rotateY(-22deg); } 14% { transform: translate3d(7px, -8px, 0) rotateZ(8deg) rotateY(26deg); } 29% { transform: translate3d(-5px, -21px, 0) rotateZ(-6deg) rotateY(-18deg) scale(1.04); } 44% { transform: translate3d(9px, -5px, 0) rotateZ(8deg) rotateY(30deg); } 59% { transform: translate3d(-1px, -2px, 0) rotateZ(-11deg) rotateY(-34deg); } 74% { transform: translate3d(-8px, -16px, 0) rotateZ(6deg) rotateY(24deg) scale(1.03); } 88% { transform: translate3d(4px, -5px, 0) rotateZ(-4deg) rotateY(-12deg); } } @media (prefers-reduced-motion: reduce) { .kiwikoru-payment-dance { animation: none !important; } }`}</style>
     <section className="mx-auto max-w-3xl px-4 sm:px-6">
       <div className="rounded-[2rem] border-2 border-gold/60 bg-forest-dark px-6 py-10 text-center text-white shadow-2xl sm:px-12 sm:py-12">
-        <div className="mx-auto mb-4 h-32 w-32 overflow-hidden" aria-label="KiwiKoru doing a happy dance" role="img">
-          <div className="kiwikoru-payment-dance h-full w-full" style={{ backgroundImage: "url('/pets/kiwikoru/spritesheet.webp')", backgroundRepeat: 'no-repeat', backgroundSize: '800% 1100%', backgroundPosition: '14.2857% 30%', animation: 'kiwikoru-payment-dance 1.45s ease-in-out infinite' }} />
+        <div className="mx-auto mb-4 h-32 w-32 [perspective:640px]" aria-label="KiwiKoru doing a happy dance" role="img">
+          <div className="kiwikoru-payment-dance h-full w-full [transform-style:preserve-3d]" style={{ backgroundImage: "url('/pets/kiwikoru/spritesheet.webp')", backgroundRepeat: 'no-repeat', backgroundSize: '800% 1100%', backgroundPosition: '42.8571% 0%', transformOrigin: '50% 88%', animation: 'kiwikoru-payment-dance 2.25s cubic-bezier(.45,.05,.25,1) infinite' }} />
         </div>
         <p className="text-xs font-extrabold uppercase tracking-[.22em] text-gold-light">Payment complete</p>
         <h1 className="mt-3 text-4xl font-semibold leading-tight md:text-5xl">Thank you for bringing your idea to life with us.</h1>
