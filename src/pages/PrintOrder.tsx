@@ -66,7 +66,7 @@ export default function PrintOrder() {
     <section className="mx-auto max-w-3xl px-4 sm:px-6">
       <div className="rounded-[2rem] border-2 border-gold/60 bg-forest-dark px-6 py-10 text-center text-white shadow-2xl sm:px-12 sm:py-12">
         <div className="mx-auto mb-4 h-32 w-32 [perspective:640px]" aria-label="KiwiKoru doing a happy dance" role="img">
-          <div className="kiwikoru-payment-dance h-full w-full [transform-style:preserve-3d]" style={{ backgroundImage: "url('/pets/kiwikoru/spritesheet.webp')", backgroundRepeat: 'no-repeat', backgroundSize: '800% 1100%', backgroundPosition: '42.8571% 0%', transformOrigin: '50% 88%', filter: 'saturate(1.08) brightness(1.05)', animation: 'kiwikoru-payment-dance 2.9s cubic-bezier(.45,.05,.25,1) infinite' }} />
+          <div className="kiwikoru-payment-dance relative h-full w-full [transform-style:preserve-3d]" style={{ backgroundImage: "url('/pets/kiwikoru/spritesheet.webp')", backgroundRepeat: 'no-repeat', backgroundSize: '800% 1100%', backgroundPosition: '14.2857% 30%', transformOrigin: '50% 88%', filter: 'saturate(1.08) brightness(1.05)', animation: 'kiwikoru-payment-dance 2.9s cubic-bezier(.45,.05,.25,1) infinite' }}><span aria-hidden className="absolute left-[46%] top-[55%] h-[8%] w-[12%] rounded-full bg-[#888d31] [transform:rotate(-8deg)]" /></div>
         </div>
         <p className="text-xs font-extrabold uppercase tracking-[.22em] text-gold-light">Payment complete</p>
         <h1 className="mt-3 text-4xl font-semibold leading-tight md:text-5xl">Thank you for bringing your idea to life with us.</h1>
