@@ -161,7 +161,7 @@ export async function createPrintCheckout(request: Request) {
     const shippingAmount = shippingByDestination[destination] + (rural ? 600 : 0)
     const origin = new URL(request.url).origin
     const stripe = new Stripe(secretKey)
-    const metadata = { order_type: '3d_print_cart', ...addressMetadata(customer), destination, rural: String(rural), print_manifest_url: manifestBlob.url, item_count: String(items.length), unit_count: String(items.reduce((sum, item) => sum + item.quantity, 0)) }
+    const metadata = { order_type: '3d_print_cart', ...addressMetadata(customer), destination, rural: String(rural), print_manifest_url: manifestBlob.url, print_download_token: crypto.randomUUID(), item_count: String(items.length), unit_count: String(items.reduce((sum, item) => sum + item.quantity, 0)) }
     const session = await stripe.checkout.sessions.create({
       mode: 'payment', customer_creation: 'always', customer_email: customer.email, billing_address_collection: 'required',
       line_items: [
@@ -181,6 +181,16 @@ export async function createPrintCheckout(request: Request) {
 }
 
 function safe(value: unknown) { return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!)) }
+
+function fromAddress(sender: string) {
+  const clean = sender.trim()
+  return /<[^<>\s]+@[^<>\s]+>$/.test(clean) ? clean : `KiwiKoru 3D <${clean}>`
+}
+
+function orderDownloadUrl(sessionId: string, token: string, index: number) {
+  const query = new URLSearchParams({ action: 'download', session_id: sessionId, token, file: String(index) })
+  return `https://www.kiwikoru.co.nz/api/stripe-checkout?${query}`
+}
 
 async function privateAttachment(url: string, filename: string, contentId?: string) {
   if (!url || !process.env.BLOB_READ_WRITE_TOKEN) return undefined
@@ -243,12 +253,12 @@ export async function confirmCheckout(request: Request) {
       const typeName = m.order_type === 'youshie' ? 'personalised Youshie' : m.order_type === '3d_print_cart' ? `${safe(m.unit_count)} custom 3D printed units` : 'custom 3D print'
       const fulfilment = m.destination === 'pickup' ? 'Free pick up in Morningside, Whangārei. We’ll email when it is ready.' : `${safe(m.delivery_address)}, ${safe(m.delivery_city)}, ${safe(m.delivery_region)} ${safe(m.delivery_postcode)}`
       const details = `<p><strong>Order:</strong> ${safe(typeName)}</p><p><strong>Total paid:</strong> NZ$${((session.amount_total || 0) / 100).toFixed(2)}</p><p><strong>${m.destination === 'pickup' ? 'Collection' : 'Delivery'}:</strong> ${fulfilment}</p><p><strong>Phone:</strong> ${safe(m.customer_phone)}</p>`
-      const sender = process.env.RESEND_FROM || process.env.EMAIL_FROM || 'onboarding@resend.dev'
+      const sender = fromAddress(process.env.RESEND_FROM || process.env.EMAIL_FROM || 'onboarding@resend.dev')
       const owner = [...new Set([process.env.RESEND_TO, process.env.EMAIL_TO, 'kiwikoru3d@gmail.com'].filter(Boolean) as string[])]
       const orderNumber = `KK-${new Date(session.created * 1000).toISOString().slice(0, 10).replaceAll('-', '')}-${session.id.slice(-6).toUpperCase()}`
       const customerHtml = brandedEmail({ eyebrow: `Order confirmed · ${orderNumber}`, title: `Thank you, ${m.customer_name}!`, intro: 'Your payment has been received and your idea is now safely in the hands of the KiwiKoru team.', content: `<div style="margin:24px 0;padding:20px;border-radius:14px;background:#f7f5ef;border:1px solid #e3dfd5">${details}</div><h2 style="font-size:18px;color:#253126">What happens next?</h2><p style="line-height:1.65;color:#506056">We’ll prepare your order and contact you by email when it is ready ${m.destination === 'pickup' ? 'to collect' : 'to dispatch'}. If anything needs changing, simply reply to this message.</p>` })
       const customerMessage = await resend.emails.send(
-        { from: `KiwiKoru 3D <${sender}>`, to: email, subject: `We’re making it real — order ${orderNumber} confirmed`, html: customerHtml },
+        { from: sender, to: email, subject: `We’re making it real — order ${orderNumber} confirmed`, html: customerHtml },
         { headers: { 'Idempotency-Key': `order-customer-${session.id}` } },
       )
       if (customerMessage.error || !customerMessage.data?.id) {
@@ -259,12 +269,14 @@ export async function confirmCheckout(request: Request) {
       const manifest = await readPrintManifest(m)
       const attachments = await orderAttachments(m, manifest)
       const attachment = attachments[0]
+      const downloadToken = m.print_download_token || ''
+      const downloadLinks = manifest?.items.map((item, index) => downloadToken ? `<li style="margin:8px 0"><a href="${orderDownloadUrl(session.id, downloadToken, index)}" style="display:inline-block;padding:10px 14px;border-radius:9px;background:#e8c9a0;color:#253126;font-weight:800;text-decoration:none">Download ${safe(item.modelName)}</a> <span style="color:#687269;font-size:12px">available for 7 days</span></li>` : '').join('') || ''
       const isYoushie = m.order_type === 'youshie' || m.order_type === 'youshie_test'
       const fileName = isYoushie ? 'Youshie customer image' : (m.model_name || '3D model')
       const cartItemRows = manifest?.items.map(item => `<tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">${safe(item.quantity)}× ${safe(item.modelName)}</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${safe(item.material)} · ${safe(item.colour)} · ${safe(item.infill)}% infill · ${safe(item.layerHeight)} mm</td></tr>`).join('') || ''
       const ownerContent = `
         ${isYoushie && attachment ? '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:0 0 24px"><div style="text-align:center"><img src="cid:customer-youshie" alt="Generated Youshie" style="display:block;width:260px;max-width:100%;border-radius:16px"><small>Generated Youshie</small></div>' + (m.youshie_original_url ? '<div style="text-align:center"><img src="cid:original-reference" alt="Original reference" style="display:block;width:260px;max-width:100%;border-radius:16px"><small>Original reference photo</small></div>' : '') + '</div>' : ''}
-        ${!isYoushie ? `<div style="margin:0 0 24px;padding:22px;border-radius:16px;background:#253126;color:#fff;text-align:center"><div style="font-size:38px">◫</div><strong style="display:block;margin-top:8px;font-size:18px">${safe(fileName)}</strong><span style="display:block;margin-top:6px;color:#e8c9a0;font-size:13px">STL production file ${attachment ? 'attached to this email' : 'stored with the paid order'}</span></div>` : ''}
+        ${!isYoushie ? `<div style="margin:0 0 24px;padding:22px;border-radius:16px;background:#253126;color:#fff;text-align:center"><div style="font-size:38px">◫</div><strong style="display:block;margin-top:8px;font-size:18px">${safe(fileName)}</strong><span style="display:block;margin-top:6px;color:#e8c9a0;font-size:13px">STL production file ${attachment ? 'attached to this email' : 'stored with the paid order'}</span></div>${downloadLinks ? `<div style="margin:0 0 24px;padding:18px;border-radius:14px;background:#f2f4ea"><strong style="color:#253126">Production-file downloads</strong><p style="margin:6px 0 10px;color:#526158;font-size:13px">Use these private links if the attachment is blocked or too large. They expire 7 days after payment.</p><ul style="margin:0;padding-left:18px">${downloadLinks}</ul></div>` : ''}` : ''}
         <table role="presentation" style="width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden">
         <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Customer</td><td style="padding:12px 16px;border-bottom:1px solid #eee;font-weight:700">${safe(m.customer_name)}</td></tr>
         <tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">Email</td><td style="padding:12px 16px;border-bottom:1px solid #eee"><a href="mailto:${safe(email)}">${safe(email)}</a></td></tr>
@@ -277,7 +289,7 @@ export async function confirmCheckout(request: Request) {
         <p style="margin:22px 0 5px"><strong>Stripe reference:</strong> ${safe(session.id)}</p><p style="margin:0;color:#687269;font-size:13px">Keep this email as the production and dispatch record for this order.</p>`
       const ownerHtml = brandedEmail({ internal: true, eyebrow: 'New paid order', title: orderNumber, intro: 'Payment is confirmed by Stripe. This project is ready to organise for production.', content: ownerContent })
       const ownerMessage = await resend.emails.send(
-        { from: `KiwiKoru 3D Orders <${sender}>`, to: owner, replyTo: email, subject: `PAID ${orderNumber} — ${safe(m.customer_name)} — ${safe(typeName)}`, html: ownerHtml, attachments: attachments.length ? attachments : undefined },
+        { from: sender, to: owner, replyTo: email, subject: `PAID ${orderNumber} — ${safe(m.customer_name)} — ${safe(typeName)}`, html: ownerHtml, attachments: attachments.length ? attachments : undefined },
         { headers: { 'Idempotency-Key': `order-owner-v3-${session.id}` } },
       )
       if (ownerMessage.error || !ownerMessage.data?.id) {
@@ -296,6 +308,39 @@ export async function confirmCheckout(request: Request) {
   }
 }
 
+
+async function downloadPrintFile(request: Request) {
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey) return new Response('Download service is unavailable.', { status: 503 })
+  const url = new URL(request.url)
+  const sessionId = url.searchParams.get('session_id') || ''
+  const token = url.searchParams.get('token') || ''
+  const index = Number(url.searchParams.get('file') || '0')
+  if (!sessionId.startsWith('cs_') || !token || !Number.isInteger(index) || index < 0) return new Response('Invalid download link.', { status: 400 })
+
+  try {
+    const stripe = new Stripe(secretKey)
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    const metadata = session.metadata || {}
+    const expired = Date.now() > (session.created * 1000) + 7 * 24 * 60 * 60 * 1000
+    if (session.payment_status !== 'paid' || metadata.order_type !== '3d_print_cart' || metadata.print_download_token !== token || expired) {
+      return new Response(expired ? 'This download link expired after 7 days.' : 'This download link is unavailable.', { status: 403 })
+    }
+    const manifest = await readPrintManifest(metadata)
+    const item = manifest?.items[index]
+    if (!item) return new Response('File not found.', { status: 404 })
+    const file = await privateAttachment(item.modelUrl, item.modelName || 'customer-model.stl')
+    if (!file) return new Response('The stored file could not be retrieved.', { status: 404 })
+    return new Response(file.content, { headers: {
+      'Content-Type': 'application/octet-stream',
+      'Content-Disposition': `attachment; filename="${String(file.filename).replace(/["\\]/g, '_')}"`,
+      'Cache-Control': 'private, no-store',
+    } })
+  } catch (error) {
+    console.error('[order-download] failed', { error })
+    return new Response('The file could not be downloaded.', { status: 500 })
+  }
+}
 
 async function sendContactEmails(request: Request) {
   const body = await request.json() as { name?: unknown; email?: unknown; subject?: unknown; message?: unknown }
@@ -362,7 +407,8 @@ async function handleStripeWebhook(request: Request) {
 }
 
 export default async function handler(request: IncomingMessage, response: ServerResponse) {
-  if (request.method !== 'POST') {
+  const requestAction = new URL(request.url || '/api/stripe-checkout', 'https://www.kiwikoru.co.nz').searchParams.get('action')
+  if (request.method !== 'POST' && !(request.method === 'GET' && requestAction === 'download')) {
     response.statusCode = 405
     response.setHeader('Content-Type', 'application/json')
     response.end(JSON.stringify({ error: 'Method not allowed.' }))
@@ -379,10 +425,10 @@ export default async function handler(request: IncomingMessage, response: Server
     const webRequest = new Request(requestUrl, {
       method: 'POST',
       headers: { 'Content-Type': request.headers['content-type'] || 'application/json', ...(typeof request.headers['stripe-signature'] === 'string' ? { 'stripe-signature': request.headers['stripe-signature'] } : {}) },
-      body,
+      ...(request.method === 'GET' ? {} : { body }),
     })
     const action = new URL(requestUrl).searchParams.get('action')
-    const checkoutResponse = action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : action === 'contact' ? await sendContactEmails(webRequest) : action === 'webhook' ? await handleStripeWebhook(webRequest) : action === 'youshie' ? await createYoushieCheckout(webRequest) : Response.json({ error: 'Unknown checkout action.' }, { status: 404 })
+    const checkoutResponse = action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : action === 'contact' ? await sendContactEmails(webRequest) : action === 'webhook' ? await handleStripeWebhook(webRequest) : action === 'download' ? await downloadPrintFile(webRequest) : action === 'youshie' ? await createYoushieCheckout(webRequest) : Response.json({ error: 'Unknown checkout action.' }, { status: 404 })
     response.statusCode = checkoutResponse.status
     response.setHeader('Content-Type', checkoutResponse.headers.get('content-type') || 'application/json')
     response.end(await checkoutResponse.text())
