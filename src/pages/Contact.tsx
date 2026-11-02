@@ -20,6 +20,12 @@ export default function Contact() {
       });
       const result = await response.json() as { error?: string };
       if (!response.ok) throw new Error(result.error || 'Unable to send your message.');
+      const gtag = (window as Window & { gtag?: (...args: unknown[]) => void }).gtag;
+      gtag?.('event', 'conversion', {
+        send_to: 'AW-18479065242/Lr9JCJFX9zqdEJrRw0tE',
+        value: 1.0,
+        currency: 'NZD',
+      });
       setSubmitted(true);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Unable to send your message.');

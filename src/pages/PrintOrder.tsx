@@ -1,4 +1,5 @@
 import { Check, ChevronLeft, FileBox, Mail, MapPin, MessageCircle, ShieldCheck, Truck } from 'lucide-react'
+import { upload } from '@vercel/blob/client'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router-dom'
@@ -41,11 +42,16 @@ export default function PrintOrder() {
     if (!items.length || working) return
     setWorking(true); setError(undefined)
     try {
-      const data = new FormData()
-      data.set('destination', destination); data.set('rural', String(rural)); data.set('customer', JSON.stringify(customer))
-      data.set('items', JSON.stringify(items.map(item => ({ fileName: item.fileName, price: item.price, material: item.material, color: item.color, infill: item.infill, quality: item.quality, estimatedVolume: item.estimatedVolume, quantity: item.quantity }))))
-      items.forEach(item => data.append('models', item.file))
-      const response = await fetch('/api/stripe-checkout?action=print', { method: 'POST', body: data })
+      const orderItems = items.map(item => ({ fileName: item.fileName, fileSize: item.file.size, price: item.price, material: item.material, color: item.color, infill: item.infill, quality: item.quality, estimatedVolume: item.estimatedVolume, quantity: item.quantity }))
+      const preparationResponse = await fetch('/api/stripe-checkout?action=print-prepare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ destination, rural, customer, items: orderItems }) })
+      const preparation = await preparationResponse.json() as { token?: string; uploads?: Array<{ pathname: string }>; error?: string }
+      if (!preparationResponse.ok || !preparation.token || preparation.uploads?.length !== items.length) throw new Error(preparation.error || 'Unable to prepare your model uploads.')
+      const blobs = await Promise.all(items.map((item, index) => upload(preparation.uploads![index].pathname, item.file, {
+        access: 'private', contentType: 'model/stl', multipart: item.file.size > 5 * 1024 * 1024,
+        handleUploadUrl: '/api/stripe-checkout?action=print-upload',
+        clientPayload: JSON.stringify({ token: preparation.token, index }),
+      })))
+      const response = await fetch('/api/stripe-checkout?action=print', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: preparation.token, blobs: blobs.map(blob => ({ url: blob.url, pathname: blob.pathname })) }) })
       const result = await response.json() as { url?: string; error?: string }
       if (!response.ok || !result.url) throw new Error(result.error || 'Unable to start secure checkout.')
       window.location.assign(result.url)

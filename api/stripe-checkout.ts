@@ -1,12 +1,15 @@
-import { put } from '@vercel/blob'
+import { head, put } from '@vercel/blob'
+import { handleUpload } from '@vercel/blob/client'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { brandedEmail, emailDetails, emailSafe } from './lib/branded-email.js'
+import { isStlFile, MAX_PRINT_ITEMS, PREPARATION_TTL_MS, safeModelName, signPrintPreparation, verifyPrintPreparation } from '../server/print-order.js'
+import type { PrintDestination, PrintPreparation } from '../server/print-order.js'
 
 export const maxDuration = 60
 
-type Destination = 'pickup' | 'north' | 'south' | 'australia'
+type Destination = PrintDestination
 type CustomerDetails = { name: string; email: string; phone: string; address: string; address2?: string; city: string; region: string; postalCode: string }
 
 const shippingByDestination: Record<Destination, number> = {
@@ -133,31 +136,95 @@ export async function createYoushieCheckout(request: Request) {
   }
 }
 
+function signingSecret() {
+  return process.env.PRINT_ORDER_SIGNING_SECRET || process.env.STRIPE_SECRET_KEY || ''
+}
+
+function shortText(value: unknown, maximum = 120) {
+  const text = String(value ?? '').trim()
+  if (text.length > maximum) throw new Error('One of the order details is too long.')
+  return text
+}
+
+export async function preparePrintCheckout(request: Request) {
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.BLOB_READ_WRITE_TOKEN) return Response.json({ error: 'Secure checkout is unavailable.' }, { status: 503 })
+  try {
+    const body = await request.json() as { destination?: unknown; rural?: unknown; customer?: unknown; items?: unknown }
+    if (!isDestination(body.destination)) return Response.json({ error: 'Please choose a delivery destination.' }, { status: 400 })
+    const pickup = body.destination === 'pickup'
+    const rural = !pickup && body.destination !== 'australia' && body.rural === true
+    const customer = readCustomer(body.customer, !pickup)
+    Object.values(customer).forEach(value => shortText(value, 200))
+    if (!Array.isArray(body.items) || !body.items.length || body.items.length > MAX_PRINT_ITEMS) throw new Error('Your cart could not be read. Please return to the cart and try again.')
+    const orderId = crypto.randomUUID()
+    const items = body.items.map((source, index) => {
+      if (!source || typeof source !== 'object') throw new Error('One of the cart items is invalid.')
+      const quote = source as Record<string, unknown>
+      const fileName = safeModelName(shortText(quote.fileName))
+      const fileSize = Number(quote.fileSize)
+      if (!isStlFile(fileName, fileSize)) throw new Error(`${fileName} must be a valid STL file no larger than 20 MB.`)
+      const amount = Math.round(Number(quote.price) * 100)
+      const quantity = Math.round(Number(quote.quantity) || 1)
+      const material = shortText(quote.material)
+      const colour = shortText(quote.color)
+      const infill = Number(quote.infill)
+      const layerHeight = Number(quote.quality)
+      const estimatedVolume = Number(quote.estimatedVolume)
+      if (!Number.isFinite(amount) || amount < 100 || amount > 10_000_000 || quantity < 1 || quantity > 99) throw new Error('One of the quoted prices or quantities is invalid.')
+      if (!material || !colour || !Number.isFinite(infill) || infill < 0 || infill > 100 || !Number.isFinite(layerHeight) || layerHeight <= 0 || layerHeight > 10 || !Number.isFinite(estimatedVolume) || estimatedVolume <= 0) throw new Error('One of the model settings is invalid.')
+      return {
+        pathname: `print-orders/${orderId}/${index + 1}-${fileName}`,
+        fileName, fileSize, amount, quantity, material, colour,
+        infill: String(infill), layerHeight: String(layerHeight), estimatedVolume: String(estimatedVolume),
+      }
+    })
+    const preparation: PrintPreparation = { orderId, expiresAt: Date.now() + PREPARATION_TTL_MS, destination: body.destination, rural, customer, items }
+    return Response.json({ token: signPrintPreparation(preparation, signingSecret()), uploads: items.map(item => ({ pathname: item.pathname })) })
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : 'Unable to prepare your files.' }, { status: 400 })
+  }
+}
+
+export async function createPrintUpload(request: Request) {
+  try {
+    const body = await request.json() as Parameters<typeof handleUpload>[0]['body']
+    const result = await handleUpload({
+      request,
+      body,
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
+        let payload: { token?: string; index?: number }
+        try { payload = JSON.parse(clientPayload || '{}') as { token?: string; index?: number } } catch { throw new Error('Invalid upload request.') }
+        const preparation = verifyPrintPreparation(String(payload.token || ''), signingSecret())
+        const item = preparation.items[payload.index ?? -1]
+        if (!item || pathname !== item.pathname) throw new Error('This file is not authorised for this order.')
+        return { allowedContentTypes: ['model/stl'], maximumSizeInBytes: item.fileSize, validUntil: preparation.expiresAt, addRandomSuffix: false, allowOverwrite: false }
+      },
+    })
+    return Response.json(result)
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : 'Unable to authorise the file upload.' }, { status: 400 })
+  }
+}
+
 export async function createPrintCheckout(request: Request) {
   const secretKey = process.env.STRIPE_SECRET_KEY
-  if (!secretKey) return Response.json({ error: 'Secure checkout is unavailable.' }, { status: 503 })
+  if (!secretKey || !process.env.BLOB_READ_WRITE_TOKEN) return Response.json({ error: 'Secure checkout is unavailable.' }, { status: 503 })
   try {
-    const form = await request.formData()
-    const destination = form.get('destination')
-    if (!isDestination(destination)) return Response.json({ error: 'Please choose a delivery destination.' }, { status: 400 })
-    const pickup = destination === 'pickup'
-    const rural = !pickup && destination !== 'australia' && form.get('rural') === 'true'
-    const customer = readCustomer(JSON.parse(String(form.get('customer') || '{}')), !pickup)
-    const rawItems = JSON.parse(String(form.get('items') || '[]')) as Array<Record<string, unknown>>
-    const models = form.getAll('models')
-    if (!Array.isArray(rawItems) || !rawItems.length || rawItems.length > 10 || models.length !== rawItems.length) throw new Error('Your cart could not be read. Please return to the cart and try again.')
-    const orderId = crypto.randomUUID()
-    const items = await Promise.all(rawItems.map(async (quote, index) => {
-      const model = models[index]
-      const amount = Math.max(100, Math.round(Number(quote.price) * 100))
-      const quantity = Math.max(1, Math.min(99, Math.round(Number(quote.quantity) || 1)))
-      if (!Number.isFinite(amount)) throw new Error('One of the quoted prices is invalid.')
-      if (!(model instanceof File) || !model.size) throw new Error('One of the model files is missing.')
-      if (model.size > 20 * 1024 * 1024) throw new Error(`${model.name} must be smaller than 20 MB.`)
-      const modelName = model.name
-      const blob = await put(`print-orders/${orderId}/${index + 1}-${model.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`, Buffer.from(await model.arrayBuffer()), { access: 'private', contentType: model.type || 'application/octet-stream', addRandomSuffix: false })
-      return { modelName, modelUrl: blob.url, amount, quantity, material: String(quote.material || ''), colour: String(quote.color || ''), infill: String(quote.infill || ''), layerHeight: String(quote.quality || ''), estimatedVolume: String(quote.estimatedVolume || '') }
+    const body = await request.json() as { token?: unknown; blobs?: unknown }
+    const preparation = verifyPrintPreparation(String(body.token || ''), signingSecret())
+    if (!Array.isArray(body.blobs) || body.blobs.length !== preparation.items.length) throw new Error('One or more model uploads are missing.')
+    const uploadedBlobs = body.blobs as unknown[]
+    const items = await Promise.all(preparation.items.map(async (item, index) => {
+      const source = uploadedBlobs[index]
+      if (!source || typeof source !== 'object') throw new Error('One or more model uploads are invalid.')
+      const blob = source as Record<string, unknown>
+      if (blob.pathname !== item.pathname || typeof blob.url !== 'string') throw new Error('One or more model uploads do not match this order.')
+      const stored = await head(item.pathname)
+      if (stored.pathname !== item.pathname || stored.url !== blob.url || stored.size !== item.fileSize || stored.contentType !== 'model/stl') throw new Error('One or more uploaded models could not be verified.')
+      return { modelName: item.fileName, modelUrl: stored.url, amount: item.amount, quantity: item.quantity, material: item.material, colour: item.colour, infill: item.infill, layerHeight: item.layerHeight, estimatedVolume: item.estimatedVolume }
     }))
+    const { orderId, destination, rural, customer } = preparation
+    const pickup = destination === 'pickup'
     const manifestBlob = await put(`print-orders/${orderId}/manifest.json`, JSON.stringify({ orderId, items }), { access: 'private', contentType: 'application/json', addRandomSuffix: false })
     const shippingAmount = shippingByDestination[destination] + (rural ? 600 : 0)
     const origin = new URL(request.url).origin
@@ -436,7 +503,7 @@ export default async function handler(request: IncomingMessage, response: Server
       ...(request.method === 'GET' ? {} : { body }),
     })
     const action = new URL(requestUrl).searchParams.get('action')
-    const checkoutResponse = action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : action === 'contact' ? await sendContactEmails(webRequest) : action === 'webhook' ? await handleStripeWebhook(webRequest) : action === 'download' ? await downloadPrintFile(webRequest) : action === 'youshie' ? await createYoushieCheckout(webRequest) : Response.json({ error: 'Unknown checkout action.' }, { status: 404 })
+    const checkoutResponse = action === 'print-prepare' ? await preparePrintCheckout(webRequest) : action === 'print-upload' ? await createPrintUpload(webRequest) : action === 'print' ? await createPrintCheckout(webRequest) : action === 'confirm' ? await confirmCheckout(webRequest) : action === 'contact' ? await sendContactEmails(webRequest) : action === 'webhook' ? await handleStripeWebhook(webRequest) : action === 'download' ? await downloadPrintFile(webRequest) : action === 'youshie' ? await createYoushieCheckout(webRequest) : Response.json({ error: 'Unknown checkout action.' }, { status: 404 })
 
     // Pass through binary bodies and headers unchanged. Converting an STL to text
     // corrupts its bytes and makes browsers save it as the API route name.

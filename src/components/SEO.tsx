@@ -133,7 +133,7 @@ export function generateFAQSchema() {
         name: 'What file types do you accept?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'We accept STL, STEP, OBJ, 3MF, PDF, JPG, and PNG files. If you have a different format or just a sketch, send it through — we can usually work with it or convert it for you.',
+          text: 'Our instant quote accepts STL files up to 20 MB. For STEP, OBJ, 3MF, PDF, JPG, PNG, another format, or just a sketch, contact us for a manual review — we can usually work with it or convert it for you.',
         },
       },
       {

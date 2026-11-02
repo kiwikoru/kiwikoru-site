@@ -79,6 +79,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
   const [fileName, setFileName] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [fileError, setFileError] = useState<string>()
   const [previewColor, setPreviewColor] = useState(PREVIEW_COLORS[0].hex)
   const [uniformScale, setUniformScale] = useState(1)
   const [dimensionInputs, setDimensionInputs] = useState({ x: '', y: '', z: '' })
@@ -88,10 +89,16 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   const processFile = useCallback((file: File) => {
-    if (!file.name.match(/\.(stl|obj)$/i)) return
-    onFileSelect?.(file)
+    setFileError(undefined)
+    if (!/\.stl$/i.test(file.name)) {
+      setFileError('Instant quotes currently support STL files only. For OBJ, 3MF or other formats, please use the contact form.')
+      return
+    }
+    if (!file.size || file.size > 20 * 1024 * 1024) {
+      setFileError('Choose a non-empty STL file no larger than 20 MB.')
+      return
+    }
     setLoading(true)
-    setFileName(file.name)
 
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -99,12 +106,15 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
         const loader = new STLLoader()
         const arrayBuffer = e.target?.result as ArrayBuffer
         const geometry = loader.parse(arrayBuffer)
+        const positions = geometry.getAttribute('position')
+        if (!positions || positions.count < 3 || positions.count % 3 !== 0) throw new Error('No printable triangles were found.')
         geometry.computeBoundingBox()
 
         // Calculate dimensions from original bounding box (before scaling)
         const box = geometry.boundingBox!
         const size = new THREE.Vector3()
         box.getSize(size)
+        if (![size.x, size.y, size.z].every(value => Number.isFinite(value) && value > 0)) throw new Error('The model dimensions are invalid.')
 
         // Center the geometry
         geometry.center()
@@ -125,12 +135,12 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
         const tempGeom = geometry.clone()
         tempGeom.scale(1/scale, 1/scale, 1/scale) // back to original
         const positionAttr = tempGeom.getAttribute('position')
-        const positions = positionAttr.array as Float32Array
+        const coordinates = positionAttr.array as Float32Array
         let volume = 0
-        for (let i = 0; i < positions.length; i += 9) {
-          const ax = positions[i],     ay = positions[i + 1], az = positions[i + 2]
-          const bx = positions[i + 3], by = positions[i + 4], bz = positions[i + 5]
-          const cx = positions[i + 6], cy = positions[i + 7], cz = positions[i + 8]
+        for (let i = 0; i < coordinates.length; i += 9) {
+          const ax = coordinates[i],     ay = coordinates[i + 1], az = coordinates[i + 2]
+          const bx = coordinates[i + 3], by = coordinates[i + 4], bz = coordinates[i + 5]
+          const cx = coordinates[i + 6], cy = coordinates[i + 7], cz = coordinates[i + 8]
           volume += (
             ax * (by * cz - bz * cy) +
             bx * (cy * az - cz * ay) +
@@ -140,18 +150,23 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
         tempGeom.dispose()
 
         const volCm3 = Math.abs(volume) / 1000
+        if (!Number.isFinite(volCm3) || volCm3 <= 0) throw new Error('The model has no measurable closed volume.')
 
+        setFileName(file.name)
         setMeshData({ geometry, volume: volCm3, dimensions: dimsMm })
         setUniformScale(1)
         setDimensionInputs({ x: String(dimsMm.x), y: String(dimsMm.y), z: String(dimsMm.z) })
         setPercentInput('100')
+        onFileSelect?.(file)
         onFileLoad?.(volCm3, dimsMm)
       } catch (err) {
         console.error('Error parsing 3D file:', err)
+        setFileError('This STL could not be read as a printable 3D model. Check it in your modelling software, or contact us for help.')
       } finally {
         setLoading(false)
       }
     }
+    reader.onerror = () => { setLoading(false); setFileError('This STL could not be read. Please choose another file or contact us for help.') }
     reader.readAsArrayBuffer(file)
   }, [onFileLoad, onFileSelect])
 
@@ -170,6 +185,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
   const clearModel = () => {
     setMeshData(null)
     setFileName('')
+    setFileError(undefined)
     setUniformScale(1)
     setDimensionInputs({ x: '', y: '', z: '' })
     setPercentInput('100')
@@ -338,7 +354,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
             aria-label="Upload 3D model to preview"
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click() }}
           >
-            <input ref={fileInputRef} type="file" accept=".stl,.obj" onChange={handleFileSelect} className="hidden" />
+            <input ref={fileInputRef} type="file" accept=".stl,model/stl" onChange={handleFileSelect} className="hidden" />
             {loading ? (
               <div className="flex flex-col items-center gap-3">
                 <div className="w-10 h-10 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
@@ -347,7 +363,7 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
             ) : (
               <>
                 <Upload size={48} className={`mb-4 transition-colors duration-300 ${dragOver ? 'text-gold' : 'text-white/25'}`} />
-                <p className="text-white/60 text-sm font-medium">Upload your STL or OBJ to preview</p>
+                <p className="text-white/60 text-sm font-medium">Upload your STL to preview</p>
                 <p className="text-white/35 text-xs mt-1.5">Drag & drop or click to browse</p>
                 <div className="mt-5 bg-white/5 rounded-lg px-4 py-2.5 border border-white/[0.06]">
                   <p className="text-[11px] text-white/40 text-center">
@@ -359,6 +375,8 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
           </div>
         )}
       </div>
+
+      {fileError && <p role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-800">{fileError}</p>}
 
       {/* Color note */}
       {meshData && (
