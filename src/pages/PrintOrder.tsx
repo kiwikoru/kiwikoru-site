@@ -25,7 +25,8 @@ export default function PrintOrder() {
   const [confirmation, setConfirmation] = useState<'sending' | 'sent' | 'error'>()
   const pickup = destination === 'pickup'
   const shipping = ({ pickup: 0, north: 15, south: 15, australia: 30 } as Record<string, number>)[destination] + (!pickup && destination !== 'australia' && rural ? 6 : 0)
-  const printTotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0)
+  // Match Stripe's per-unit cent rounding so the displayed total is exact.
+  const printTotal = items.reduce((totalCents, item) => totalCents + Math.round(item.price * 100) * item.quantity, 0) / 100
   const total = printTotal + shipping
 
   useEffect(() => {
