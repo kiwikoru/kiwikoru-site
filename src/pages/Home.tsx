@@ -8,6 +8,7 @@ import type { CSSProperties } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { printCategories } from '../data/whatWePrint';
+import KiwiNewsRepairPopup from '../components/KiwiNewsRepairPopup';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -489,6 +490,7 @@ function FAQSection() {
 export default function Home() {
   return (
     <main>
+      <KiwiNewsRepairPopup />
       <HeroSection />
       <StepsSection />
       <FindModelsSection />
