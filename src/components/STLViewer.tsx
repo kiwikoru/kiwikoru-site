@@ -363,11 +363,12 @@ export default function STLViewer({ onFileLoad, onFileSelect, onClear, onScaleCh
             ) : (
               <>
                 <Upload size={48} className={`mb-4 transition-colors duration-300 ${dragOver ? 'text-gold' : 'text-white/25'}`} />
-                <p className="text-white/60 text-sm font-medium">Upload your STL to preview</p>
-                <p className="text-white/35 text-xs mt-1.5">Drag & drop or click to browse</p>
+                <p className="text-white/80 text-sm font-semibold">Upload your STL to preview</p>
+                <p className="text-gold-light text-xs font-bold mt-1.5">Valid STL files · maximum 20 MB</p>
+                <p className="text-white/45 text-xs mt-1">Drag & drop or click to browse</p>
                 <div className="mt-5 bg-white/5 rounded-lg px-4 py-2.5 border border-white/[0.06]">
                   <p className="text-[11px] text-white/40 text-center">
-                    Upload your model and preview it before requesting an estimate
+                    We validate and preview the model before calculating your estimate
                   </p>
                 </div>
               </>

@@ -4,8 +4,8 @@ import Stripe from 'stripe'
 import { Resend } from 'resend'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 import { brandedEmail, emailDetails, emailSafe } from './lib/branded-email.js'
-import { isStlFile, MAX_PRINT_ITEMS, PREPARATION_TTL_MS, safeModelName, signPrintPreparation, verifyPrintPreparation } from '../server/print-order.js'
-import type { PrintDestination, PrintPreparation } from '../server/print-order.js'
+import { isStlFile, MAX_MODEL_SIZE, MAX_PRINT_ITEMS, PREPARATION_TTL_MS, renderScaleChangeAlert, safeModelName, signPrintPreparation, verifyPrintPreparation } from '../server/print-order.js'
+import type { ModelDimensions, PrintDestination, PrintPreparation } from '../server/print-order.js'
 
 export const maxDuration = 60
 
@@ -146,6 +146,14 @@ function shortText(value: unknown, maximum = 120) {
   return text
 }
 
+function readDimensions(value: unknown): ModelDimensions {
+  if (!value || typeof value !== 'object') throw new Error('One of the model dimensions is missing.')
+  const source = value as Record<string, unknown>
+  const dimensions = { x: Number(source.x), y: Number(source.y), z: Number(source.z) }
+  if (Object.values(dimensions).some(dimension => !Number.isFinite(dimension) || dimension <= 0 || dimension > 1_000_000)) throw new Error('One of the model dimensions is invalid.')
+  return dimensions
+}
+
 export async function preparePrintCheckout(request: Request) {
   if (!process.env.STRIPE_SECRET_KEY || !process.env.BLOB_READ_WRITE_TOKEN) return Response.json({ error: 'Secure checkout is unavailable.' }, { status: 503 })
   try {
@@ -170,12 +178,16 @@ export async function preparePrintCheckout(request: Request) {
       const infill = Number(quote.infill)
       const layerHeight = Number(quote.quality)
       const estimatedVolume = Number(quote.estimatedVolume)
+      const scale = Number(quote.scale)
+      const originalDimensions = readDimensions(quote.originalDimensions)
+      const finalDimensions = readDimensions(quote.finalDimensions)
       if (!Number.isFinite(amount) || amount < 100 || amount > 10_000_000 || quantity < 1 || quantity > 99) throw new Error('One of the quoted prices or quantities is invalid.')
       if (!material || !colour || !Number.isFinite(infill) || infill < 0 || infill > 100 || !Number.isFinite(layerHeight) || layerHeight <= 0 || layerHeight > 10 || !Number.isFinite(estimatedVolume) || estimatedVolume <= 0) throw new Error('One of the model settings is invalid.')
+      if (!Number.isFinite(scale) || scale < 0.05 || scale > 10 || (['x', 'y', 'z'] as const).some(axis => Math.abs(finalDimensions[axis] - originalDimensions[axis] * scale) > 0.2)) throw new Error('The model scale or dimensions are invalid.')
       return {
         pathname: `print-orders/${orderId}/${index + 1}-${fileName}`,
         fileName, fileSize, amount, quantity, material, colour,
-        infill: String(infill), layerHeight: String(layerHeight), estimatedVolume: String(estimatedVolume),
+        infill: String(infill), layerHeight: String(layerHeight), estimatedVolume: String(estimatedVolume), scale, originalDimensions, finalDimensions,
       }
     })
     const preparation: PrintPreparation = { orderId, expiresAt: Date.now() + PREPARATION_TTL_MS, destination: body.destination, rural, customer, items }
@@ -221,7 +233,7 @@ export async function createPrintCheckout(request: Request) {
       if (blob.pathname !== item.pathname || typeof blob.url !== 'string') throw new Error('One or more model uploads do not match this order.')
       const stored = await head(item.pathname)
       if (stored.pathname !== item.pathname || stored.url !== blob.url || stored.size !== item.fileSize || stored.contentType !== 'model/stl') throw new Error('One or more uploaded models could not be verified.')
-      return { modelName: item.fileName, modelUrl: stored.url, amount: item.amount, quantity: item.quantity, material: item.material, colour: item.colour, infill: item.infill, layerHeight: item.layerHeight, estimatedVolume: item.estimatedVolume }
+      return { modelName: item.fileName, modelUrl: stored.url, fileSize: item.fileSize, amount: item.amount, quantity: item.quantity, material: item.material, colour: item.colour, infill: item.infill, layerHeight: item.layerHeight, estimatedVolume: item.estimatedVolume, scale: item.scale, originalDimensions: item.originalDimensions, finalDimensions: item.finalDimensions }
     }))
     const { orderId, destination, rural, customer } = preparation
     const pickup = destination === 'pickup'
@@ -260,13 +272,15 @@ function orderDownloadUrl(sessionId: string, token: string, index: number) {
   return `https://www.kiwikoru.co.nz/api/stripe-checkout?${query}`
 }
 
-async function privateAttachment(url: string, filename: string, contentId?: string) {
+async function privateAttachment(url: string, filename: string, contentId?: string, maximumBytes = MAX_MODEL_SIZE) {
   if (!url || !process.env.BLOB_READ_WRITE_TOKEN) return undefined
   try {
     const response = await fetch(url, { headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` } })
     if (!response.ok) throw new Error(`Blob download returned ${response.status}`)
+    const declaredLength = Number(response.headers.get('content-length'))
+    if (Number.isFinite(declaredLength) && declaredLength > maximumBytes) return undefined
     const content = Buffer.from(await response.arrayBuffer())
-    if (!content.length || content.length > 25 * 1024 * 1024) return undefined
+    if (!content.length || content.length > maximumBytes) return undefined
     return { filename, content, ...(contentId ? { contentId } : {}) }
   } catch (error) {
     console.error('[order-confirmation] unable to attach customer file', { error })
@@ -274,7 +288,8 @@ async function privateAttachment(url: string, filename: string, contentId?: stri
   }
 }
 
-type PrintManifest = { items: Array<{ modelUrl: string; modelName: string; amount: number; quantity: number; material: string; colour: string; infill: string; layerHeight: string }> }
+type PrintManifestItem = { modelUrl: string; modelName: string; fileSize: number; amount: number; quantity: number; material: string; colour: string; infill: string; layerHeight: string; estimatedVolume: string; scale: number; originalDimensions: ModelDimensions; finalDimensions: ModelDimensions }
+type PrintManifest = { items: PrintManifestItem[] }
 
 async function readPrintManifest(metadata: Record<string, string>): Promise<PrintManifest | undefined> {
   if (!metadata.print_manifest_url || !process.env.BLOB_READ_WRITE_TOKEN) return undefined
@@ -297,10 +312,17 @@ async function orderAttachments(metadata: Record<string, string>, manifest?: Pri
     return [generated, original].filter(Boolean) as NonNullable<Awaited<ReturnType<typeof privateAttachment>>>[]
   }
   if (manifest?.items.length) {
-    const attachments = await Promise.all(manifest.items.map(item => privateAttachment(item.modelUrl, item.modelName || 'customer-model.stl')))
-    return attachments.filter(Boolean) as NonNullable<Awaited<ReturnType<typeof privateAttachment>>>[]
+    const maximumAttachmentTotal = 8 * 1024 * 1024
+    const attachments: NonNullable<Awaited<ReturnType<typeof privateAttachment>>>[] = []
+    let attachedBytes = 0
+    for (const item of manifest.items) {
+      if (!Number.isFinite(item.fileSize) || item.fileSize <= 0 || attachedBytes + item.fileSize > maximumAttachmentTotal) continue
+      const attachment = await privateAttachment(item.modelUrl, item.modelName || 'customer-model.stl', undefined, maximumAttachmentTotal - attachedBytes)
+      if (attachment) { attachments.push(attachment); attachedBytes += attachment.content.length }
+    }
+    return attachments
   }
-  const model = await privateAttachment(metadata.model_url, metadata.model_name || 'customer-model.stl')
+  const model = await privateAttachment(metadata.model_url, metadata.model_name || 'customer-model.stl', undefined, 8 * 1024 * 1024)
   return model ? [model] : []
 }
 
@@ -344,10 +366,12 @@ export async function confirmCheckout(request: Request) {
       const attachment = attachments[0]
       const downloadToken = m.print_download_token || ''
       const downloadLinks = manifest?.items.map((item, index) => downloadToken ? `<li style="margin:8px 0"><a href="${orderDownloadUrl(session.id, downloadToken, index)}" style="display:inline-block;padding:10px 14px;border-radius:9px;background:#e8c9a0;color:#253126;font-weight:800;text-decoration:none">Download ${safe(item.modelName)}</a> <span style="color:#687269;font-size:12px">available for 7 days</span></li>` : '').join('') || ''
+      const scaleAlerts = manifest?.items.map(item => renderScaleChangeAlert({ ...item, pathname: '', fileName: item.modelName })).join('') || ''
       const isYoushie = m.order_type === 'youshie' || m.order_type === 'youshie_test'
       const fileName = isYoushie ? 'Youshie customer image' : (m.model_name || '3D model')
       const cartItemRows = manifest?.items.map(item => `<tr><td style="padding:12px 16px;border-bottom:1px solid #eee;color:#687269">${safe(item.quantity)}× ${safe(item.modelName)}</td><td style="padding:12px 16px;border-bottom:1px solid #eee">${safe(item.material)} · ${safe(item.colour)} · ${safe(item.infill)}% infill · ${safe(item.layerHeight)} mm</td></tr>`).join('') || ''
       const ownerContent = `
+        ${scaleAlerts}
         ${isYoushie && attachment ? '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:0 0 24px"><div style="text-align:center"><img src="cid:customer-youshie" alt="Generated Youshie" style="display:block;width:260px;max-width:100%;border-radius:16px"><small>Generated Youshie</small></div>' + (m.youshie_original_url ? '<div style="text-align:center"><img src="cid:original-reference" alt="Original reference" style="display:block;width:260px;max-width:100%;border-radius:16px"><small>Original reference photo</small></div>' : '') + '</div>' : ''}
         ${!isYoushie ? `<div style="margin:0 0 24px;padding:22px;border-radius:16px;background:#253126;color:#fff;text-align:center"><div style="font-size:38px">◫</div><strong style="display:block;margin-top:8px;font-size:18px">${safe(fileName)}</strong><span style="display:block;margin-top:6px;color:#e8c9a0;font-size:13px">STL production file ${attachment ? 'attached to this email' : 'stored with the paid order'}</span></div>${downloadLinks ? `<div style="margin:0 0 24px;padding:18px;border-radius:14px;background:#f2f4ea"><strong style="color:#253126">Production-file downloads</strong><p style="margin:6px 0 10px;color:#526158;font-size:13px">Use these private links if the attachment is blocked or too large. They expire 7 days after payment.</p><ul style="margin:0;padding-left:18px">${downloadLinks}</ul></div>` : ''}` : ''}
         <table role="presentation" style="width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden">
@@ -363,10 +387,17 @@ export async function confirmCheckout(request: Request) {
         <tr><td style="padding:12px 16px;color:#687269">Total paid</td><td style="padding:12px 16px;font-size:20px;font-weight:800">NZ${((session.amount_total || 0) / 100).toFixed(2)}</td></tr></table>
         <p style="margin:22px 0 5px"><strong>KiwiKoru order number:</strong> ${safe(orderNumber)}</p><p style="margin:0;color:#687269;font-size:13px">Keep this email as the production and dispatch record for this order.</p>`
       const ownerHtml = brandedEmail({ internal: true, eyebrow: 'New paid order', title: orderNumber, intro: 'Payment is confirmed by Stripe. This project is ready to organise for production.', content: ownerContent })
-      const ownerMessage = await resend.emails.send(
+      let ownerMessage = await resend.emails.send(
         { from: sender, to: owner, replyTo: email, subject: `PAID ${orderNumber} — ${safe(m.customer_name)} — ${safe(typeName)}`, html: ownerHtml, attachments: attachments.length ? attachments : undefined },
-        { headers: { 'Idempotency-Key': `order-owner-v3-${session.id}` } },
+        { headers: { 'Idempotency-Key': `order-owner-v4-${session.id}` } },
       )
+      if ((ownerMessage.error || !ownerMessage.data?.id) && attachments.length) {
+        console.error('[order-confirmation] owner email with attachments rejected; retrying with private download links only', { sessionId: session.id, error: ownerMessage.error })
+        ownerMessage = await resend.emails.send(
+          { from: sender, to: owner, replyTo: email, subject: `PAID ${orderNumber} — ${safe(m.customer_name)} — ${safe(typeName)}`, html: ownerHtml },
+          { headers: { 'Idempotency-Key': `order-owner-v4-links-${session.id}` } },
+        )
+      }
       if (ownerMessage.error || !ownerMessage.data?.id) {
         console.error('[order-confirmation] owner email rejected', { sessionId: session.id, error: ownerMessage.error })
         throw new Error(`Owner notification rejected: ${ownerMessage.error?.message || 'No delivery ID returned.'}`)

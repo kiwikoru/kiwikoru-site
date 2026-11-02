@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isStlFile, MAX_MODEL_SIZE, safeModelName, signPrintPreparation, verifyPrintPreparation } from '../server/print-order.js'
+import { isStlFile, MAX_MODEL_SIZE, renderScaleChangeAlert, safeModelName, signPrintPreparation, verifyPrintPreparation } from '../server/print-order.js'
 import type { PrintPreparation } from '../server/print-order.js'
 
 const preparation: PrintPreparation = {
@@ -8,7 +8,7 @@ const preparation: PrintPreparation = {
   destination: 'north',
   rural: false,
   customer: { name: 'Test Customer', email: 'test@example.com', phone: '0210000000', address: '1 Test Street', city: 'Whangārei', region: 'Northland', postalCode: '0110' },
-  items: [{ pathname: 'print-orders/order-123/1-part.stl', fileName: 'part.stl', fileSize: 1234, amount: 1200, quantity: 1, material: 'PLA', colour: 'White', infill: '20', layerHeight: '0.2', estimatedVolume: '10' }],
+  items: [{ pathname: 'print-orders/order-123/1-part.stl', fileName: 'part.stl', fileSize: 1234, amount: 1200, quantity: 1, material: 'PLA', colour: 'White', infill: '20', layerHeight: '0.2', estimatedVolume: '10', scale: 1.5, originalDimensions: { x: 10, y: 20, z: 30 }, finalDimensions: { x: 15, y: 30, z: 45 } }],
 }
 
 describe('print-order preparation tokens', () => {
@@ -19,9 +19,31 @@ describe('print-order preparation tokens', () => {
 
   it('rejects tampering, a wrong secret, and expiry', () => {
     const token = signPrintPreparation(preparation, 'test-secret')
-    expect(() => verifyPrintPreparation(`${token.slice(0, -1)}x`, 'test-secret', 9_999)).toThrow(/invalid/i)
+    const tampered = `${token[0] === 'a' ? 'b' : 'a'}${token.slice(1)}`
+    expect(() => verifyPrintPreparation(tampered, 'test-secret', 9_999)).toThrow(/invalid/i)
     expect(() => verifyPrintPreparation(token, 'wrong-secret', 9_999)).toThrow(/invalid/i)
     expect(() => verifyPrintPreparation(token, 'test-secret', 10_001)).toThrow(/expired/i)
+  })
+
+  it('rejects correctly signed scale metadata with invalid values or inconsistent dimensions', () => {
+    const invalidScale = { ...preparation, items: [{ ...preparation.items[0], scale: 10.1 }] }
+    const inconsistentDimensions = { ...preparation, items: [{ ...preparation.items[0], finalDimensions: { x: 15, y: 30, z: 44 } }] }
+    expect(() => verifyPrintPreparation(signPrintPreparation(invalidScale, 'test-secret'), 'test-secret', 9_999)).toThrow(/invalid/i)
+    expect(() => verifyPrintPreparation(signPrintPreparation(inconsistentDimensions, 'test-secret'), 'test-secret', 9_999)).toThrow(/invalid/i)
+  })
+})
+
+describe('owner email scale alert', () => {
+  it('renders a conspicuous red alert with scale and original/final dimensions', () => {
+    const html = renderScaleChangeAlert(preparation.items[0])
+    expect(html).toContain('background:#fee2e2')
+    expect(html).toContain('SCALE CHANGED — 150%')
+    expect(html).toContain('Original: X 10.0 × Y 20.0 × Z 30.0 mm')
+    expect(html).toContain('Final: X 15.0 × Y 30.0 × Z 45.0 mm')
+  })
+
+  it('does not render an alert when the model remains at original scale', () => {
+    expect(renderScaleChangeAlert({ ...preparation.items[0], scale: 1, finalDimensions: preparation.items[0].originalDimensions })).toBe('')
   })
 })
 

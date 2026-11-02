@@ -73,6 +73,12 @@ function HeroSection() {
             </p>
             <div className="hero-cta mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link
+                to="/quote"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-kiwi-gold px-7 py-3.5 font-bold text-kiwi-dark shadow-[0_10px_30px_rgba(212,184,150,.3)] ring-2 ring-kiwi-gold/30 transition hover:-translate-y-0.5 hover:bg-gold-light hover:shadow-[0_12px_34px_rgba(212,184,150,.45)]"
+              >
+                <Upload className="h-5 w-5" /> Upload STL · Get Instant Quote <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
                 to="/services"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-white/30 text-white hover:border-kiwi-gold hover:text-kiwi-gold transition-colors"
               >

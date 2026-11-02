@@ -8,15 +8,13 @@ import '../components/OrderCustomerFields.css'
 import { clearPrintCart } from '../lib/printCart'
 import type { PrintCartItem } from '../lib/printCart'
 
-type QuoteData = { fileName: string; price: number; material: string; color: string; infill: number; quality: number; estimatedVolume: number }
-type OrderState = { modelFile?: File; quote?: QuoteData; cartItems?: PrintCartItem[] }
+type OrderState = { cartItems?: PrintCartItem[] }
 
 export default function PrintOrder() {
   const { state } = useLocation()
   const [searchParams] = useSearchParams()
   const order = state as OrderState | null
-  const legacyItem = order?.quote && order.modelFile ? [{ ...order.quote, file: order.modelFile, quantity: 1 }] : []
-  const items = order?.cartItems?.length ? order.cartItems : legacyItem
+  const items = order?.cartItems ?? []
   const [destination, setDestination] = useState('north')
   const [rural, setRural] = useState(false)
   const [customer, setCustomer] = useState(emptyCustomerDetails)
@@ -43,7 +41,19 @@ export default function PrintOrder() {
     if (!items.length || working) return
     setWorking(true); setError(undefined)
     try {
-      const orderItems = items.map(item => ({ fileName: item.fileName, fileSize: item.file.size, price: item.price, material: item.material, color: item.color, infill: item.infill, quality: item.quality, estimatedVolume: item.estimatedVolume, quantity: item.quantity }))
+      const orderItems = items.map(item => {
+        const scale = Number(item.scale) || 1
+        const finalDimensions = item.dimensions
+        if (!finalDimensions || ![finalDimensions.x, finalDimensions.y, finalDimensions.z].every(value => Number.isFinite(value) && value > 0)) {
+          throw new Error(`Please remove ${item.fileName} from the cart and add it again so we can verify its dimensions.`)
+        }
+        const originalDimensions = item.originalDimensions ?? {
+          x: +(finalDimensions.x / scale).toFixed(1),
+          y: +(finalDimensions.y / scale).toFixed(1),
+          z: +(finalDimensions.z / scale).toFixed(1),
+        }
+        return { fileName: item.fileName, fileSize: item.file.size, price: item.price, material: item.material, color: item.color, infill: item.infill, quality: item.quality, estimatedVolume: item.estimatedVolume, scale, originalDimensions, finalDimensions, quantity: item.quantity }
+      })
       const preparationResponse = await fetch('/api/stripe-checkout?action=print-prepare', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ destination, rural, customer, items: orderItems }) })
       const preparation = await preparationResponse.json() as { token?: string; uploads?: Array<{ pathname: string }>; error?: string }
       if (!preparationResponse.ok || !preparation.token || preparation.uploads?.length !== items.length) throw new Error(preparation.error || 'Unable to prepare your model uploads.')

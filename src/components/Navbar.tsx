@@ -106,8 +106,8 @@ export default function Navbar() {
             <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" aria-label="Chat with KiwiKoru on WhatsApp" className="w-10 h-10 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-md transition-colors hover:bg-[#20bd5a] focus-gold">
               <WhatsAppLogo className="w-5 h-5" />
             </a>
-            <Link to="/quote" className="inline-flex items-center px-5 py-2.5 bg-gold/90 text-forest font-semibold text-sm rounded-pill transition-all duration-300 hover:bg-gold hover:-translate-y-0.5 focus-gold backdrop-blur-sm">
-              Get Instant Estimate
+            <Link to="/quote" className="inline-flex items-center px-5 py-2.5 bg-gold text-forest-dark font-bold text-sm rounded-pill ring-2 ring-gold-light/40 shadow-[0_7px_20px_rgba(212,184,150,.25)] transition-all duration-300 hover:bg-gold-light hover:-translate-y-0.5 hover:shadow-[0_9px_25px_rgba(212,184,150,.4)] focus-gold">
+              Upload STL · Instant Quote
             </Link>
           </div>
 
@@ -143,7 +143,7 @@ export default function Navbar() {
             </button>
           </div>
           <Link to="/quote" className="mt-10 px-8 py-3 bg-gold text-forest font-semibold rounded-pill transition-all duration-200 hover:bg-gold-light focus-gold" onClick={() => setMobileOpen(false)}>
-            Get Instant Estimate
+            Upload STL · Instant Quote
           </Link>
           <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="mt-4 inline-flex items-center gap-3 px-7 py-3 bg-[#25D366] text-white font-semibold rounded-pill focus-gold" onClick={() => setMobileOpen(false)}>
             <WhatsAppLogo className="w-5 h-5" /> Chat on WhatsApp

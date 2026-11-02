@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import { ArrowRight, ChevronDown, Info, MessageCircle, ShoppingCart, Trash2 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, ChevronDown, FileWarning, Info, Mail, MessageCircle, ShoppingCart, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import STLViewer from '../components/STLViewer';
 import { addPrintCartItem } from '../lib/printCart';
 
@@ -37,6 +37,7 @@ export default function Quote() {
   const [modelFile, setModelFile] = useState<File | null>(null);
   const [fileSize, setFileSize] = useState(0);
   const [measuredVolume, setMeasuredVolume] = useState<number | null>(null);
+  const [originalDimensions, setOriginalDimensions] = useState<{ x: number; y: number; z: number }>();
   const [dimensions, setDimensions] = useState<{ x: number; y: number; z: number }>();
   const [scale, setScale] = useState(1);
   const [thumbnail, setThumbnail] = useState<string>();
@@ -63,15 +64,17 @@ export default function Quote() {
 
   const addToCart = async () => {
     if (!modelFile || !uploadedFile) return;
-    await addPrintCartItem({ id: crypto.randomUUID(), fileName: uploadedFile, file: modelFile, thumbnail, price: unitPrice, material: materialData.name, color, infill, quality: layer, estimatedVolume: volume, estimatedWeight: weight, dimensions, scale, quantity, createdAt: Date.now() });
+    if (!originalDimensions || !dimensions) return;
+    await addPrintCartItem({ id: crypto.randomUUID(), fileName: uploadedFile, file: modelFile, thumbnail, price: unitPrice, material: materialData.name, color, infill, quality: layer, estimatedVolume: volume, estimatedWeight: weight, originalDimensions, dimensions, scale, quantity, createdAt: Date.now() });
     setInCart(true);
   };
   const number = (value: string, minimum: number) => Math.max(minimum, Number(value) || minimum);
 
   return <main className="min-h-screen bg-kiwi-light pb-16 pt-24"><div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-    <div className="relative mb-12 text-center"><h1 className="text-3xl font-heading font-semibold text-kiwi-dark lg:text-4xl">Instant 3D Quote</h1><p className="mt-3 text-kiwi-base/70">Upload an STL file up to 20 MB and get an instant price for your 3D print.</p><p className="mt-2 text-sm"><span className="text-kiwi-base/50">Have an OBJ, 3MF, STEP or another format? </span><Link to="/contact" className="font-medium text-kiwi-base underline">Send it for a manual quote</Link></p><button type="button" onClick={() => navigate('/cart')} className="mt-5 inline-flex items-center gap-2 rounded-full border border-forest/15 bg-white px-4 py-2 text-sm font-semibold text-forest shadow-sm lg:absolute lg:right-0 lg:top-0"><ShoppingCart className="h-5 w-5" />Cart</button></div>
+    <div className="relative mb-8 text-center"><h1 className="text-3xl font-heading font-semibold text-kiwi-dark lg:text-4xl">Instant 3D Quote</h1><p className="mt-3 text-kiwi-base/70">Upload a valid STL file up to 20 MB and get an instant price for your 3D print.</p><button type="button" onClick={() => navigate('/cart')} className="mt-5 inline-flex items-center gap-2 rounded-full border border-forest/15 bg-white px-4 py-2 text-sm font-semibold text-forest shadow-sm lg:absolute lg:right-0 lg:top-0"><ShoppingCart className="h-5 w-5" />Cart</button></div>
+    <div className="mb-8 flex flex-col items-center justify-between gap-4 rounded-2xl border-2 border-amber-300 bg-amber-50 p-5 text-left shadow-sm sm:flex-row"><div className="flex items-start gap-3"><FileWarning className="mt-0.5 h-6 w-6 shrink-0 text-amber-700"/><div><strong className="text-forest-dark">File larger than 20 MB or not an STL?</strong><p className="mt-1 text-sm leading-relaxed text-forest/70">Email us a Google Drive, Dropbox or similar download link for manual review. We can also help with OBJ, 3MF, STEP and other model formats.</p></div></div><a href="mailto:kiwikoru3d@gmail.com?subject=Large%203D%20model%20for%20manual%20quote&body=Hi%20KiwiKoru%2C%0A%0AHere%20is%20a%20download%20link%20to%20my%203D%20model%3A%0A%0AWhat%20I%20need%20printed%3A%0AQuantity%3A%0A%0AThanks" className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-forest px-5 py-3 font-bold text-white shadow-md transition hover:bg-forest-dark sm:w-auto"><Mail className="h-4 w-4"/>Email us a file link</a></div>
     <div className="grid gap-8 lg:grid-cols-5"><div className="lg:col-span-3">
-      <STLViewer onFileSelect={fileSelected} onFileLoad={(nextVolume, nextDimensions) => { setMeasuredVolume(nextVolume); setDimensions(nextDimensions); setScale(1); changed(); }} onScaleChange={(nextVolume, nextDimensions, nextScale) => { setMeasuredVolume(nextVolume); setDimensions(nextDimensions); setScale(nextScale); changed(); }} onPreviewColorChange={(nextColor) => { setColor(nextColor); changed(); }} onThumbnailChange={thumbnailChanged} onClear={() => { setUploadedFile(null); setModelFile(null); setFileSize(0); setMeasuredVolume(null); setDimensions(undefined); setScale(1); setThumbnail(undefined); changed(); }} />
+      <STLViewer onFileSelect={fileSelected} onFileLoad={(nextVolume, nextDimensions) => { setMeasuredVolume(nextVolume); setOriginalDimensions(nextDimensions); setDimensions(nextDimensions); setScale(1); changed(); }} onScaleChange={(nextVolume, nextDimensions, nextScale) => { setMeasuredVolume(nextVolume); setDimensions(nextDimensions); setScale(nextScale); changed(); }} onPreviewColorChange={(nextColor) => { setColor(nextColor); changed(); }} onThumbnailChange={thumbnailChanged} onClear={() => { setUploadedFile(null); setModelFile(null); setFileSize(0); setMeasuredVolume(null); setOriginalDimensions(undefined); setDimensions(undefined); setScale(1); setThumbnail(undefined); changed(); }} />
       <section className="mt-8 rounded-2xl border border-gray-200 bg-white p-6"><h2 className="mb-5 flex items-center gap-2 font-heading font-semibold text-kiwi-dark"><Info className="h-4 w-4 text-kiwi-base" />Quote Details</h2><div className="grid gap-5 sm:grid-cols-2">
         <label><span className="mb-2 block text-xs font-medium uppercase tracking-wider text-kiwi-base/60">Material</span><select value={material} onChange={(event) => { setMaterial(event.target.value as keyof typeof MATERIALS); changed(); }} className={selectClass}>{Object.entries(MATERIALS).map(([key, item]) => <option key={key} value={key}>{item.name}</option>)}</select></label>
         <label><span className="mb-2 block text-xs font-medium uppercase tracking-wider text-kiwi-base/60">Quantity</span><input type="number" min="1" max="99" value={quantity} onChange={(event) => { setQuantity(Math.min(99, Math.round(number(event.target.value, 1)))); changed(); }} className={selectClass} /></label>

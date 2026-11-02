@@ -10,7 +10,8 @@ export type PrintCartItem = {
   quality: number
   estimatedVolume: number
   estimatedWeight?: number
-  dimensions?: { x: number; y: number; z: number }
+  originalDimensions: { x: number; y: number; z: number }
+  dimensions: { x: number; y: number; z: number }
   scale: number
   quantity: number
   createdAt: number
