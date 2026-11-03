@@ -6,21 +6,21 @@ const SESSION_KEY = 'kiwikoru-repair-news-dismissed'
 
 const steps = [
   {
-    image: '/images/case-home-repair.webp',
+    image: '/images/repair-process-capture.png',
     icon: ScanLine,
     number: '01',
     title: 'Capture & measure',
     copy: 'We assess the surviving shape using 3D capture or scanning where suitable, plus precision measurements.',
   },
   {
-    image: '/images/home-repair-latch.webp',
+    image: '/images/repair-process-rebuild.png',
     icon: Camera,
     number: '02',
     title: 'Rebuild or mirror',
     copy: 'We can mirror the intact side or reconstruct missing geometry in CAD from the broken original.',
   },
   {
-    image: '/images/printer-workshop-real.jpg',
+    image: '/images/repair-process-print.png',
     icon: Check,
     number: '03',
     title: 'Print & test',
@@ -105,6 +105,7 @@ export default function KiwiNewsRepairPopup() {
                 <div className="relative h-32 overflow-hidden sm:h-40">
                   <img src={step.image} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#17231c]/75 via-transparent to-transparent" />
+                  <span className="absolute right-2 top-2 rounded-full bg-[#17231c]/80 px-2 py-1 text-[8px] font-black uppercase tracking-[.12em] text-white/85 ring-1 ring-white/20">Illustrative 3D process</span>
                   <span className="absolute bottom-3 left-3 text-xs font-black tracking-[.18em] text-gold-light">STEP {step.number}</span>
                 </div>
                 <div className="p-4">
